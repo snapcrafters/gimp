@@ -1,15 +1,80 @@
-name: my-snap-name # you probably want to 'snapcraft register <name>'
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: gimp
+version: '2.8.20'
+summary: GNU Image Manipulation Program
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  Whether you are a graphic designer, photographer, illustrator, or scientist,
+  GIMP provides you with sophisticated tools to get your job done. You can
+  further enhance your productivity with GIMP thanks to many customization
+  options and 3rd party plugins.
 
-confinement: devmode # use 'strict' once you have the right plugs and slots
+confinement: strict
+
+apps:
+  gimp:
+    command: desktop-launch env GIMP2_DATADIR="$SNAP/usr/share/gimp/2.0" GIMP2_LOCALEDIR="$SNAP/usr/share/gimp/2.0/locale" GIMP2_SYSCONFDIR="$SNAP/etc/gimp/2.0" GIMP2_PLUGINDIR="$SNAP/usr/lib/gimp/2.0" $SNAP/usr/bin/gimp
+    plugs: [home, removable-media, unity7, opengl]
 
 parts:
-  my-part:
-    # See 'snapcraft plugins'
-    plugin: nil
+  patches:
+    plugin: dump
+    source: snap/patches
+    prime: [-*]
+  gimp:
+    after: [patches, desktop-gtk2]
+    plugin: autotools
+    source: git://git.gnome.org/gimp
+    source-tag: 'GIMP_2_8_20'
+    prepare: patch -p 1 < $SNAPCRAFT_STAGE/bump_Babl-GEGL_versions.patch
+    configflags:
+      - '--prefix=/usr'
+      - '--sysconfdir=/etc'
+      - '--enable-binreloc'
+    build-packages:
+      - gettext
+      - gnome-pkg-tools
+      - gtk-doc-tools
+      - intltool
+      - iso-codes
+      - libaa1-dev
+      - libart-2.0-dev
+      - libasound2-dev
+      - libatk1.0-dev
+      - libbabl-dev
+      - libbz2-dev
+      - libcairo2-dev
+      - libcurl4-gnutls-dev
+      - libdbus-glib-1-dev
+      - libexif-dev
+      - libfreetype6-dev
+      - libfontconfig1-dev
+      - libglib2.0-dev
+      - libglib2.0-doc
+      - libgegl-dev
+      - libgtk2.0-dev
+      - libgtk2.0-doc
+      - libgdk-pixbuf2.0-dev
+      - libgdk-pixbuf2.0-doc
+      - libgs-dev
+      - libgudev-1.0-dev
+      - libice-dev
+      - libjasper-dev
+      - libjpeg-dev
+      - liblcms2-dev
+      - libmng-dev
+      - libpango1.0-dev
+      - libpng12-dev
+      - libpoppler-glib-dev
+      - librsvg2-dev
+      - libsm-dev
+      - libtiff5-dev
+      - libwmf-dev
+      - libx11-dev
+      - libxcursor-dev
+      - libxmu-dev
+      - libxpm-dev
+      - libxt-dev
+      - zlib1g-dev
+      - patchutils
+      - python-dev
+      - python-gtk2-dev
+      - xsltproc
