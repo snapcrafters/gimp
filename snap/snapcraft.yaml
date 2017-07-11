@@ -8,6 +8,7 @@ description: |
   options and 3rd party plugins.
 
 confinement: strict
+icon: gimp.png
 
 apps:
   gimp:
