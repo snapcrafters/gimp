@@ -1,5 +1,5 @@
 name: gimp
-version: '2.8.20'
+version: '2.8.22'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -24,7 +24,7 @@ parts:
     after: [patches, desktop-gtk2]
     plugin: autotools
     source: git://git.gnome.org/gimp
-    source-tag: 'GIMP_2_8_20'
+    source-tag: 'GIMP_2_8_22'
     prepare: patch -p 1 < $SNAPCRAFT_STAGE/bump_Babl-GEGL_versions.patch
     configflags:
       - '--prefix=/usr'
@@ -42,40 +42,55 @@ parts:
       - libatk1.0-dev
       - libbabl-dev
       - libbz2-dev
-      - libcairo2-dev
-      - libcurl4-gnutls-dev
-      - libdbus-glib-1-dev
+      - libcurl4-openssl-dev
       - libexif-dev
       - libfreetype6-dev
       - libfontconfig1-dev
-      - libglib2.0-dev
-      - libglib2.0-doc
       - libgegl-dev
-      - libgtk2.0-dev
-      - libgtk2.0-doc
-      - libgdk-pixbuf2.0-dev
-      - libgdk-pixbuf2.0-doc
       - libgs-dev
       - libgudev-1.0-dev
       - libice-dev
       - libjasper-dev
-      - libjpeg-dev
+      - libjpeg8-dev
       - liblcms2-dev
       - libmng-dev
-      - libpango1.0-dev
       - libpng12-dev
       - libpoppler-glib-dev
       - librsvg2-dev
       - libsm-dev
       - libtiff5-dev
       - libwmf-dev
-      - libx11-dev
-      - libxcursor-dev
-      - libxmu-dev
       - libxpm-dev
-      - libxt-dev
       - zlib1g-dev
       - patchutils
       - python-dev
       - python-gtk2-dev
       - xsltproc
+    stage-packages:
+      - libaa1
+      - libart-2.0-2
+      - libasound2
+      - libbabl-0.1-0
+      - libbz2-1.0
+      - libcurl3
+      - libexif12
+      - libfreetype6
+      - libfontconfig1
+      - libgegl-0.3-0
+      - libgs9
+      - libgudev-1.0-0
+      - libice6
+      - libjasper1
+      - libjpeg8
+      - liblcms2-2
+      - libmng2
+      - libpng12-0
+      - librsvg2-2
+      - libsm6
+      - libtiff5
+      - libwmf0.2-7
+      - libxpm4
+      - zlib1g
+      - python
+      - python-dev
+      - python-gtk2
