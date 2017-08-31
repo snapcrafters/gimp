@@ -1,5 +1,5 @@
 name: gimp
-version: '2.8.22'
+version: '2.9.6'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -24,7 +24,7 @@ parts:
     after: [patches, desktop-gtk2]
     plugin: autotools
     source: git://git.gnome.org/gimp
-    source-tag: 'GIMP_2_8_22'
+    source-tag: 'GIMP_2_9_6'
     prepare: patch -p 1 < $SNAPCRAFT_STAGE/bump_Babl-GEGL_versions.patch
     configflags:
       - '--prefix=/usr'
