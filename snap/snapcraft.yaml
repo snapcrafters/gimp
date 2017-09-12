@@ -14,18 +14,71 @@ apps:
   gimp:
     command: desktop-launch env GIMP2_DATADIR="$SNAP/usr/share/gimp/2.0" GIMP2_LOCALEDIR="$SNAP/usr/share/gimp/2.0/locale" GIMP2_SYSCONFDIR="$SNAP/etc/gimp/2.0" GIMP2_PLUGINDIR="$SNAP/usr/lib/gimp/2.0" $SNAP/usr/bin/gimp
     plugs: [gsettings, home, removable-media, unity7, opengl]
+    environment:
+      GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
 parts:
-  patches:
-    plugin: dump
-    source: snap/patches
-    prime: [-*]
+  gegl:
+    plugin: autotools
+    source: git://git.gnome.org/gegl
+    source-tag: 'GEGL_0_2_0'
+    configflags:
+      - 'LDFLAGS=-lm'
+      - '--prefix=/usr'
+    build-packages:
+      - gettext
+      - intltool
+      # - libavformat-dev # not compatible - need earlier release
+      - libbabl-dev
+      - libc6-dev
+      - libcairo2-dev
+      - libexiv2-dev
+      - libgdk-pixbuf2.0-dev
+      - libglib2.0-dev
+      - libgraphviz-dev
+      - libjasper-dev
+      - libjpeg8-dev
+      - libopenexr-dev
+      - libopenraw-dev
+      - libpango1.0-dev
+      - libpangocairo-1.0-0
+      - libpng12-dev
+      - librsvg2-dev
+      - libsdl2-dev
+      - libspiro-dev
+      - libv4l-dev
+      - valac
+    stage-packages:
+      # - libavformat-ffmpeg56 # not compatible - need earlier release
+      - libbabl-0.1-0
+      - libcairo2
+      - libcdt5
+      - libcgraph6
+      - libexiv2-14
+      - libgdk-pixbuf2.0-0
+      - libglib2.0-0
+      - libgvc6
+      - libgvc6-plugins-gtk
+      - libgvpr2
+      - libjasper1
+      - libjpeg8
+      - libopenexr22
+      - libopenraw1v5
+      - libpango-1.0-0
+      - libpangocairo-1.0-0
+      - libpathplan4
+      - libpng12-0
+      - librsvg2-2
+      - libsdl2-2.0-0
+      - libspiro0
+      - libv4l-0
+      - libxdot4
+
   gimp:
-    after: [patches, desktop-gtk2]
+    after: [gegl, desktop-gtk2]
     plugin: autotools
     source: git://git.gnome.org/gimp
     source-tag: 'GIMP_2_8_22'
-    prepare: patch -p 1 < $SNAPCRAFT_STAGE/bump_Babl-GEGL_versions.patch
     configflags:
       - '--prefix=/usr'
       - '--sysconfdir=/etc'
@@ -48,7 +101,6 @@ parts:
       - libexif-dev
       - libfreetype6-dev
       - libfontconfig1-dev
-      - libgegl-dev
       - libgs-dev
       - libgudev-1.0-dev
       - libice-dev
@@ -78,7 +130,6 @@ parts:
       - libexif12
       - libfreetype6
       - libfontconfig1
-      - libgegl-0.3-0
       - libgs9
       - libgudev-1.0-0
       - libice6
