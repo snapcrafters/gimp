@@ -13,7 +13,7 @@ icon: gimp.png
 apps:
   gimp:
     command: desktop-launch env GIMP2_DATADIR="$SNAP/usr/share/gimp/2.0" GIMP2_LOCALEDIR="$SNAP/usr/share/gimp/2.0/locale" GIMP2_SYSCONFDIR="$SNAP/etc/gimp/2.0" GIMP2_PLUGINDIR="$SNAP/usr/lib/gimp/2.0" $SNAP/usr/bin/gimp
-    plugs: [gsettings, home, removable-media, unity7, opengl]
+    plugs: [gsettings, home, removable-media, unity7, opengl, desktop, desktop-legacy, wayland]
     environment:
       GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
