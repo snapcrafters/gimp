@@ -12,8 +12,21 @@ icon: gimp.png
 
 apps:
   gimp:
-    command: desktop-launch env GIMP2_DATADIR="$SNAP/usr/share/gimp/2.0" GIMP2_LOCALEDIR="$SNAP/usr/share/gimp/2.0/locale" GIMP2_SYSCONFDIR="$SNAP/etc/gimp/2.0" GIMP2_PLUGINDIR="$SNAP/usr/lib/gimp/2.0" $SNAP/usr/bin/gimp
-    plugs: [gsettings, home, removable-media, unity7, opengl, desktop, desktop-legacy, wayland]
+    command: desktop-launch alsa-launch $SNAP/usr/bin/gimp
+    environment:
+      GIMP2_DATADIR: $SNAP/usr/share/gimp/2.0
+      GIMP2_LOCALEDIR: $SNAP/usr/share/gimp/2.0/locale
+      GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
+      GIMP2_SYSCONFDIR: $SNAP/etc/gimp/2.0
+    plugs:
+    - desktop
+    - desktop-legacy
+    - gsettings
+    - home
+    - opengl
+    - removable-media
+    - wayland
+    - x11
     environment:
       GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
@@ -23,127 +36,125 @@ parts:
     source: git://git.gnome.org/gegl
     source-tag: 'GEGL_0_2_0'
     configflags:
-      - 'LDFLAGS=-lm'
-      - '--prefix=/usr'
+    - 'LDFLAGS=-lm'
+    - '--prefix=/usr'
     build-packages:
-      - gettext
-      - intltool
-      # - libavformat-dev # not compatible - need earlier release
-      - libbabl-dev
-      - libc6-dev
-      - libcairo2-dev
-      - libexiv2-dev
-      - libgdk-pixbuf2.0-dev
-      - libglib2.0-dev
-      - libgraphviz-dev
-      - libjasper-dev
-      - libjpeg8-dev
-      - libopenexr-dev
-      - libopenraw-dev
-      - libpango1.0-dev
-      - libpangocairo-1.0-0
-      - libpng12-dev
-      - librsvg2-dev
-      - libsdl2-dev
-      - libspiro-dev
-      - libv4l-dev
-      - valac
+    - gettext
+    - intltool
+    # - libavformat-dev # not compatible - need earlier release
+    - libbabl-dev
+    - libc6-dev
+    - libcairo2-dev
+    - libexiv2-dev
+    - libgdk-pixbuf2.0-dev
+    - libglib2.0-dev
+    - libgraphviz-dev
+    - libjasper-dev
+    - libjpeg8-dev
+    - libopenexr-dev
+    - libopenraw-dev
+    - libpango1.0-dev
+    - libpangocairo-1.0-0
+    - libpng12-dev
+    - librsvg2-dev
+    - libsdl2-dev
+    - libspiro-dev
+    - libv4l-dev
+    - valac
     stage-packages:
-      # - libavformat-ffmpeg56 # not compatible - need earlier release
-      - libbabl-0.1-0
-      - libcairo2
-      - libcdt5
-      - libcgraph6
-      - libexiv2-14
-      - libgdk-pixbuf2.0-0
-      - libglib2.0-0
-      - libgvc6
-      - libgvc6-plugins-gtk
-      - libgvpr2
-      - libjasper1
-      - libjpeg8
-      - libopenexr22
-      - libopenraw1v5
-      - libpango-1.0-0
-      - libpangocairo-1.0-0
-      - libpathplan4
-      - libpng12-0
-      - librsvg2-2
-      - libsdl2-2.0-0
-      - libspiro0
-      - libv4l-0
-      - libxdot4
+    # - libavformat-ffmpeg56 # not compatible - need earlier release
+    - libbabl-0.1-0
+    - libcairo2
+    - libcdt5
+    - libcgraph6
+    - libexiv2-14
+    - libgdk-pixbuf2.0-0
+    - libglib2.0-0
+    - libgvc6
+    - libgvc6-plugins-gtk
+    - libgvpr2
+    - libjasper1
+    - libjpeg8
+    - libopenexr22
+    - libopenraw1v5
+    - libpango-1.0-0
+    - libpangocairo-1.0-0
+    - libpathplan4
+    - libpng12-0
+    - librsvg2-2
+    - libsdl2-2.0-0
+    - libspiro0
+    - libv4l-0
+    - libxdot4
 
   gimp:
-    after: [gegl, desktop-gtk2]
+    after: [alsa, gegl, desktop-gtk2]
     plugin: autotools
     source: git://git.gnome.org/gimp
     source-tag: 'GIMP_2_8_22'
     configflags:
-      - '--prefix=/usr'
-      - '--sysconfdir=/etc'
-      - '--enable-binreloc'
+    - '--prefix=/usr'
+    - '--sysconfdir=/etc'
+    - '--enable-binreloc'
     install: |
       sed -i 's|^\(.*python=\).*|\1/snap/gimp/current/usr/bin/python|' $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp
     build-packages:
-      - gettext
-      - gnome-pkg-tools
-      - gtk-doc-tools
-      - intltool
-      - iso-codes
-      - libaa1-dev
-      - libart-2.0-dev
-      - libasound2-dev
-      - libatk1.0-dev
-      - libbabl-dev
-      - libbz2-dev
-      - libcurl4-openssl-dev
-      - libexif-dev
-      - libfreetype6-dev
-      - libfontconfig1-dev
-      - libgs-dev
-      - libgudev-1.0-dev
-      - libice-dev
-      - libjasper-dev
-      - libjpeg8-dev
-      - liblcms2-dev
-      - libmng-dev
-      - libpng12-dev
-      - libpoppler-glib-dev
-      - librsvg2-dev
-      - libsm-dev
-      - libtiff5-dev
-      - libwmf-dev
-      - libxpm-dev
-      - zlib1g-dev
-      - patchutils
-      - python-dev
-      - python-gtk2-dev
-      - xsltproc
+    - gettext
+    - gnome-pkg-tools
+    - gtk-doc-tools
+    - intltool
+    - iso-codes
+    - libaa1-dev
+    - libart-2.0-dev
+    - libatk1.0-dev
+    - libbabl-dev
+    - libbz2-dev
+    - libcurl4-openssl-dev
+    - libexif-dev
+    - libfreetype6-dev
+    - libfontconfig1-dev
+    - libgs-dev
+    - libgudev-1.0-dev
+    - libice-dev
+    - libjasper-dev
+    - libjpeg8-dev
+    - liblcms2-dev
+    - libmng-dev
+    - libpng12-dev
+    - libpoppler-glib-dev
+    - librsvg2-dev
+    - libsm-dev
+    - libtiff5-dev
+    - libwmf-dev
+    - libxpm-dev
+    - zlib1g-dev
+    - patchutils
+    - python-dev
+    - python-gtk2-dev
+    - xsltproc
     stage-packages:
-      - libaa1
-      - libart-2.0-2
-      - libasound2
-      - libbabl-0.1-0
-      - libbz2-1.0
-      - libcurl3
-      - libexif12
-      - libfreetype6
-      - libfontconfig1
-      - libgs9
-      - libgudev-1.0-0
-      - libice6
-      - libjasper1
-      - libjpeg8
-      - liblcms2-2
-      - libmng2
-      - libpng12-0
-      - librsvg2-2
-      - libsm6
-      - libtiff5
-      - libwmf0.2-7
-      - libxpm4
-      - zlib1g
-      - python
-      - python-dev
-      - python-gtk2
+    - libaa1
+    - libart-2.0-2
+    - libbabl-0.1-0
+    - libbz2-1.0
+    - libcurl3
+    - libexif12
+    - libfreetype6
+    - libfontconfig1
+    - libgs9
+    - libgudev-1.0-0
+    - libice6
+    - libjasper1
+    - libjpeg8
+    - liblcms2-2
+    - libmng2
+    - libpng12-0
+    - librsvg2-2
+    - libsm6
+    - libtiff5
+    - libwmf0.2-7
+    - libxpm4
+    - zlib1g
+    - python
+    - python-dev
+    - python-gtk2
