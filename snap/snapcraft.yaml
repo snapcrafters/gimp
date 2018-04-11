@@ -37,7 +37,7 @@ parts:
       cat <<EOF > $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
       for pcfile in \$SNAPCRAFT_PART_INSTALL/usr/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/local/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/local/lib/pkgconfig/*.pc; do
         sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\\\${prefix}~g" \$pcfile || true
-        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1$SNAPCRAFT_STAGE/\3~" \$pcfile || true 
+        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1/\3~" \$pcfile || true
       done
       EOF
       chmod +x $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
@@ -49,6 +49,11 @@ parts:
     source: patches
     prime:
     - -*
+
+  alsa:
+    after: [alsa-lib, alsa-plugins]
+  alsa-plugins:
+    after: [alsa-lib]
 
   # https://download.gnome.org/sources/at-spi2-core
   atspi2:
@@ -82,6 +87,9 @@ parts:
     - libxi6
     - libxkbcommon-x11-0
     - libxtst6
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gimp.org/pub/babl
   babl:
@@ -96,11 +104,11 @@ parts:
     - --disable-docs
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - lib
-    - usr/lib
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - lib
+    # - usr/lib
 
   # https://cairographics.org/releases or https://cairographics.org/snapshots
   cairo:
@@ -116,9 +124,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   desktop-glib-only:
     build-packages: []
@@ -137,9 +145,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
   
   # https://download.savannah.gnu.org/releases/freetype
   freetype-prebuild:
@@ -166,9 +174,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/gdk-pixbuf
   gdk-pixbuf:
@@ -188,6 +196,9 @@ parts:
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
     
   # https://download.gimp.org/pub/gegl
   gegl:
@@ -211,32 +222,30 @@ parts:
     source-checksum: sha256/f8b4a93ad2c5187efcc7d9a665ef626a362587eb701eebccf21b13616791e551
     plugin: autotools
     build-packages:
-    - libavcodec-dev
-    - libavutil-dev
     - libexiv2-dev
     - libfftw3-dev
     - libjpeg8-dev
     - liblensfun-dev
     - libopenexr-dev
     - libraw-dev
-    - libsdl1.2-dev
     - libspiro-dev
     - libsuitesparse-dev
-    - libswscale-dev
     - libtiff5-dev
-    - libv4l-dev
     - valac
     configflags:
     - --prefix=/usr
     - --disable-docs
     - --disable-rpath
+    build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --disable-docs --disable-rpath
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libamd2.4.1
     - libbtf1.2.1
-    - libavcodec-ffmpeg56
-    - libavutil-ffmpeg54
     - libcamd2.4.1
     - libccolamd2.9.1
     - libcholmod3.0.6
@@ -247,37 +256,34 @@ parts:
     - libjpeg8
     - libopenexr22
     - libraw15
-    - libsdl1.2debian
     - libspiro0
     - libspqr2.0.2
-    - libswscale-ffmpeg3
     - libtiff5
     - libumfpack5.7.1
-    - libv4l-0
     stage:
     - -usr/lib/**/glib-2.0/gio-querymodules
     - -usr/lib/**/glib-2.0/glib-compile-resources
     - -usr/lib/**/glib-2.0/glib-compile-schemas
     - -usr/share/doc
     - -usr/share/lintian
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -usr/bin/X11
-    - -usr/lib/gcc
-    - -usr/lib/pkgconfig
-    - -usr/lib/mime
-    - -usr/lib/valgrind
-    - -usr/lib/X11
-    - lib
-    - usr/bin
-    - usr/lib
-    - usr/share/gir-1.0
-    - usr/share/graphviz
-    - usr/share/lensfun
-    - usr/share/locale
-    - usr/share/mime
-    - usr/share/X11
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -usr/bin/X11
+    # - -usr/lib/gcc
+    # - -usr/lib/pkgconfig
+    # - -usr/lib/mime
+    # - -usr/lib/valgrind
+    # - -usr/lib/X11
+    # - lib
+    # - usr/bin
+    # - usr/lib
+    # - usr/share/gir-1.0
+    # - usr/share/graphviz
+    # - usr/share/lensfun
+    # - usr/share/locale
+    # - usr/share/mime
+    # - usr/share/X11
 
   # https://ftp.gnu.org/pub/gnu/gettext
   gettext:
@@ -305,13 +311,13 @@ parts:
     stage-packages:
     - libunistring0
     - libxml2
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - lib
-    - usr/lib
-    - usr/share/gettext*
-    - usr/share/locale
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - lib
+    # - usr/lib
+    # - usr/share/gettext*
+    # - usr/share/locale
 
   # https://download.gnome.org/sources/gexiv2
   gexiv2:
@@ -340,13 +346,13 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libexiv2-14
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - lib
-    - usr/bin/py*
-    - usr/lib
-    - usr/share/gir-1.0
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - lib
+    # - usr/bin/py*
+    # - usr/lib
+    # - usr/share/gir-1.0
 
   # https://download.gnome.org/sources/glib
   glib:
@@ -372,9 +378,9 @@ parts:
     - python
     - python3
     - zlib1g
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/glib-networking
   glib-networking:
@@ -401,10 +407,10 @@ parts:
     stage-packages:
     - libgnutls30
     - libproxy1v5
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -root
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -root
 
   # https://download.gnome.org/sources
   gobject-introspection:
@@ -433,9 +439,9 @@ parts:
     - libffi6
     - python
     - python3
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://graphviz.gitlab.io/_pages/Download/Download_source.html
   graphviz:
@@ -449,6 +455,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources
   gsettings-desktop-schemas:
@@ -469,15 +478,16 @@ parts:
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://gstreamer.freedesktop.org/src/gstreamer
   gstreamer:
     after:
     - fix-pkgconfig-files
     - gettext
+    - gobject-introspection
     source: https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.13.1.tar.xz
     source-checksum: sha256/7d2dc896d533cf89f08ce41e3ae3914b1ef9b463ae16c3ef689367e114495804
     plugin: autotools
@@ -491,39 +501,79 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-benchmarks
+    - --disable-check
     - --disable-debug
     - --disable-examples
+    - --disable-fatal-warnings
     - --disable-gst-debug
     - --disable-gst-tracer-hooks
     - --disable-rpath
     - --disable-tests
     - --disable-tools
+    - --enable-introspection=auto
+    build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --disable-benchmarks --disable-check --disable-debug --disable-examples --disable-fatal-warnings --disable-gst-debug --disable-gst-tracer-hooks --disable-rpath --disable-tests --disable-tools --enable-introspection=auto
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libpulse0
     - libxv1
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
   
   gst-plugins-base:
     after:
+    - alsa
     - cairo
     - fix-pkgconfig-files
     - gettext
+    - gobject-introspection
     - gstreamer
     - pango
     source: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.13.1.tar.xz
     source-checksum: sha256/51cd6cb976d5f6b1cd46b800352cf11fca7af3d971e23fe38e1773505b29e21d
     plugin: autotools
+    build-packages:
+    - libegl1-mesa-dev
+    - libfribidi-dev
+    - libgl1-mesa-dev
+    - liborc-0.4-dev
+    - libpulse-dev
+    - libx11-dev
+    - libxv-dev
+    - zlib1g-dev
     configflags:
     - --prefix=/usr
-    build-packages:
-    - libfribidi-dev
-    - libpulse-dev
+    - --disable-debug
+    - --disable-examples
+    - --disable-fatal-warnings
+    - --disable-rpath
+    - --disable-valgrind
+    - --enable-introspection=auto
+    - --enable-orc
+    build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --disable-debug --disable-examples --disable-fatal-warnings --disable-rpath --disable-valgrind --enable-introspection=auto --enable-orc
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
+    - libegl1-mesa
     - libfribidi0
+    - libgl1
+    - liborc-0.4-0
     - libpulse0
+    - libx11-6
+    - libxv1
+    - zlib1g
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/gtk+
   gtk2:
@@ -569,6 +619,9 @@ parts:
     - libxinerama1
     - libxrandr2
     - libxrender1
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
   
   # https://download.gnome.org/sources/gtk+
   gtk3:
@@ -618,6 +671,9 @@ parts:
     - libxinerama1
     - libxrandr2
     - libxrender1
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://www.freedesktop.org/software/harfbuzz/release
   harfbuzz:
@@ -641,9 +697,9 @@ parts:
       rm -f $SNAPCRAFT_STAGE/usr/lib/libfreetype.so*
     stage-packages:
     - libicu55
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # http://www.ece.uvic.ca/~frodo/jasper
   jasper:
@@ -664,11 +720,11 @@ parts:
     stage-packages:
     - libgl1-mesa-glx
     - libjpeg8
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - usr/lib
-    - usr/share/X11
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - usr/lib
+    # - usr/share/X11
 
   # https://download.gnome.org/sources/json-glib
   json-glib:
@@ -694,9 +750,9 @@ parts:
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://github.com/mm2/Little-CMS/releases
   lcms2:
@@ -716,13 +772,14 @@ parts:
     - libjpeg8
     - libtiff5
     - zlib1g
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -usr/lib/gcc
-    - -usr/lib/pkgconfig
-    - usr/lib
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -usr/lib/gcc
+    # - -usr/lib/pkgconfig
+    # - usr/lib
 
+  # https://download.gnome.org/sources/atk
   libatk:
     after:
     - fix-pkgconfig-files
@@ -745,6 +802,9 @@ parts:
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
     
   # https://download.gnome.org/sources/at-spi2-atk
   libatk-bridge:
@@ -773,6 +833,9 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libdbus-1-3
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://github.com/google/brotli/releases
   libbrotli:
@@ -786,6 +849,9 @@ parts:
     # - -DBROTLI_DISABLE_TESTS
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/libcroco
   libcroco:
@@ -798,6 +864,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/libepoxy
   libepoxy:
@@ -814,6 +883,9 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libegl1-mesa
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://gnupg.org/ftp/gcrypt/libgcrypt
   libgcrypt:
@@ -828,6 +900,9 @@ parts:
     - --disable-doc
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://gnupg.org/ftp/gcrypt/libgpg-error
   libgpg-error:
@@ -842,6 +917,9 @@ parts:
     - --disable-tests
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://github.com/mypaint/libmypaint/releases
   libmypaint:
@@ -861,6 +939,11 @@ parts:
     - python3
     configflags:
     - --prefix=/usr
+    build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage:
@@ -869,15 +952,15 @@ parts:
     - -usr/lib/**/glib-2.0/glib-compile-schemas
     - -usr/share/doc
     - -usr/share/lintian
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -usr/lib/gcc
-    - -usr/lib/pkgconfig
-    - lib
-    - usr/lib
-    - usr/share/gir-1.0
-    - usr/share/locale
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -usr/lib/gcc
+    # - -usr/lib/pkgconfig
+    # - lib
+    # - usr/lib
+    # - usr/share/gir-1.0
+    # - usr/share/locale
 
   # http://www.libpng.org
   libpng:
@@ -894,11 +977,11 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - zlib1g
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -usr/lib/pkgconfig
-    - usr/lib
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -usr/lib/pkgconfig
+    # - usr/lib
 
   # https://download.gnome.org/sources/librsvg
   librsvg:
@@ -925,6 +1008,9 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libxml2
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/libsecret
   libsecret:
@@ -950,6 +1036,9 @@ parts:
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/libsoup
   libsoup:
@@ -980,6 +1069,9 @@ parts:
     stage-packages:
     - libsqlite3-0
     - libxml2
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://chromium.googlesource.com/webm/libwebp
   libwebp:
@@ -997,11 +1089,11 @@ parts:
     - --enable-libwebpdecoder
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    prime:
-    - -**/*.a
-    - -**/*.la
-    - -usr/lib/pkgconfig
-    - usr/lib
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
+    # - -usr/lib/pkgconfig
+    # - usr/lib
 
   # https://github.com/google/woff2/releases
   libwoff2dec:
@@ -1015,6 +1107,9 @@ parts:
     - -DCMAKE_BUILD_TYPE=Release
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://download.gnome.org/sources/pango
   pango:
@@ -1038,9 +1133,9 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libfribidi0
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://www.cairographics.org/releases/
   pixman:
@@ -1053,6 +1148,9 @@ parts:
     - --prefix=/usr
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://poppler.freedesktop.org/
   poppler:
@@ -1076,9 +1174,9 @@ parts:
     stage-packages:
     - libopenjp2-7
     - zlib1g
-    prime:
-    - -**/*.a
-    - -**/*.la
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://webkitgtk.org/releases
   webkit2gtk:
@@ -1107,6 +1205,11 @@ parts:
     - -DENABLE_GEOLOCATION=no
     - -DENABLE_SPELLCHECK=no
     - -DUSE_LIBNOTIFY=no
+    build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      cmake ../src -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DENABLE_GEOLOCATION=no -DENABLE_SPELLCHECK=no -DUSE_LIBNOTIFY=no
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
@@ -1114,10 +1217,14 @@ parts:
     - libhyphen0
     - libxslt1.1
     - libxt6
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://www.gimp.org/downloads
   gimp:
     after:
+    - alsa
     - babl
     - cairo
     - desktop-glib-only
@@ -1144,23 +1251,27 @@ parts:
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
     source-checksum: md5/e8892481e70c4ee3c204b6aa484f4eba
+    configflags:
+    - --prefix=/usr
+    - --sysconfdir=/etc
+    - --enable-binreloc
     build: |
       export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
       export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.3"
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      [ -x ./autogen.sh ] && env NOCONFIGURE=1 ./autogen.sh
-      env PYTHON=/usr/bin/python2.7 ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
+      export PYTHON=/usr/bin/python2.7
+      if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
+      ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     install: |
-      sed -i 's|^\(.*python=\).*|\1/snap/gimp/current/usr/bin/python|' $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E "s|^(.*python=).*|\1/snap/gimp/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
     - gnome-pkg-tools
     - intltool
     - iso-codes
     - libaa1-dev
     - libart-2.0-dev
-    - libasound2-dev
     - libbz2-dev
     - libcurl4-openssl-dev
     - libexif-dev
@@ -1183,7 +1294,6 @@ parts:
     - darktable
     - libaa1
     - libart-2.0-2
-    - libbabl-0.1-0
     - libbz2-1.0
     - libcurl3
     - libexif12
@@ -1204,30 +1314,29 @@ parts:
     - python3-dev
     - xdg-utils
     - zlib1g
-    prime:
-    - -**/*.a
-    - -**/*.la 
-    - etc/ghostscript
-    - etc/gimp
-    - etc/mime.types
-    - lib
-    - usr/bin
-    - usr/lib
-    - usr/sbin
-    - usr/share/appdata
-    - usr/share/applications/darktable.desktop
-    - usr/share/applications/gimp.desktop
-    - usr/share/aspell
-    - usr/share/darktable
-    - usr/share/enchant
-    - usr/share/ghostscript
-    - usr/share/gimp
-    - usr/share/icons
-    - usr/share/lensfun
-    - usr/share/libgphoto2
-    - usr/share/locale
-    - usr/share/X11
-    - usr/share/xml
-    - var/lib/aspell
-    - var/lib/dictionaries-common
-    - var/lib/ghostscript
+    # prime:
+    # - -**/*.a
+    # - -**/*.la 
+    # - etc/ghostscript
+    # - etc/gimp
+    # - etc/mime.types
+    # - lib
+    # - usr/bin
+    # - usr/lib
+    # - usr/sbin
+    # - usr/share/appdata
+    # - usr/share/applications/gimp.desktop
+    # - usr/share/aspell
+    # - usr/share/darktable
+    # - usr/share/enchant
+    # - usr/share/ghostscript
+    # - usr/share/gimp
+    # - usr/share/icons
+    # - usr/share/lensfun
+    # - usr/share/libgphoto2
+    # - usr/share/locale
+    # - usr/share/X11
+    # - usr/share/xml
+    # - var/lib/aspell
+    # - var/lib/dictionaries-common
+    # - var/lib/ghostscript
