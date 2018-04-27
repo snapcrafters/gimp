@@ -31,6 +31,11 @@ apps:
       GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
 parts:
+  alsa:
+    after: [alsa-lib, alsa-plugins]
+  alsa-plugins:
+    after: [alsa-lib]
+
   gegl:
     plugin: autotools
     source: git://git.gnome.org/gegl
