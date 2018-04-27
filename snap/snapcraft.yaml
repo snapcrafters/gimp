@@ -18,6 +18,7 @@ apps:
       GIMP2_LOCALEDIR: $SNAP/usr/share/gimp/2.0/locale
       GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
       GIMP2_SYSCONFDIR: $SNAP/etc/gimp/2.0
+      GEGL_PATH: $SNAP/usr/lib/gegl-0.2
     plugs:
     - desktop
     - desktop-legacy
@@ -27,8 +28,6 @@ apps:
     - removable-media
     - wayland
     - x11
-    environment:
-      GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
 parts:
   alsa:
