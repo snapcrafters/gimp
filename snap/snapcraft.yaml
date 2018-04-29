@@ -12,7 +12,8 @@ icon: gimp.png
 
 apps:
   gimp:
-    command: desktop-launch alsa-launch $SNAP/usr/bin/gimp
+    command: desktop-launch $SNAP/usr/bin/gimp
+    desktop: usr/share/applications/gimp.desktop
     environment:
       GIMP2_DATADIR: $SNAP/usr/share/gimp/2.0
       GIMP2_LOCALEDIR: $SNAP/usr/share/gimp/2.0/locale
@@ -98,6 +99,7 @@ parts:
     - '--enable-binreloc'
     install: |
       sed -i 's|^\(.*python=\).*|\1/snap/gimp/current/usr/bin/python|' $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp
+      sed -i 's|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' $SNAPCRAFT_PART_INSTALL/usr/share/applications/gimp.desktop
     build-packages:
     - gettext
     - gnome-pkg-tools
