@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.0-RC1'
+version: '2.10.0'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -14,6 +14,8 @@ apps:
   gimp:
     command: desktop-launch alsa-launch $SNAP/usr/bin/gimp
     environment:
+      BABL_PATH: $SNAP/usr/lib/babl-0.1
+      GEGL_PATH: $SNAP/usr/lib/gegl-0.3
       GIMP2_DATADIR: $SNAP/usr/share/gimp/2.0
       GIMP2_LOCALEDIR: $SNAP/usr/share/gimp/2.0/locale
       GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
@@ -27,13 +29,11 @@ apps:
     - removable-media
     - wayland
     - x11
-    environment:
-      GEGL_PATH: $SNAP/usr/lib/gegl-0.2
 
 parts:
   fix-pkgconfig-files:
     plugin: nil
-    build: |
+    override-build: |
       cat <<EOF > $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
       for pcfile in \$SNAPCRAFT_PART_INSTALL/usr/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/local/lib/\$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc \$SNAPCRAFT_PART_INSTALL/usr/local/lib/pkgconfig/*.pc; do
         sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\\\${prefix}~g" \$pcfile || true
@@ -69,18 +69,16 @@ parts:
     - libxkbcommon-dev
     - libxtst-dev
     - python3-pip
-    prepare: |
-      pip3 install meson
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
-    build: |
+    override-build: |
+      pip3 install meson
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       meson --prefix=/usr --buildtype=release snapbuild
       cd snapbuild
       ninja
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libx11-6
@@ -102,7 +100,8 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-docs
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -122,7 +121,8 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -143,7 +143,8 @@ parts:
     - gperf
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -158,7 +159,8 @@ parts:
     configflags:
     - --prefix=/usr/local
     - --without-harfbuzz
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     prime:
     - -*
@@ -172,7 +174,8 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -189,12 +192,11 @@ parts:
     - --prefix=/usr
     - --enable-relocatable=true
     - --with_man=false
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --enable-relocations
-      make
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -236,12 +238,11 @@ parts:
     - --prefix=/usr
     - --disable-docs
     - --disable-rpath
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --disable-docs --disable-rpath
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libamd2.4.1
@@ -306,7 +307,8 @@ parts:
     - --without-included-glib
     - --without-included-libunistring
     - --without-included-libxml
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libunistring0
@@ -337,12 +339,11 @@ parts:
     - --disable-gtk-doc
     - --disable-gtk-doc-html
     - --disable-gtk-doc-pdf
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libexiv2-14
@@ -370,7 +371,8 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libmount1
@@ -395,12 +397,12 @@ parts:
     - libgnutls-dev
     - libproxy-dev
     - python3-pip
-    prepare: |
-      pip3 install meson
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
-    install: |
+    override-build: |
+      pip3 install meson
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     organize:
       root/build_gimp/stage/usr/lib/gio/modules/*: usr/lib/gio/modules/
@@ -428,12 +430,12 @@ parts:
     - patch
     - python-dev
     - python3-dev
-    prepare: |
-      patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
     configflags:
     - --prefix=/usr
     - --with-python=python
-    install: |
+    override-build: |
+      patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libffi6
@@ -453,7 +455,8 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -471,12 +474,11 @@ parts:
     source-checksum: sha256/4cb4cd7790b77e5542ec75275237613ad22f3a1f2f41903a298cf6cc996a9167
     configflags:
     - --prefix=/usr
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -511,12 +513,11 @@ parts:
     - --disable-tests
     - --disable-tools
     - --enable-introspection=auto
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --disable-benchmarks --disable-check --disable-debug --disable-examples --disable-fatal-warnings --disable-gst-debug --disable-gst-tracer-hooks --disable-rpath --disable-tests --disable-tools --enable-introspection=auto
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libpulse0
@@ -555,12 +556,11 @@ parts:
     - --disable-valgrind
     - --enable-introspection=auto
     - --enable-orc
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --disable-debug --disable-examples --disable-fatal-warnings --disable-rpath --disable-valgrind --enable-introspection=auto --enable-orc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libegl1-mesa
@@ -596,17 +596,15 @@ parts:
     - libxinerama-dev
     - libxrandr-dev
     - libxrender-dev
-    prepare: |
-      env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
     configflags:
     - --prefix=/usr
     - --with-xinput
-    build: |
+    override-build: |
+      env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --with-xinput
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage:
     - -usr/bin/gtk-update-icon-cache
@@ -652,12 +650,11 @@ parts:
     - --prefix=/usr
     - --enable-x11-backend
     - --enable-wayland-backend
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --enable-x11-backend --enable-wayland-backend
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libwayland-client0
@@ -684,15 +681,15 @@ parts:
     source: https://www.freedesktop.org/software/harfbuzz/release/harfbuzz-1.7.6.tar.bz2
     source-checksum: sha256/da7bed39134826cd51e57c29f1dfbe342ccedb4f4773b1c951ff05ff383e2e9b
     plugin: autotools
-    prepare: |
-      apt-get remove -yyq libfreetype6
-      ln -s ../local/lib/libfreetype.so.6 $SNAPCRAFT_STAGE/usr/lib/
     build-packages:
     - libicu-dev
     configflags:
     - --prefix=/usr
     - --with-cairo=no
-    install: |
+    override-build: |
+      apt-get remove -yyq libfreetype6
+      ln -s ../local/lib/libfreetype.so.6 $SNAPCRAFT_STAGE/usr/lib/
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
       rm -f $SNAPCRAFT_STAGE/usr/lib/libfreetype.so*
     stage-packages:
@@ -715,7 +712,8 @@ parts:
     - -DCMAKE_BUILD_TYPE=release
     - -DJAS_ENABLE_LIBJPEG=true
     - -DJAS_ENABLE_OPENGL=true
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libgl1-mesa-glx
@@ -736,19 +734,17 @@ parts:
     source-checksum: sha256/2d7709a44749c7318599a6829322e081915bdc73f5be5045882ed120bb686dc8
     build-packages:
     - python3-pip
-    prepare: |
-      pip3 install meson
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
     - -Ddocs=false
-    build: |
+    override-build: |
+      pip3 install meson
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       meson --prefix=/usr --buildtype=release -Ddocs=false snapbuild
       cd snapbuild
       ninja
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -766,7 +762,8 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libjpeg8
@@ -789,18 +786,16 @@ parts:
     plugin: meson
     build-packages:
       - python3-pip
-    prepare: |
-      pip3 install meson
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
-    build: |
+    override-build: |
+      pip3 install meson
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       meson --prefix=/usr --buildtype=release snapbuild
       cd snapbuild
       ninja
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -818,18 +813,16 @@ parts:
     build-packages:
     - libdbus-1-dev
     - python3-pip
-    prepare: |
-      pip3 install meson
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
-    build: |
+    override-build: |
+      pip3 install meson
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       meson --prefix=/usr --buildtype=release snapbuild
       cd snapbuild
       ninja
       env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libdbus-1-3
@@ -847,7 +840,8 @@ parts:
     - -DCMAKE_INSTALL_PREFIX=/usr
     - -DCMAKE_BUILD_TYPE=Release
     # - -DBROTLI_DISABLE_TESTS
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -862,7 +856,8 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -879,7 +874,8 @@ parts:
     - libegl1-mesa-dev
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libegl1-mesa
@@ -898,7 +894,8 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-doc
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -915,7 +912,8 @@ parts:
     - --prefix=/usr
     - --disable-doc
     - --disable-tests
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -939,12 +937,11 @@ parts:
     - python3
     configflags:
     - --prefix=/usr
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage:
     - -usr/lib/**/glib-2.0/gio-querymodules
@@ -973,7 +970,8 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - zlib1g
@@ -994,17 +992,16 @@ parts:
     source: https://download.gnome.org/sources/librsvg/2.42/librsvg-2.42.3.tar.xz
     source-checksum: sha256/704f2c44b9b170fc5498de36a161d01ca8f584ba9c42654b98565a7b7bcbe657
     plugin: autotools
+    build-packages:
+    - cargo
+    - libxml2-dev
     configflags:
     - --prefix=/usr
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    build-packages:
-    - cargo
-    - libxml2-dev
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libxml2
@@ -1029,12 +1026,11 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-manpages
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --disable-manpages
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -1059,12 +1055,11 @@ parts:
     - --prefix=/usr
     - --without-gnome
     - --disable-tls-check
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr --without-gnome --disable-tls-check
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libsqlite3-0
@@ -1087,7 +1082,8 @@ parts:
     - --enable-libwebpmux
     - --enable-libwebpdemux
     - --enable-libwebpdecoder
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -1105,7 +1101,8 @@ parts:
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
     - -DCMAKE_BUILD_TYPE=Release
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -1124,12 +1121,11 @@ parts:
     - libfribidi-dev
     configflags:
     - --prefix=/usr
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       ./configure --prefix=/usr
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libfribidi0
@@ -1146,7 +1142,8 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
@@ -1169,7 +1166,8 @@ parts:
     build-packages:
     - libopenjp2-7-dev
     - zlib1g-dev
-    install: |
+    override-build: |
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libopenjp2-7
@@ -1205,12 +1203,11 @@ parts:
     - -DENABLE_GEOLOCATION=no
     - -DENABLE_SPELLCHECK=no
     - -DUSE_LIBNOTIFY=no
-    build: |
+    override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       cmake ../src -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DENABLE_GEOLOCATION=no -DENABLE_SPELLCHECK=no -DUSE_LIBNOTIFY=no
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libgles2-mesa
@@ -1255,7 +1252,7 @@ parts:
     - --prefix=/usr
     - --sysconfdir=/etc
     - --enable-binreloc
-    build: |
+    override-build: |
       export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
       export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.3"
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
@@ -1264,7 +1261,6 @@ parts:
       ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-    install: |
       sed -i -E "s|^(.*python=).*|\1/snap/gimp/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
     - gnome-pkg-tools
