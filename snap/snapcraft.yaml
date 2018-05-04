@@ -53,7 +53,9 @@ parts:
   alsa:
     after: [alsa-lib, alsa-plugins]
   alsa-plugins:
-    after: [alsa-lib]
+    after: [alsa-lib, pulseaudio]
+    build-packages: []
+    stage-packages: []
 
   # https://download.gnome.org/sources/at-spi2-core
   atspi2:
@@ -95,8 +97,8 @@ parts:
     - fix-pkgconfig-files
     - gobject-introspection
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.44.tar.bz2
-    source-checksum: sha256/f463fda0dec534c442234d1c374ea5d19abe0da942e11c9c5092dcc6b30cde7d
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.46.tar.bz2
+    source-checksum: sha256/bbc2403b1badf8014ec42200e65d7b1f46e68e627c33c6242fa31ac5dc869e5b
     configflags:
     - --prefix=/usr
     - --disable-docs
@@ -143,9 +145,12 @@ parts:
     - gperf
     configflags:
     - --prefix=/usr
+    - --sysconfdir=/etc
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage:
+    - -usr/var
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -185,8 +190,10 @@ parts:
   gdk-pixbuf:
     after:
     - fix-pkgconfig-files
-    source: https://download.gnome.org/sources/gdk-pixbuf/2.36/gdk-pixbuf-2.36.11.tar.xz
-    source-checksum: sha256/ae62ab87250413156ed72ef756347b10208c00e76b222d82d9ed361ed9dde2f3
+    - glib
+    - gobject-introspection
+    source: https://download.gnome.org/sources/gdk-pixbuf/2.36/gdk-pixbuf-2.36.12.tar.xz
+    source-checksum: sha256/fff85cf48223ab60e3c3c8318e2087131b590fd6f1737e42cb3759a3b427a334
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -217,23 +224,23 @@ parts:
     - gtk2
     - json-glib
     - lcms2
+    - liblensfun
     - librsvg
     - libwebp
     - pango
-    source: https://download.gimp.org/pub/gegl/0.3/gegl-0.3.30.tar.bz2
-    source-checksum: sha256/f8b4a93ad2c5187efcc7d9a665ef626a362587eb701eebccf21b13616791e551
+    - vala
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.0.tar.bz2
+    source-checksum: sha256/d04d2bfa0ff5a4bcfe7566f7418929a9c80f0109fa248ea4ff19538b3e99f0c5
     plugin: autotools
     build-packages:
     - libexiv2-dev
     - libfftw3-dev
     - libjpeg8-dev
-    - liblensfun-dev
     - libopenexr-dev
     - libraw-dev
     - libspiro-dev
     - libsuitesparse-dev
     - libtiff5-dev
-    - valac
     configflags:
     - --prefix=/usr
     - --disable-docs
@@ -261,12 +268,12 @@ parts:
     - libspqr2.0.2
     - libtiff5
     - libumfpack5.7.1
-    stage:
-    - -usr/lib/**/glib-2.0/gio-querymodules
-    - -usr/lib/**/glib-2.0/glib-compile-resources
-    - -usr/lib/**/glib-2.0/glib-compile-schemas
-    - -usr/share/doc
-    - -usr/share/lintian
+    # stage:
+    # - -usr/lib/**/glib-2.0/gio-querymodules
+    # - -usr/lib/**/glib-2.0/glib-compile-resources
+    # - -usr/lib/**/glib-2.0/glib-compile-schemas
+    # - -usr/share/doc
+    # - -usr/share/lintian
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -328,12 +335,12 @@ parts:
     - glib
     - gobject-introspection
     - gtk2
+    - vala
     source: https://download.gnome.org/sources/gexiv2/0.10/gexiv2-0.10.8.tar.xz
     source-checksum: sha256/81c528fd1e5e03577acd80fb77798223945f043fd1d4e06920c71202eea90801
     plugin: autotools
     build-packages:
     - libexiv2-dev
-    - valac
     configflags:
     - --prefix=/usr
     - --disable-gtk-doc
@@ -433,6 +440,7 @@ parts:
     configflags:
     - --prefix=/usr
     - --with-python=python
+    disable-parallel: true
     override-build: |
       patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
       snapcraftctl build
@@ -441,6 +449,8 @@ parts:
     - libffi6
     - python
     - python3
+    stage:
+    - -root
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -490,6 +500,7 @@ parts:
     - fix-pkgconfig-files
     - gettext
     - gobject-introspection
+    - pulseaudio
     source: https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.13.1.tar.xz
     source-checksum: sha256/7d2dc896d533cf89f08ce41e3ae3914b1ef9b463ae16c3ef689367e114495804
     plugin: autotools
@@ -498,7 +509,6 @@ parts:
     - flex
     - gettext
     - liborc-0.4-dev
-    - libpulse-dev
     - libxv-dev
     configflags:
     - --prefix=/usr
@@ -520,7 +530,6 @@ parts:
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
-    - libpulse0
     - libxv1
     # prime:
     # - -**/*.a
@@ -535,6 +544,7 @@ parts:
     - gobject-introspection
     - gstreamer
     - pango
+    - pulseaudio
     source: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.13.1.tar.xz
     source-checksum: sha256/51cd6cb976d5f6b1cd46b800352cf11fca7af3d971e23fe38e1773505b29e21d
     plugin: autotools
@@ -543,7 +553,6 @@ parts:
     - libfribidi-dev
     - libgl1-mesa-dev
     - liborc-0.4-dev
-    - libpulse-dev
     - libx11-dev
     - libxv-dev
     - zlib1g-dev
@@ -567,7 +576,6 @@ parts:
     - libfribidi0
     - libgl1
     - liborc-0.4-0
-    - libpulse0
     - libx11-6
     - libxv1
     - zlib1g
@@ -598,16 +606,17 @@ parts:
     - libxrender-dev
     configflags:
     - --prefix=/usr
+    - --sysconfdir=/etc
     - --with-xinput
     override-build: |
       env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --with-xinput
+      ./configure --prefix=/usr --sysconfdir=/etc --with-xinput
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage:
-    - -usr/bin/gtk-update-icon-cache
+    # stage:
+    # - -usr/bin/gtk-update-icon-cache
     stage-packages:
     - libx11-6
     - libxcomposite1
@@ -919,6 +928,22 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
+  # https://sourceforge.net/projects/lensfun/files
+  liblensfun:
+    after:
+    - fix-pkgconfig-files
+    - glib
+    - gobject-introspection
+    plugin: cmake
+    source: https://sourceforge.mirrorservice.org/l/le/lensfun/0.3.2/lensfun-0.3.2.tar.gz
+    configflags:
+    - -DCMAKE_INSTALL_PREFIX=/usr
+    - -DCMAKE_BUILD_TYPE=Release
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+
+
   # https://github.com/mypaint/libmypaint/releases
   libmypaint:
     after:
@@ -943,12 +968,12 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage:
-    - -usr/lib/**/glib-2.0/gio-querymodules
-    - -usr/lib/**/glib-2.0/glib-compile-resources
-    - -usr/lib/**/glib-2.0/glib-compile-schemas
-    - -usr/share/doc
-    - -usr/share/lintian
+    # stage:
+    # - -usr/lib/**/glib-2.0/gio-querymodules
+    # - -usr/lib/**/glib-2.0/glib-compile-resources
+    # - -usr/lib/**/glib-2.0/glib-compile-schemas
+    # - -usr/share/doc
+    # - -usr/share/lintian
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -997,9 +1022,10 @@ parts:
     - libxml2-dev
     configflags:
     - --prefix=/usr
+    - --enable-pixbuf-loader
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr
+      ./configure --prefix=/usr --enable-pixbuf-loader
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1017,12 +1043,12 @@ parts:
     - glib
     - gobject-introspection
     - libgcrypt
+    - vala
     source: https://download.gnome.org/sources/libsecret/0.18/libsecret-0.18.tar.xz
     source-checksum: sha256/0c73aa762dbd1e38ba7b03de350e23ce818cb810b0784375e95ef61e004b02e3
     plugin: autotools
     build-packages:
     - intltool
-    - valac
     configflags:
     - --prefix=/usr
     - --disable-manpages
@@ -1044,13 +1070,13 @@ parts:
     - glib
     - glib-networking
     - gobject-introspection
+    - vala
     source: https://download.gnome.org/sources/libsoup/2.62/libsoup-2.62.0.tar.xz
     source-checksum: sha256/ab7c7ae8d19d0a27ab3b6ae21599cec8c7f7b773b3f2b1090c5daf178373aaac
     plugin: autotools
     build-packages:
     - libsqlite3-dev
     - libxml2-dev
-    - valac
     configflags:
     - --prefix=/usr
     - --without-gnome
@@ -1107,6 +1133,15 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
+  
+  # https://github.com/Jehan/mypaint-brushes/releases
+  mypaint-brushes:
+    after:
+    - libmypaint
+    source: https://github.com/Jehan/mypaint-brushes/archive/v1.3.0.tar.gz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
 
   # https://download.gnome.org/sources/pango
   pango:
@@ -1175,6 +1210,81 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
+  
+  # https://freedesktop.org/software/pulseaudio/releases
+  pulseaudio:
+    after:
+    - fix-pkgconfig-files
+    - glib
+    plugin: autotools
+    source: https://freedesktop.org/software/pulseaudio/releases/pulseaudio-11.1.tar.xz
+    source-checksum: sha1/53bde72b6bfe715c19b1519db8845f7a58346b67
+    build-packages:
+    - libsndfile1-dev
+    configflags:
+    - --prefix=/usr
+    - --sysconfdir=/etc
+    - --without-caps
+    - --without-fftw
+    - --without-speex
+    - --without-soxr
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage-packages:
+    - libsndfile1
+
+  # https://github.com/pygobject/pycairo/releases
+  pycairo:
+    after:
+    - cairo
+    plugin: python
+    python-version: python2
+    source: https://github.com/pygobject/pycairo/releases/download/v1.17.0/pycairo-1.17.0.tar.gz
+    source-checksum: sha256/cdd4d1d357325dec3a21720b85d273408ef83da5f15c184f2eff3212ff236b9f
+
+  # https://ftp.acc.umu.se/pub/GNOME/sources/pygobject
+  pygobject:
+    after:
+    - cairo
+    - fix-pkgconfig-files
+    - gtk2
+    - pycairo
+    plugin: autotools
+    source: https://ftp.acc.umu.se/pub/GNOME/sources/pygobject/2.28/pygobject-2.28.7.tar.xz
+    source-checksum: sha256/bb9d25a3442ca7511385a7c01b057492095c263784ef31231ffe589d83a96a5a
+    build-packages:
+    - python2.7-dev
+    configflags:
+    - --prefix=/usr
+    - --enable-cairo
+    override-build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      export PYTHON=/usr/bin/python
+      ./configure --prefix=/usr --enable-cairo
+      make && make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage-packages:
+    - python2.7
+
+  # https://wiki.gnome.org/Projects/Vala/Release
+  vala:
+    after:
+    - fix-pkgconfig-files
+    - glib
+    - graphviz
+    plugin: autotools
+    source: https://download.gnome.org/sources/vala/0.38/vala-0.38.9.tar.xz
+    source-checksum: sha256/c3ba214dd2bf981d646d57adfed0ce69600b2ba6c942dea1c93630ed98c201b6
+    build-packages:
+    - bison
+    - flex
+    configflags:
+    - --prefix=/usr
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    prime: [-*]
 
   # https://webkitgtk.org/releases
   webkit2gtk:
@@ -1241,13 +1351,15 @@ parts:
     - libmypaint
     - libpng
     - libwebp
+    - mypaint-brushes
     - pango
     - poppler
+    - pygobject
     - librsvg
     - webkit2gtk
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: md5/e8892481e70c4ee3c204b6aa484f4eba
+    source-checksum: md5/5e91357ede5a5d5cb0db981ff8f9726c
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
@@ -1257,13 +1369,14 @@ parts:
       export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.3"
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       export PYTHON=/usr/bin/python2.7
+      export CFLAGS="-I$SNAPCRAFT_STAGE/usr/include/glib-2.0 -lharfbuzz $CFLAGS"
+      export CPPFLAGS="-I$SNAPCRAFT_STAGE/usr/include/glib-2.0 -lharfbuzz $CPPFLAGS"
       if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
       ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       sed -i -E "s|^(.*python=).*|\1/snap/gimp/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
-    - gnome-pkg-tools
     - intltool
     - iso-codes
     - libaa1-dev
@@ -1284,10 +1397,9 @@ parts:
     - patchutils
     - python-dev
     - python2.7-dev
-    - python3-dev
     - xsltproc
     stage-packages:
-    - darktable
+    # - darktable
     - libaa1
     - libart-2.0-2
     - libbz2-1.0
@@ -1305,9 +1417,7 @@ parts:
     - libsm6
     - libtiff5
     - libxpm4
-    - python-dev
     - python2.7-dev
-    - python3-dev
     - xdg-utils
     - zlib1g
     # prime:
