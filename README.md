@@ -13,7 +13,6 @@ distributions.</p>
 
 ## Install
 
-    sudo apt install snapd-xdg-open
     sudo snap install gimp
 
 ([Don't have snapd installed?](https://snapcraft.io/docs/core/install))
@@ -29,7 +28,8 @@ are working to land snap install documentation and
 the [snapcraft.yaml](https://github.com/snapcrafters/fork-and-rename-me/blob/master/snap/snapcraft.yaml)
 upstream so GIMP can authoritatively publish future releases.
 
-  - [x] Fork the [Snapcrafters template](https://github.com/snapcrafters/fork-and-rename-me) repository to your own GitHub account
+  - [x] Fork the [Snapcrafters template](https://github.com/snapcrafters/fork-and-rename-me) repository to your own GitHub account.
+    - If you have already forked the Snapcrafter template to your account and want to create another snap, you'll need to use GitHub's [Import repository](https://github.com/new/import) feature because you can only fork a repository once.
   - [x] Rename the forked Snapcrafters template repository
   - [x] Update logos and references to `[Project]` and `[my-snap-name]`
   - [x] Create a snap that runs in `devmode`
@@ -57,6 +57,7 @@ upstream so GIMP can authoritatively publish future releases.
 
 If you have any questions, [post in the Snapcraft forum](https://forum.snapcraft.io).
 
+<!-- 
 ## The Snapcrafters
 
 | [![Daniel Llewellyn](http://gravatar.com/avatar/c77d9922c44ee0a34b8cabc4029b5082/?s=128)](https://github.com/diddledan/) |
