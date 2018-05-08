@@ -1554,7 +1554,7 @@ parts:
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       export PYTHON=/usr/bin/python2.7
       export GIO_MODULE_DIR=$SNAPCRAFT_STAGE/usr/lib/gio/modules
-      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=$SNAP/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
+      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
         desktop/gimp.desktop.in.in
       if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
       ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
