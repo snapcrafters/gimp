@@ -4,7 +4,7 @@
   GIMP - The GNU Image Manipulation Program
 </h1>
 
-<p align="center"><b>This is the snap for GIMP</b>, <i>"The Free & Open Source Image Editor"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux
+<p align="center"><b>This is the snap for GIMP</b>, <i>"The Free &amp; Open Source Image Editor"</i>. It works on Ubuntu, Fedora, Debian, and other major Linux
 distributions.</p>
 
 <p align="center">
@@ -37,7 +37,7 @@ upstream so GIMP can authoritatively publish future releases.
   - [x] Add a screenshot to this `README.md`
   - [x] Publish the `devmode` snap in the Snap store edge channel
   - [x] Add install instructions to this `README.md`
-  - [ ] Update snap store metadata, icons and screenshots
+  - [x] Update snap store metadata, icons and screenshots
   - [x] Convert the snap to `strict` confinement, or `classic` confinement if it qualifies
   - [x] Publish the confined snap in the Snap store beta channel
   - [x] Update the install instructions in this `README.md`
