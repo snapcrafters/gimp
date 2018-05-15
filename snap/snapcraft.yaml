@@ -19,18 +19,20 @@ apps:
       BABL_PATH: $SNAP/usr/lib/babl-0.1
       GEGL_PATH: $SNAP/usr/lib/gegl-0.4
       GIMP2_DATADIR: $SNAP/usr/share/gimp/2.0
-      GIMP2_LOCALEDIR: $SNAP/usr/share/gimp/2.0/locale
+      GIMP2_LOCALEDIR: $SNAP/usr/share/locale
       GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
       GIMP2_SYSCONFDIR: $SNAP/etc/gimp/2.0
       LD_LIBRARY_PATH: $SNAP/usr/lib/libblas:$SNAP/usr/lib/lapack:$LD_LIBRARY_PATH
       PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
     plugs:
+    - cups-control
     - desktop
     - desktop-legacy
     - gsettings
     - home
     - opengl
     - removable-media
+    - unity7
     - wayland
     - x11
 
@@ -47,7 +49,7 @@ parts:
       chmod +x $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
     prime:
     - -*
-  
+
   fix-symlinks:
     # REF: https://unix.stackexchange.com/questions/100918/convert-absolute-symlink-to-relative-symlink-with-simple-linux-command
     plugin: nil
@@ -205,7 +207,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://download.savannah.gnu.org/releases/freetype
   freetype-prebuild:
     after:
@@ -266,7 +268,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-    
+
   # https://download.gimp.org/pub/gegl
   gegl:
     after:
@@ -485,7 +487,7 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-gtk3-engine
-  
+
   # # https://download.gnome.org/sources/gnome-themes-standard
   # gnome-themes-standard:
   #   after:
@@ -575,98 +577,98 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # https://gstreamer.freedesktop.org/src/gstreamer
-  gstreamer:
-    after:
-    - fix-pkgconfig-files
-    - gettext
-    - gobject-introspection
-    - pulseaudio
-    source: https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.13.1.tar.xz
-    source-checksum: sha256/7d2dc896d533cf89f08ce41e3ae3914b1ef9b463ae16c3ef689367e114495804
-    plugin: autotools
-    build-packages:
-    - bison
-    - flex
-    - gettext
-    - liborc-0.4-dev
-    - libxv-dev
-    configflags:
-    - --prefix=/usr
-    - --disable-benchmarks
-    - --disable-check
-    - --disable-debug
-    - --disable-examples
-    - --disable-fatal-warnings
-    - --disable-gst-debug
-    - --disable-gst-tracer-hooks
-    - --disable-rpath
-    - --disable-tests
-    - --disable-tools
-    - --enable-introspection=auto
-    override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-benchmarks --disable-check --disable-debug --disable-examples --disable-fatal-warnings --disable-gst-debug --disable-gst-tracer-hooks --disable-rpath --disable-tests --disable-tools --enable-introspection=auto
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-      chmod -s $SNAPCRAFT_PART_INSTALL/usr/libexec/gstreamer-1.0/gst-ptp-helper
-    stage-packages:
-    - libxv1
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
-  
-  # https://gstreamer.freedesktop.org/src/gst-plugins-base
-  gst-plugins-base:
-    after:
-    - alsa
-    - cairo
-    - fix-pkgconfig-files
-    - gettext
-    - gobject-introspection
-    - gstreamer
-    - pango
-    - pulseaudio
-    source: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.13.1.tar.xz
-    source-checksum: sha256/51cd6cb976d5f6b1cd46b800352cf11fca7af3d971e23fe38e1773505b29e21d
-    plugin: autotools
-    build-packages:
-    - libegl1-mesa-dev
-    - libfribidi-dev
-    - libgl1-mesa-dev
-    - liborc-0.4-dev
-    - libwayland-dev
-    - libx11-dev
-    - libxv-dev
-    - zlib1g-dev
-    configflags:
-    - --prefix=/usr
-    - --disable-debug
-    - --disable-examples
-    - --disable-fatal-warnings
-    - --disable-rpath
-    - --disable-valgrind
-    - --enable-introspection=auto
-    - --enable-orc
-    override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-debug --disable-examples --disable-fatal-warnings --disable-rpath --disable-valgrind --enable-introspection=auto --enable-orc
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libegl1-mesa
-    - libfribidi0
-    - libgl1
-    - liborc-0.4-0
-    - libwayland-egl1-mesa
-    - libx11-6
-    - libxv1
-    - zlib1g
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://gstreamer.freedesktop.org/src/gstreamer
+  # gstreamer:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   - gobject-introspection
+  #   - pulseaudio
+  #   source: https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.13.1.tar.xz
+  #   source-checksum: sha256/7d2dc896d533cf89f08ce41e3ae3914b1ef9b463ae16c3ef689367e114495804
+  #   plugin: autotools
+  #   build-packages:
+  #   - bison
+  #   - flex
+  #   - gettext
+  #   - liborc-0.4-dev
+  #   - libxv-dev
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-benchmarks
+  #   - --disable-check
+  #   - --disable-debug
+  #   - --disable-examples
+  #   - --disable-fatal-warnings
+  #   - --disable-gst-debug
+  #   - --disable-gst-tracer-hooks
+  #   - --disable-rpath
+  #   - --disable-tests
+  #   - --disable-tools
+  #   - --enable-introspection=auto
+  #   override-build: |
+  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+  #     ./configure --prefix=/usr --disable-benchmarks --disable-check --disable-debug --disable-examples --disable-fatal-warnings --disable-gst-debug --disable-gst-tracer-hooks --disable-rpath --disable-tests --disable-tools --enable-introspection=auto
+  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #     chmod -s $SNAPCRAFT_PART_INSTALL/usr/libexec/gstreamer-1.0/gst-ptp-helper
+  #   stage-packages:
+  #   - libxv1
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
+
+  # # https://gstreamer.freedesktop.org/src/gst-plugins-base
+  # gst-plugins-base:
+  #   after:
+  #   - alsa
+  #   - cairo
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   - gobject-introspection
+  #   - gstreamer
+  #   - pango
+  #   - pulseaudio
+  #   source: https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.13.1.tar.xz
+  #   source-checksum: sha256/51cd6cb976d5f6b1cd46b800352cf11fca7af3d971e23fe38e1773505b29e21d
+  #   plugin: autotools
+  #   build-packages:
+  #   - libegl1-mesa-dev
+  #   - libfribidi-dev
+  #   - libgl1-mesa-dev
+  #   - liborc-0.4-dev
+  #   - libwayland-dev
+  #   - libx11-dev
+  #   - libxv-dev
+  #   - zlib1g-dev
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-debug
+  #   - --disable-examples
+  #   - --disable-fatal-warnings
+  #   - --disable-rpath
+  #   - --disable-valgrind
+  #   - --enable-introspection=auto
+  #   - --enable-orc
+  #   override-build: |
+  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+  #     ./configure --prefix=/usr --disable-debug --disable-examples --disable-fatal-warnings --disable-rpath --disable-valgrind --enable-introspection=auto --enable-orc
+  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   stage-packages:
+  #   - libegl1-mesa
+  #   - libfribidi0
+  #   - libgl1
+  #   - liborc-0.4-0
+  #   - libwayland-egl1-mesa
+  #   - libx11-6
+  #   - libxv1
+  #   - zlib1g
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
   # https://download.gnome.org/sources/gtk+
   gtk2:
@@ -712,7 +714,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://download.gnome.org/sources/gtk+
   # gtk3:
   #   after:
@@ -895,7 +897,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-    
+
   # https://download.gnome.org/sources/at-spi2-atk
   libatk-bridge:
     after:
@@ -963,61 +965,61 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # https://download.gnome.org/sources/libepoxy
-  libepoxy:
-    after:
-    - fix-pkgconfig-files
-    source: https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.0.tar.xz
-    source-checksum: sha256/4c94995398a6ebf691600dda2e9685a0cac261414175c2adf4645cdfab42a5d5
-    plugin: autotools
-    build-packages:
-    - libegl1-mesa-dev
-    configflags:
-    - --prefix=/usr
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libegl1-mesa
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://download.gnome.org/sources/libepoxy
+  # libepoxy:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   source: https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.0.tar.xz
+  #   source-checksum: sha256/4c94995398a6ebf691600dda2e9685a0cac261414175c2adf4645cdfab42a5d5
+  #   plugin: autotools
+  #   build-packages:
+  #   - libegl1-mesa-dev
+  #   configflags:
+  #   - --prefix=/usr
+  #   override-build: |
+  #     snapcraftctl build
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   stage-packages:
+  #   - libegl1-mesa
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
-  # https://gnupg.org/ftp/gcrypt/libgcrypt
-  libgcrypt:
-    after:
-    - fix-pkgconfig-files
-    - gettext
-    - libgpg-error
-    source: https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.8.2.tar.bz2
-    plugin: autotools
-    configflags:
-    - --prefix=/usr
-    - --disable-doc
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://gnupg.org/ftp/gcrypt/libgcrypt
+  # libgcrypt:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   - libgpg-error
+  #   source: https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.8.2.tar.bz2
+  #   plugin: autotools
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-doc
+  #   override-build: |
+  #     snapcraftctl build
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
-  # https://gnupg.org/ftp/gcrypt/libgpg-error
-  libgpg-error:
-    after:
-    - fix-pkgconfig-files
-    - gettext
-    source: https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.28.tar.bz2
-    plugin: autotools
-    configflags:
-    - --prefix=/usr
-    - --disable-doc
-    - --disable-tests
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://gnupg.org/ftp/gcrypt/libgpg-error
+  # libgpg-error:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   source: https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.28.tar.bz2
+  #   plugin: autotools
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-doc
+  #   - --disable-tests
+  #   override-build: |
+  #     snapcraftctl build
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
   # https://sourceforge.net/projects/lensfun/files
   liblensfun:
@@ -1115,68 +1117,76 @@ parts:
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     stage-packages:
     - libxml2
+    organize:
+      root/build_gimp/stage/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/*: usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/
+    stage:
+    - -root
     # prime:
     # - -**/*.a
     # - -**/*.la
 
-  # https://download.gnome.org/sources/libsecret
-  libsecret:
-    after:
-    - fix-pkgconfig-files
-    - gettext
-    - glib
-    - gobject-introspection
-    - libgcrypt
-    - vala
-    source: https://download.gnome.org/sources/libsecret/0.18/libsecret-0.18.tar.xz
-    source-checksum: sha256/0c73aa762dbd1e38ba7b03de350e23ce818cb810b0784375e95ef61e004b02e3
-    plugin: autotools
-    build-packages:
-    - intltool
-    configflags:
-    - --prefix=/usr
-    - --disable-manpages
-    override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-manpages
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://download.gnome.org/sources/libsecret
+  # libsecret:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   - glib
+  #   - gobject-introspection
+  #   - libgcrypt
+  #   - vala
+  #   source: https://download.gnome.org/sources/libsecret/0.18/libsecret-0.18.tar.xz
+  #   source-checksum: sha256/0c73aa762dbd1e38ba7b03de350e23ce818cb810b0784375e95ef61e004b02e3
+  #   plugin: autotools
+  #   build-packages:
+  #   - intltool
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-manpages
+  #   override-build: |
+  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+  #     ./configure --prefix=/usr --disable-manpages
+  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
-  # https://download.gnome.org/sources/libsoup
-  libsoup:
-    after:
-    - fix-pkgconfig-files
-    - gettext
-    - glib
-    - glib-networking
-    - gobject-introspection
-    - vala
-    source: https://download.gnome.org/sources/libsoup/2.62/libsoup-2.62.0.tar.xz
-    source-checksum: sha256/ab7c7ae8d19d0a27ab3b6ae21599cec8c7f7b773b3f2b1090c5daf178373aaac
-    plugin: autotools
-    build-packages:
-    - libsqlite3-dev
-    - libxml2-dev
-    configflags:
-    - --prefix=/usr
-    - --without-gnome
-    - --disable-tls-check
-    override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --without-gnome --disable-tls-check
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libsqlite3-0
-    - libxml2
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
+  # # https://download.gnome.org/sources/libsoup
+  # libsoup:
+  #   after:
+  #   - fix-pkgconfig-files
+  #   - gettext
+  #   - glib
+  #   - glib-networking
+  #   - gobject-introspection
+  #   - vala
+  #   source: https://download.gnome.org/sources/libsoup/2.62/libsoup-2.62.0.tar.xz
+  #   source-checksum: sha256/ab7c7ae8d19d0a27ab3b6ae21599cec8c7f7b773b3f2b1090c5daf178373aaac
+  #   plugin: autotools
+  #   build-packages:
+  #   - libsqlite3-dev
+  #   - libxml2-dev
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --without-gnome
+  #   - --disable-tls-check
+  #   override-build: |
+  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+  #     ./configure --prefix=/usr --without-gnome --disable-tls-check
+  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+  #   stage-packages:
+  #   - libsqlite3-0
+  #   - libxml2
+  #   organize:
+  #     root/build_gimp/stage/usr/share/vala/vapi/*: usr/share/vala/vapi/
+  #   stage:
+  #   - -root
+  #   # prime:
+  #   # - -**/*.a
+  #   # - -**/*.la
 
   # https://chromium.googlesource.com/webm/libwebp
   libwebp:
@@ -1217,7 +1227,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://github.com/Jehan/mypaint-brushes/releases
   mypaint-brushes:
     after:
@@ -1312,7 +1322,7 @@ parts:
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
     - -DCMAKE_BUILD_TYPE=Release
-  
+
   # https://freedesktop.org/software/pulseaudio/releases
   pulseaudio:
     after:
@@ -1579,7 +1589,9 @@ parts:
     - libsm-dev
     - libtiff5-dev
     - libxcursor-dev
+    - libxmu-dev
     - libxpm-dev
+    - libxt-dev
     - zlib1g-dev
     - patchutils
     - python-dev
@@ -1605,13 +1617,15 @@ parts:
     - libsm6
     - libtiff5
     - libxcursor1
+    - libxmu6
     - libxpm4
+    - libxt6
     - python2.7-dev
     - xdg-utils
     - zlib1g
     # prime:
     # - -**/*.a
-    # - -**/*.la 
+    # - -**/*.la
     # - etc/ghostscript
     # - etc/gimp
     # - etc/mime.types
