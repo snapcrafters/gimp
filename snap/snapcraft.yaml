@@ -25,6 +25,7 @@ apps:
       LD_LIBRARY_PATH: $SNAP/usr/lib/libblas:$SNAP/usr/lib/lapack:$LD_LIBRARY_PATH
       PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
     plugs:
+    - cups-control
     - desktop
     - desktop-legacy
     - gsettings
@@ -47,7 +48,7 @@ parts:
       chmod +x $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
     prime:
     - -*
-  
+
   fix-symlinks:
     # REF: https://unix.stackexchange.com/questions/100918/convert-absolute-symlink-to-relative-symlink-with-simple-linux-command
     plugin: nil
@@ -205,7 +206,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://download.savannah.gnu.org/releases/freetype
   freetype-prebuild:
     after:
@@ -266,7 +267,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-    
+
   # https://download.gimp.org/pub/gegl
   gegl:
     after:
@@ -485,7 +486,7 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-gtk3-engine
-  
+
   # # https://download.gnome.org/sources/gnome-themes-standard
   # gnome-themes-standard:
   #   after:
@@ -616,7 +617,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://gstreamer.freedesktop.org/src/gst-plugins-base
   gst-plugins-base:
     after:
@@ -712,7 +713,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://download.gnome.org/sources/gtk+
   # gtk3:
   #   after:
@@ -895,7 +896,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-    
+
   # https://download.gnome.org/sources/at-spi2-atk
   libatk-bridge:
     after:
@@ -1217,7 +1218,7 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
-  
+
   # https://github.com/Jehan/mypaint-brushes/releases
   mypaint-brushes:
     after:
@@ -1312,7 +1313,7 @@ parts:
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
     - -DCMAKE_BUILD_TYPE=Release
-  
+
   # https://freedesktop.org/software/pulseaudio/releases
   pulseaudio:
     after:
@@ -1611,7 +1612,7 @@ parts:
     - zlib1g
     # prime:
     # - -**/*.a
-    # - -**/*.la 
+    # - -**/*.la
     # - etc/ghostscript
     # - etc/gimp
     # - etc/mime.types
