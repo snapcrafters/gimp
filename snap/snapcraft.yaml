@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.0'
+version: '2.10.2'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -74,8 +74,12 @@ parts:
   desktop-launch:
     after:
     - adwaita-icon-theme
-    # - gnome-themes-standard
-    - gnome-themes-extra
+    - gnome-icon-theme
+    - gnome-icon-theme-extras
+    - gnome-icon-theme-symbolic
+    - gnome-themes-standard
+    # - gnome-themes-extra
+    - hicolor-icon-theme
     - gtk2
     - shared-mime-info
     plugin: dump
@@ -86,7 +90,6 @@ parts:
       desktop-launch: bin/desktop-launch
     stage-packages:
     - dmz-cursor-theme
-    - hicolor-icon-theme
     - libxkbcommon0
     - locales-all
     - ttf-ubuntu-font-family
@@ -106,6 +109,7 @@ parts:
     after:
     - gettext
     - gtk2
+    - librsvg
     source: https://download.gnome.org/sources/adwaita-icon-theme/3.28/adwaita-icon-theme-3.28.0.tar.xz
     source-checksum: sha256/7aae8c1dffd6772fd1a21a3d365a0ea28b7c3988bdbbeafbf8742cda68242150
     plugin: autotools
@@ -151,9 +155,10 @@ parts:
     after:
     - fix-pkgconfig-files
     - gobject-introspection
+    - librsvg
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.46.tar.bz2
-    source-checksum: sha256/bbc2403b1badf8014ec42200e65d7b1f46e68e627c33c6242fa31ac5dc869e5b
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.50.tar.bz2
+    source-checksum: sha256/b52c1dc081ff9ae8bc4cb7cdb959c762ea692b9f4431bacf8d17a14dbcc85b2d
     configflags:
     - --prefix=/usr
     - --disable-docs
@@ -172,8 +177,8 @@ parts:
     - fix-pkgconfig-files
     - fontconfig
     - pixman
-    source: https://cairographics.org/snapshots/cairo-1.15.10.tar.xz
-    source-checksum: sha1/de180498ac563249b93ee5e17ba9aa26f90644b3
+    source: https://cairographics.org/snapshots/cairo-1.15.12.tar.xz
+    source-checksum: sha1/4e64c6a48789edb4c60bc3fa95bd3992cc388b88
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -211,7 +216,7 @@ parts:
   freetype-prebuild:
     after:
     - fix-pkgconfig-files
-    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.tar.bz2
+    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
     plugin: autotools
     configflags:
     - --prefix=/usr/local
@@ -227,7 +232,7 @@ parts:
     after:
     - fix-pkgconfig-files
     - harfbuzz
-    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.tar.bz2
+    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -281,15 +286,18 @@ parts:
     - gobject-introspection
     - graphviz
     - gtk2
+    - jasper
     - json-glib
     - lcms2
     - liblensfun
+    - libpng
     - librsvg
     - libwebp
     - pango
+    - pygobject
     - vala
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.0.tar.bz2
-    source-checksum: sha256/d04d2bfa0ff5a4bcfe7566f7418929a9c80f0109fa248ea4ff19538b3e99f0c5
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.2.tar.bz2
+    source-checksum: sha256/6a358bc19d20b8ac1daf645cc8b53cdc2ea6f9c98a6036179a57045a26a07f8d
     plugin: autotools
     build-packages:
     - libexiv2-dev
@@ -306,6 +314,7 @@ parts:
     - --disable-rpath
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      export GIO_MODULE_DIR=$SNAPCRAFT_STAGE/usr/lib/gio/modules
       ./configure --prefix=/usr --disable-docs --disable-rpath
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
@@ -419,8 +428,8 @@ parts:
   glib:
     after:
     - fix-pkgconfig-files
-    source: https://download.gnome.org/sources/glib/2.56/glib-2.56.0.tar.xz
-    source-checksum: sha256/ecef6e17e97b8d9150d0e8a4b3edee1ac37331213b8a2a87a083deea408a0fc7
+    source: https://download.gnome.org/sources/glib/2.56/glib-2.56.1.tar.xz
+    source-checksum: sha256/40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d
     plugin: autotools
     build-packages:
     - libmount-dev
@@ -432,10 +441,12 @@ parts:
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage:
+    - -usr/lib/python2.7/sitecustomize.py
     stage-packages:
     - libmount1
     - libpcre3
-    - python
+    # - python
     - zlib1g
     # prime:
     # - -**/*.a
@@ -448,8 +459,8 @@ parts:
     - glib
     - gsettings-desktop-schemas
     plugin: meson
-    source: https://download.gnome.org/sources/glib-networking/2.56/glib-networking-2.56.0.tar.xz
-    source-checksum: sha256/47fd10bcae2e5039dc5f685e3ea384f48e64a6bee26d755718f534a978477c93
+    source: https://download.gnome.org/sources/glib-networking/2.57/glib-networking-2.57.1.tar.xz
+    source-checksum: sha256/663878443c636aa0af5b6708ddf715d82effe961989972cb9a1f48d2a3ecb026
     build-packages:
     - libgnutls-dev
     - libproxy-dev
@@ -473,41 +484,75 @@ parts:
     # - -**/*.la
     # - -root
 
+  # https://download.gnome.org/sources/gnome-icon-theme
+  gnome-icon-theme:
+    after:
+    - hicolor-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme/2.31/gnome-icon-theme-2.31.0.tar.bz2
+    source-checksum: sha256/ea7e05b77ead159379392b3b275ca0c9cbacd7d936014e447cc7c5e27a767982
+    plugin: autotools
+    build-packages:
+    - icon-naming-utils
+    configflags:
+    - --prefix=/usr
+
+  # https://download.gnome.org/sources/gnome-icon-theme-extras
+  gnome-icon-theme-extras:
+    after:
+    - gnome-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme-extras/3.12/gnome-icon-theme-extras-3.12.0.tar.xz
+    source-checksum: sha256/4eec6cea8a7b09c4ed6ebab1a3b42539b9c61a53bec4b8872e774611cc619608
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+
+  # https://download.gnome.org/sources/gnome-icon-theme-symbolic
+  gnome-icon-theme-symbolic:
+    after:
+    - gnome-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme-symbolic/3.12/gnome-icon-theme-symbolic-3.12.0.tar.xz
+    source-checksum: sha256/851a4c9d8e8cb0000c9e5e78259ab8b8e67c5334e4250ebcc8dfdaa33520068b
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+
   # https://download.gnome.org/sources/gnome-themes-extra
-  gnome-themes-extra:
+  # gnome-themes-extra:
+  #   after:
+  #   - gettext
+  #   - glib
+  #   - gnome-themes-standard
+  #   - gtk2
+  #   source: https://download.gnome.org/sources/gnome-themes-extra/3.28/gnome-themes-extra-3.28.tar.xz
+  #   source-checksum: sha256/7c4ba0bff001f06d8983cfc105adaac42df1d1267a2591798a780bac557a5819
+  #   plugin: autotools
+  #   configflags:
+  #   - --prefix=/usr
+  #   - --disable-gtk3-engine
+
+  # https://download.gnome.org/sources/gnome-themes-standard
+  gnome-themes-standard:
     after:
     - gettext
     - glib
-    # - gnome-themes-standard
     - gtk2
-    source: https://download.gnome.org/sources/gnome-themes-extra/3.28/gnome-themes-extra-3.28.tar.xz
-    source-checksum: sha256/7c4ba0bff001f06d8983cfc105adaac42df1d1267a2591798a780bac557a5819
+    - librsvg
+    source: https://download.gnome.org/sources/gnome-themes-standard/3.22/gnome-themes-standard-3.22.3.tar.xz
+    source-checksum: sha256/61dc87c52261cfd5b94d65e8ffd923ddeb5d3944562f84942eeeb197ab8ab56a
     plugin: autotools
     configflags:
     - --prefix=/usr
     - --disable-gtk3-engine
 
-  # # https://download.gnome.org/sources/gnome-themes-standard
-  # gnome-themes-standard:
-  #   after:
-  #   - gettext
-  #   - glib
-  #   - gtk2
-  #   source: https://download.gnome.org/sources/gnome-themes-standard/3.27/gnome-themes-standard-3.27.90.tar.xz
-  #   source-checksum: sha256/ffc7ccb5458ae4ef2501c49d84d3af150ca3b70c9b239e7ba6c05fe1405d31dc
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --disable-gtk3-engine
-
-  # https://download.gnome.org/sources
+  # https://download.gnome.org/sources/gobject-introspection
   gobject-introspection:
     after:
     - fix-pkgconfig-files
     - glib
     - patches
     plugin: autotools
-    source: https://download.gnome.org/sources/gobject-introspection/1.56/gobject-introspection-1.56.0.tar.xz
-    source-checksum: sha256/0d7059fad7aa5ec50d9678aea4ea139acab23737e9cf9ca0d86c615cecbaa0f8
+    source: https://download.gnome.org/sources/gobject-introspection/1.56/gobject-introspection-1.56.1.tar.xz
+    source-checksum: sha256/5b2875ccff99ff7baab63a34b67f8c920def240e178ff50add809e267d9ea24b
     build-packages:
     - bison
     - flex
@@ -522,11 +567,12 @@ parts:
       patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libffi6
-    - python
     stage:
     - -root
+    - -usr/lib/python2.7/sitecustomize.py
+    stage-packages:
+    - libffi6
+    # - python
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -554,7 +600,7 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # https://download.gnome.org/sources
+  # https://download.gnome.org/sources/gsettings-desktop-schemas
   gsettings-desktop-schemas:
     after:
     - fix-pkgconfig-files
@@ -791,6 +837,13 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
+  # https://icon-theme.freedesktop.org/releases
+  hicolor-icon-theme:
+    source: https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.17.tar.xz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+
   # http://www.ece.uvic.ca/~frodo/jasper
   jasper:
     after:
@@ -874,8 +927,8 @@ parts:
     after:
     - fix-pkgconfig-files
     - gobject-introspection
-    source: https://download.gnome.org/sources/atk/2.28/atk-2.28.1.tar.xz
-    source-checksum: sha256/cd3a1ea6ecc268a2497f0cd018e970860de24a6d42086919d6bf6c8e8d53f4fc
+    source: https://download.gnome.org/sources/atk/2.29/atk-2.29.1.tar.xz
+    source-checksum: sha256/1aa7707c6297c1797fe4d79a22a57ede4d5586b0f7a3b30e886d7ca9d75f20da
     plugin: meson
     build-packages:
     - libdbus-1-dev
@@ -930,7 +983,7 @@ parts:
   libbrotli:
     after:
     - fix-pkgconfig-files
-    source: https://github.com/google/brotli/archive/v1.0.3.tar.gz
+    source: https://github.com/google/brotli/archive/v1.0.4.tar.gz
     plugin: cmake
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -1050,7 +1103,7 @@ parts:
     build-packages:
     - intltool
     - libjson-c-dev
-    - python
+    # - python
     configflags:
     - --prefix=/usr
     override-build: |
@@ -1069,7 +1122,7 @@ parts:
     # - usr/share/gir-1.0
     # - usr/share/locale
 
-  # http://www.libpng.org
+  # http://sourceforge.mirrorservice.org/l/li/libpng/libpng16
   libpng:
     after:
     - fix-pkgconfig-files
@@ -1099,8 +1152,8 @@ parts:
     - fontconfig
     - gdk-pixbuf
     - libcroco
-    source: https://download.gnome.org/sources/librsvg/2.42/librsvg-2.42.3.tar.xz
-    source-checksum: sha256/704f2c44b9b170fc5498de36a161d01ca8f584ba9c42654b98565a7b7bcbe657
+    source: https://download.gnome.org/sources/librsvg/2.42/librsvg-2.42.4.tar.xz
+    source-checksum: sha256/225280a2a69ee4cce6452a1a92d9297cc1b34a8faface2bf2b4b9da48f044de3
     plugin: autotools
     build-packages:
     - cargo
@@ -1186,7 +1239,7 @@ parts:
     plugin: autotools
     source: https://chromium.googlesource.com/webm/libwebp.git
     source-type: git
-    source-tag: v0.6.1
+    source-tag: v1.0.0
     source-depth: 1
     configflags:
     - --prefix=/usr
@@ -1234,8 +1287,8 @@ parts:
     - cairo
     - fix-pkgconfig-files
     - fontconfig
-    source: https://download.gnome.org/sources/pango/1.42/pango-1.42.0.tar.xz
-    source-checksum: sha256/9924d88a3dcedff753f0763814a1605307c5c9c931413b8b47ea7267d1b19446
+    source: https://download.gnome.org/sources/pango/1.42/pango-1.42.1.tar.xz
+    source-checksum: sha256/915a6756b298578ff27c7a6393f8c2e62e6e382f9411f2504d7af1a13c7bce32
     plugin: autotools
     build-packages:
     - libfribidi-dev
@@ -1278,7 +1331,7 @@ parts:
     - glib
     - gobject-introspection
     - lcms2
-    source: https://poppler.freedesktop.org/poppler-0.64.0.tar.xz
+    source: https://poppler.freedesktop.org/poppler-0.65.0.tar.xz
     plugin: cmake
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -1305,6 +1358,7 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
+  # https://poppler.freedesktop.org/
   poppler-data:
     after:
     - poppler
@@ -1346,7 +1400,10 @@ parts:
     source: https://github.com/pygobject/pycairo/releases/download/v1.17.0/pycairo-1.17.0.tar.gz
     source-checksum: sha256/cdd4d1d357325dec3a21720b85d273408ef83da5f15c184f2eff3212ff236b9f
     build-packages:
+    - libxcb-render0-dev
     - python-pip
+    stage-packages:
+    - libxcb-render0
 
   # https://download.gnome.org/sources/pygobject
   pygobject:
@@ -1359,7 +1416,7 @@ parts:
     source: https://download.gnome.org/sources/pygobject/2.28/pygobject-2.28.7.tar.xz
     source-checksum: sha256/bb9d25a3442ca7511385a7c01b057492095c263784ef31231ffe589d83a96a5a
     build-packages:
-    - python2.7-dev
+    - python-dev
     configflags:
     - --prefix=/usr
     - --enable-cairo
@@ -1370,8 +1427,8 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - python2.7
+    # stage-packages:
+    # - python
 
   # https://download.gnome.org/sources/pygtk
   pygtk:
@@ -1389,7 +1446,7 @@ parts:
     source: https://download.gnome.org/sources/pygtk/2.24/pygtk-2.24.0.tar.bz2
     source-checksum: sha256/cd1c1ea265bd63ff669e92a2d3c2a88eb26bcd9e5363e0f82c896e649f206912
     build-packages:
-    - python2.7-dev
+    - python-dev
     configflags:
     - --prefix=/usr
     override-build: |
@@ -1399,8 +1456,8 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - python2.7
+    # stage-packages:
+    # - python
 
   # https://freedesktop.org/wiki/Software/shared-mime-info
   shared-mime-info:
@@ -1544,10 +1601,11 @@ parts:
     # - webkitgtk
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: md5/5e91357ede5a5d5cb0db981ff8f9726c
+    source-checksum: sha256/1cb0baaecdefe44d371a15f2739a1bcbce4682336b4ccf8eb7b587ce52c333eb
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
     - --enable-binreloc
     override-build: |
       export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
@@ -1558,7 +1616,7 @@ parts:
       sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
         desktop/gimp.desktop.in.in
       if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
-      ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
+      ./configure --prefix=/usr --sysconfdir=/etc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/ --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       sed -i -E "s|^(.*python=).*|\1/snap/gimp/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
@@ -1584,7 +1642,6 @@ parts:
     - zlib1g-dev
     - patchutils
     - python-dev
-    - python2.7-dev
     - xsltproc
     stage-packages:
     # - darktable
@@ -1607,7 +1664,8 @@ parts:
     - libtiff5
     - libxcursor1
     - libxpm4
-    - python2.7-dev
+    - libxt6
+    - python-dev
     - xdg-utils
     - zlib1g
     # prime:
