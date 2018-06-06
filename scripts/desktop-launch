@@ -395,7 +395,7 @@ ln -sfn $REALHOME/.config/ibus/bus $IBUS_CONFIG_PATH
 # GTK launcher specific part #
 ##############################
 
-export GTK_PATH=$RUNTIME/usr/lib/gtk-2.0
+export GTK_PATH=$RUNTIME/usr/lib/gtk-3.0:$RUNTIME/usr/lib/gtk-2.0
 
 # ibus and fcitx integration
 GTK_IM_MODULE_DIR=$XDG_CACHE_HOME/immodules
@@ -405,6 +405,7 @@ if [ $needs_update = true ]; then
   mkdir -p $GTK_IM_MODULE_DIR
   ln -s $RUNTIME/usr/lib/gtk-2.0/2.10.0/immodules/*.so $GTK_IM_MODULE_DIR
   $RUNTIME/usr/bin/gtk-query-immodules-2.0 > $GTK_IM_MODULE_FILE
+  $RUNTIME/usr/bin/gtk-query-immodules-3.0 >> $GTK_IM_MODULE_FILE
 fi
 
 ###############################

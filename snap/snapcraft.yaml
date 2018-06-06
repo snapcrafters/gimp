@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.0'
+version: '2.10.2'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -75,8 +75,12 @@ parts:
   desktop-launch:
     after:
     - adwaita-icon-theme
-    # - gnome-themes-standard
-    - gnome-themes-extra
+    - gnome-icon-theme
+    - gnome-icon-theme-extras
+    - gnome-icon-theme-symbolic
+    - gnome-themes-standard
+    # - gnome-themes-extra
+    - hicolor-icon-theme
     - gtk2
     - shared-mime-info
     plugin: dump
@@ -87,7 +91,6 @@ parts:
       desktop-launch: bin/desktop-launch
     stage-packages:
     - dmz-cursor-theme
-    - hicolor-icon-theme
     - libxkbcommon0
     - locales-all
     - ttf-ubuntu-font-family
@@ -105,13 +108,23 @@ parts:
   # https://download.gnome.org/sources/adwaita-icon-theme
   adwaita-icon-theme:
     after:
+    - gdk-pixbuf
     - gettext
+    - gnome-icon-theme
     - gtk2
+    - gtk3
+    - librsvg
     source: https://download.gnome.org/sources/adwaita-icon-theme/3.28/adwaita-icon-theme-3.28.0.tar.xz
     source-checksum: sha256/7aae8c1dffd6772fd1a21a3d365a0ea28b7c3988bdbbeafbf8742cda68242150
     plugin: autotools
     configflags:
     - --prefix=/usr
+    override-build: |
+      env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
 
   # https://download.gnome.org/sources/at-spi2-core
   atspi2:
@@ -152,12 +165,14 @@ parts:
     after:
     - fix-pkgconfig-files
     - gobject-introspection
+    - librsvg
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.46.tar.bz2
-    source-checksum: sha256/bbc2403b1badf8014ec42200e65d7b1f46e68e627c33c6242fa31ac5dc869e5b
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.50.tar.bz2
+    source-checksum: sha256/b52c1dc081ff9ae8bc4cb7cdb959c762ea692b9f4431bacf8d17a14dbcc85b2d
     configflags:
     - --prefix=/usr
     - --disable-docs
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -173,17 +188,85 @@ parts:
     - fix-pkgconfig-files
     - fontconfig
     - pixman
-    source: https://cairographics.org/snapshots/cairo-1.15.10.tar.xz
-    source-checksum: sha1/de180498ac563249b93ee5e17ba9aa26f90644b3
+    source: https://cairographics.org/snapshots/cairo-1.15.12.tar.xz
+    source-checksum: sha1/4e64c6a48789edb4c60bc3fa95bd3992cc388b88
     plugin: autotools
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     # prime:
     # - -**/*.a
     # - -**/*.la
+
+  darktable:
+    after:
+    - cairo
+    - dbus-glib
+    - glib
+    - graphicsmagick
+    - gtk3
+    - json-glib
+    - lcms2
+    - liblensfun
+    - libpng
+    - librsvg
+    - libsecret
+    - libsoup
+    - libwebp
+    - osmgpsmap
+    source: https://github.com/darktable-org/darktable/releases/download/release-2.4.3/darktable-2.4.3.tar.xz
+    plugin: cmake
+    configflags:
+    - -DCMAKE_INSTALL_PREFIX=/usr
+    - -DCMAKE_BUILD_TYPE=Release
+    - -DDONT_USE_INTERNAL_LUA=Off
+    - -DBINARY_PACKAGE_BUILD=On
+    build-packages:
+    - curl
+    - intltool
+    - libexiv2-dev
+    - libflickcurl-dev
+    - libjpeg8-dev
+    - libopenexr-dev
+    - libopenjp2-7-dev
+    - libpugixml-dev
+    - libsqlite3-dev
+    - libtiff5-dev
+    - libxml2-utils
+    - libxml2-dev
+    - xsltproc
+    stage-packages:
+    - curl
+    - libexiv2-14
+    - libflickcurl0
+    - libjpeg8
+    - libopenexr22
+    - libopenjp2-7
+    - libpugixml1v5
+    - libsqlite3-0
+    - libtiff5
+    - libxml2
+
+  # https://dbus.freedesktop.org/releases/dbus-glib
+  dbus-glib:
+    after:
+    - glib
+    source: https://dbus.freedesktop.org/releases/dbus-glib/dbus-glib-0.110.tar.gz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --sysconfdir=/etc
+    - --disable-static
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    build-packages:
+    - libdbus-1-dev
+    stage-packages:
+    - libdbus-1-3
 
   # https://www.freedesktop.org/software/fontconfig/release
   fontconfig:
@@ -198,6 +281,7 @@ parts:
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -212,11 +296,12 @@ parts:
   freetype-prebuild:
     after:
     - fix-pkgconfig-files
-    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.tar.bz2
+    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
     plugin: autotools
     configflags:
     - --prefix=/usr/local
     - --without-harfbuzz
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -228,10 +313,11 @@ parts:
     after:
     - fix-pkgconfig-files
     - harfbuzz
-    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.tar.bz2
+    source: https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
     plugin: autotools
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -254,14 +340,15 @@ parts:
     - libtiff5-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --enable-relocatable=true
-    - --with_man=false
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --enable-relocations
+      ./configure --prefix=/usr --disable-static --enable-relocations
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+      sed -i "s|Exec=/usr/bin/|Exec=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/|g" $SNAPCRAFT_PART_INSTALL/usr/share/thumbnailers/gdk-pixbuf-thumbnailer.thumbnailer
     stage-packages:
     - libjpeg8
     - libtiff5
@@ -282,15 +369,18 @@ parts:
     - gobject-introspection
     - graphviz
     - gtk2
+    - jasper
     - json-glib
     - lcms2
     - liblensfun
+    - libpng
     - librsvg
     - libwebp
     - pango
+    - pygobject
     - vala
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.0.tar.bz2
-    source-checksum: sha256/d04d2bfa0ff5a4bcfe7566f7418929a9c80f0109fa248ea4ff19538b3e99f0c5
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.2.tar.bz2
+    source-checksum: sha256/6a358bc19d20b8ac1daf645cc8b53cdc2ea6f9c98a6036179a57045a26a07f8d
     plugin: autotools
     build-packages:
     - libexiv2-dev
@@ -305,9 +395,11 @@ parts:
     - --prefix=/usr
     - --disable-docs
     - --disable-rpath
+    - --disable-static
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-docs --disable-rpath
+      export GIO_MODULE_DIR=$SNAPCRAFT_STAGE/usr/lib/gio/modules
+      ./configure --prefix=/usr --disable-docs --disable-rpath --disable-static
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -361,6 +453,7 @@ parts:
     - libxml2-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --disable-curses
     - --disable-java
     - --enable-relocatable
@@ -389,6 +482,7 @@ parts:
     - glib
     - gobject-introspection
     - gtk2
+    - gtk3
     - vala
     source: https://download.gnome.org/sources/gexiv2/0.10/gexiv2-0.10.8.tar.xz
     source-checksum: sha256/81c528fd1e5e03577acd80fb77798223945f043fd1d4e06920c71202eea90801
@@ -397,12 +491,13 @@ parts:
     - libexiv2-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --disable-gtk-doc
     - --disable-gtk-doc-html
     - --disable-gtk-doc-pdf
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf
+      ./configure --prefix=/usr --disable-static --disable-gtk-doc --disable-gtk-doc-html --disable-gtk-doc-pdf
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -420,8 +515,8 @@ parts:
   glib:
     after:
     - fix-pkgconfig-files
-    source: https://download.gnome.org/sources/glib/2.56/glib-2.56.0.tar.xz
-    source-checksum: sha256/ecef6e17e97b8d9150d0e8a4b3edee1ac37331213b8a2a87a083deea408a0fc7
+    source: https://download.gnome.org/sources/glib/2.56/glib-2.56.1.tar.xz
+    source-checksum: sha256/40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d
     plugin: autotools
     build-packages:
     - libmount-dev
@@ -430,13 +525,16 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage:
+    - -usr/lib/python2.7/sitecustomize.py
     stage-packages:
     - libmount1
     - libpcre3
-    - python
+    # - python
     - zlib1g
     # prime:
     # - -**/*.a
@@ -449,8 +547,8 @@ parts:
     - glib
     - gsettings-desktop-schemas
     plugin: meson
-    source: https://download.gnome.org/sources/glib-networking/2.56/glib-networking-2.56.0.tar.xz
-    source-checksum: sha256/47fd10bcae2e5039dc5f685e3ea384f48e64a6bee26d755718f534a978477c93
+    source: https://download.gnome.org/sources/glib-networking/2.57/glib-networking-2.57.1.tar.xz
+    source-checksum: sha256/663878443c636aa0af5b6708ddf715d82effe961989972cb9a1f48d2a3ecb026
     build-packages:
     - libgnutls-dev
     - libproxy-dev
@@ -474,41 +572,75 @@ parts:
     # - -**/*.la
     # - -root
 
-  # https://download.gnome.org/sources/gnome-themes-extra
-  gnome-themes-extra:
+  # https://download.gnome.org/sources/gnome-icon-theme
+  gnome-icon-theme:
     after:
-    - gettext
-    - glib
-    # - gnome-themes-standard
-    - gtk2
-    source: https://download.gnome.org/sources/gnome-themes-extra/3.28/gnome-themes-extra-3.28.tar.xz
-    source-checksum: sha256/7c4ba0bff001f06d8983cfc105adaac42df1d1267a2591798a780bac557a5819
+    - hicolor-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme/2.31/gnome-icon-theme-2.31.0.tar.bz2
+    source-checksum: sha256/ea7e05b77ead159379392b3b275ca0c9cbacd7d936014e447cc7c5e27a767982
+    plugin: autotools
+    build-packages:
+    - icon-naming-utils
+    configflags:
+    - --prefix=/usr
+
+  # https://download.gnome.org/sources/gnome-icon-theme-extras
+  gnome-icon-theme-extras:
+    after:
+    - gnome-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme-extras/3.12/gnome-icon-theme-extras-3.12.0.tar.xz
+    source-checksum: sha256/4eec6cea8a7b09c4ed6ebab1a3b42539b9c61a53bec4b8872e774611cc619608
     plugin: autotools
     configflags:
     - --prefix=/usr
-    - --disable-gtk3-engine
 
-  # # https://download.gnome.org/sources/gnome-themes-standard
-  # gnome-themes-standard:
+  # https://download.gnome.org/sources/gnome-icon-theme-symbolic
+  gnome-icon-theme-symbolic:
+    after:
+    - gnome-icon-theme
+    source: https://download.gnome.org/sources/gnome-icon-theme-symbolic/3.12/gnome-icon-theme-symbolic-3.12.0.tar.xz
+    source-checksum: sha256/851a4c9d8e8cb0000c9e5e78259ab8b8e67c5334e4250ebcc8dfdaa33520068b
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+
+  # https://download.gnome.org/sources/gnome-themes-extra
+  # gnome-themes-extra:
   #   after:
   #   - gettext
   #   - glib
+  #   - gnome-themes-standard
   #   - gtk2
-  #   source: https://download.gnome.org/sources/gnome-themes-standard/3.27/gnome-themes-standard-3.27.90.tar.xz
-  #   source-checksum: sha256/ffc7ccb5458ae4ef2501c49d84d3af150ca3b70c9b239e7ba6c05fe1405d31dc
+  #   source: https://download.gnome.org/sources/gnome-themes-extra/3.28/gnome-themes-extra-3.28.tar.xz
+  #   source-checksum: sha256/7c4ba0bff001f06d8983cfc105adaac42df1d1267a2591798a780bac557a5819
+  #   plugin: autotools
   #   configflags:
   #   - --prefix=/usr
   #   - --disable-gtk3-engine
 
-  # https://download.gnome.org/sources
+  # https://download.gnome.org/sources/gnome-themes-standard
+  gnome-themes-standard:
+    after:
+    - gettext
+    - glib
+    - gtk2
+    - gtk3
+    - librsvg
+    source: https://download.gnome.org/sources/gnome-themes-standard/3.22/gnome-themes-standard-3.22.3.tar.xz
+    source-checksum: sha256/61dc87c52261cfd5b94d65e8ffd923ddeb5d3944562f84942eeeb197ab8ab56a
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+
+  # https://download.gnome.org/sources/gobject-introspection
   gobject-introspection:
     after:
     - fix-pkgconfig-files
     - glib
     - patches
     plugin: autotools
-    source: https://download.gnome.org/sources/gobject-introspection/1.56/gobject-introspection-1.56.0.tar.xz
-    source-checksum: sha256/0d7059fad7aa5ec50d9678aea4ea139acab23737e9cf9ca0d86c615cecbaa0f8
+    source: https://download.gnome.org/sources/gobject-introspection/1.56/gobject-introspection-1.56.1.tar.xz
+    source-checksum: sha256/5b2875ccff99ff7baab63a34b67f8c920def240e178ff50add809e267d9ea24b
     build-packages:
     - bison
     - flex
@@ -517,20 +649,52 @@ parts:
     - python-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --with-python=python
     disable-parallel: true
     override-build: |
       patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libffi6
-    - python
     stage:
     - -root
+    - -usr/lib/python2.7/sitecustomize.py
+    stage-packages:
+    - libffi6
+    # - python
     # prime:
     # - -**/*.a
     # - -**/*.la
+
+  graphicsmagick:
+    after:
+    - fix-pkgconfig-files
+    - freetype
+    - lcms2
+    - libpng
+    - libwebp
+    source: http://sourceforge.mirrorservice.org/g/gr/graphicsmagick/graphicsmagick/1.3.28/GraphicsMagick-1.3.28.tar.xz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --enable-shared
+    - --disable-static
+    build-packages:
+    - libbz2-dev
+    - libjbig-dev
+    - libjpeg8-dev
+    - liblzma-dev
+    - libtiff5-dev
+    - libxml2-dev
+    - zlib1g-dev
+    stage-packages:
+    - libbz2-1.0
+    - libjbig0
+    - libjpeg8
+    - liblzma5
+    - libtiff5
+    - libxml2
+    - zlib1g
 
   # https://graphviz.gitlab.io/_pages/Download/Download_source.html
   graphviz:
@@ -545,6 +709,7 @@ parts:
     - libxcb1-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -555,7 +720,7 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # https://download.gnome.org/sources
+  # https://download.gnome.org/sources/gsettings-desktop-schemas
   gsettings-desktop-schemas:
     after:
     - fix-pkgconfig-files
@@ -567,9 +732,10 @@ parts:
     source-checksum: sha256/4cb4cd7790b77e5542ec75275237613ad22f3a1f2f41903a298cf6cc996a9167
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr
+      ./configure --prefix=/usr --disable-static
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -677,6 +843,7 @@ parts:
     - fix-pkgconfig-files
     - fontconfig
     - gdk-pixbuf
+    - glib
     - libatk
     - pango
     source: https://download.gnome.org/sources/gtk+/2.24/gtk+-2.24.32.tar.xz
@@ -694,14 +861,17 @@ parts:
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --disable-static
     - --with-xinput
     override-build: |
       env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --sysconfdir=/etc --with-xinput
+      ./configure --prefix=/usr --sysconfdir=/etc --disable-static --with-xinput
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage:
+    - -usr/bin/gtk-update-icon-cache
     stage-packages:
     - libx11-6
     - libxcomposite1
@@ -716,52 +886,54 @@ parts:
     # - -**/*.la
 
   # https://download.gnome.org/sources/gtk+
-  # gtk3:
-  #   after:
-  #   - cairo
-  #   - fix-pkgconfig-files
-  #   - fontconfig
-  #   - gdk-pixbuf
-  #   - libatk
-  #   - libatk-bridge
-  #   - libepoxy
-  #   - pango
-  #   source: https://download.gnome.org/sources/gtk+/3.22/gtk+-3.22.29.tar.xz
-  #   source-checksum: sha256/a07d64b939fcc034a066b7723fdf9b24e92c9cfb6a8497593f3471fe56fbbbf8
-  #   plugin: autotools
-  #   build-packages:
-  #   - libwayland-dev
-  #   - libx11-dev
-  #   - libxcomposite-dev
-  #   - libxdamage-dev
-  #   - libxfixes-dev
-  #   - libxi-dev
-  #   - libxinerama-dev
-  #   - libxrandr-dev
-  #   - libxrender-dev
-  #   - wayland-protocols
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --enable-x11-backend
-  #   - --enable-wayland-backend
-  #   override-build: |
-  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-  #     ./configure --prefix=/usr --enable-x11-backend --enable-wayland-backend
-  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   stage-packages:
-  #   - libwayland-client0
-  #   - libwayland-cursor0
-  #   - libwayland-egl1-mesa
-  #   - libx11-6
-  #   - libxcomposite1
-  #   - libxdamage1
-  #   - libxfixes3
-  #   - libxi6
-  #   - libxinerama1
-  #   - libxrandr2
-  #   - libxrender1
+  gtk3:
+    after:
+    - cairo
+    - fix-pkgconfig-files
+    - fontconfig
+    - gdk-pixbuf
+    - glib
+    - libatk
+    - libatk-bridge
+    - libepoxy
+    - pango
+    source: https://download.gnome.org/sources/gtk+/3.22/gtk+-3.22.29.tar.xz
+    source-checksum: sha256/a07d64b939fcc034a066b7723fdf9b24e92c9cfb6a8497593f3471fe56fbbbf8
+    plugin: autotools
+    build-packages:
+    - libwayland-dev
+    - libx11-dev
+    - libxcomposite-dev
+    - libxdamage-dev
+    - libxfixes-dev
+    - libxi-dev
+    - libxinerama-dev
+    - libxrandr-dev
+    - libxrender-dev
+    - wayland-protocols
+    configflags:
+    - --prefix=/usr
+    - --disable-static
+    - --enable-x11-backend
+    - --enable-wayland-backend
+    override-build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --disable-static --enable-x11-backend --enable-wayland-backend
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage-packages:
+    - libwayland-client0
+    - libwayland-cursor0
+    - libwayland-egl1-mesa
+    - libx11-6
+    - libxcomposite1
+    - libxdamage1
+    - libxfixes3
+    - libxi6
+    - libxinerama1
+    - libxrandr2
+    - libxrender1
     # prime:
     # - -**/*.a
     # - -**/*.la
@@ -779,6 +951,7 @@ parts:
     - libicu-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --with-cairo=no
     override-build: |
       apt-get remove -yyq libfreetype6
@@ -791,6 +964,13 @@ parts:
     # prime:
     # - -**/*.a
     # - -**/*.la
+
+  # https://icon-theme.freedesktop.org/releases
+  hicolor-icon-theme:
+    source: https://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.17.tar.xz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
 
   # http://www.ece.uvic.ca/~frodo/jasper
   jasper:
@@ -856,6 +1036,7 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -875,8 +1056,8 @@ parts:
     after:
     - fix-pkgconfig-files
     - gobject-introspection
-    source: https://download.gnome.org/sources/atk/2.28/atk-2.28.1.tar.xz
-    source-checksum: sha256/cd3a1ea6ecc268a2497f0cd018e970860de24a6d42086919d6bf6c8e8d53f4fc
+    source: https://download.gnome.org/sources/atk/2.29/atk-2.29.1.tar.xz
+    source-checksum: sha256/1aa7707c6297c1797fe4d79a22a57ede4d5586b0f7a3b30e886d7ca9d75f20da
     plugin: meson
     build-packages:
     - libdbus-1-dev
@@ -931,7 +1112,7 @@ parts:
   libbrotli:
     after:
     - fix-pkgconfig-files
-    source: https://github.com/google/brotli/archive/v1.0.3.tar.gz
+    source: https://github.com/google/brotli/archive/v1.0.4.tar.gz
     plugin: cmake
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -956,6 +1137,7 @@ parts:
     - libxml2-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1051,12 +1233,13 @@ parts:
     build-packages:
     - intltool
     - libjson-c-dev
-    - python
+    # - python
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr
+      ./configure --prefix=/usr --disable-static
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1070,7 +1253,7 @@ parts:
     # - usr/share/gir-1.0
     # - usr/share/locale
 
-  # http://www.libpng.org
+  # http://sourceforge.mirrorservice.org/l/li/libpng/libpng16
   libpng:
     after:
     - fix-pkgconfig-files
@@ -1081,6 +1264,7 @@ parts:
     - zlib1g-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1100,21 +1284,24 @@ parts:
     - fontconfig
     - gdk-pixbuf
     - libcroco
-    source: https://download.gnome.org/sources/librsvg/2.42/librsvg-2.42.3.tar.xz
-    source-checksum: sha256/704f2c44b9b170fc5498de36a161d01ca8f584ba9c42654b98565a7b7bcbe657
+    - pango
+    source: https://download.gnome.org/sources/librsvg/2.42/librsvg-2.42.4.tar.xz
+    source-checksum: sha256/225280a2a69ee4cce6452a1a92d9297cc1b34a8faface2bf2b4b9da48f044de3
     plugin: autotools
     build-packages:
     - cargo
     - libxml2-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --enable-pixbuf-loader
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --enable-pixbuf-loader
+      ./configure --prefix=/usr --disable-static --enable-pixbuf-loader
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+      sed -i "s|Exec=/usr/bin/|Exec=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/|g" $SNAPCRAFT_PART_INSTALL/usr/share/thumbnailers/librsvg.thumbnailer
     stage-packages:
     - libxml2
     organize:
@@ -1195,10 +1382,11 @@ parts:
     plugin: autotools
     source: https://chromium.googlesource.com/webm/libwebp.git
     source-type: git
-    source-tag: v0.6.1
+    source-tag: v1.0.0
     source-depth: 1
     configflags:
     - --prefix=/usr
+    - --disable-static
     - --enable-libwebpmux
     - --enable-libwebpdemux
     - --enable-libwebpdecoder
@@ -1237,22 +1425,46 @@ parts:
     configflags:
     - --prefix=/usr
 
+  osmgpsmap:
+    after:
+    - fix-pkgconfig-files
+    - cairo
+    - gobject-introspection
+    - gtk3
+    - libsoup
+    - pycairo
+    - pygobject
+    - pygtk
+    source: https://github.com/nzjrs/osm-gps-map/releases/download/1.1.0/osm-gps-map-1.1.0.tar.gz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --disable-static
+    override-build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      export PYTHON=/usr/bin/python
+      ./configure --prefix=/usr --disable-static
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+
   # https://download.gnome.org/sources/pango
   pango:
     after:
     - cairo
     - fix-pkgconfig-files
     - fontconfig
-    source: https://download.gnome.org/sources/pango/1.42/pango-1.42.0.tar.xz
-    source-checksum: sha256/9924d88a3dcedff753f0763814a1605307c5c9c931413b8b47ea7267d1b19446
+    source: https://download.gnome.org/sources/pango/1.42/pango-1.42.1.tar.xz
+    source-checksum: sha256/915a6756b298578ff27c7a6393f8c2e62e6e382f9411f2504d7af1a13c7bce32
     plugin: autotools
     build-packages:
     - libfribidi-dev
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr
+      ./configure --prefix=/usr --disable-static
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1271,6 +1483,7 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
+    - --disable-static
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -1287,7 +1500,7 @@ parts:
     - glib
     - gobject-introspection
     - lcms2
-    source: https://poppler.freedesktop.org/poppler-0.64.0.tar.xz
+    source: https://poppler.freedesktop.org/poppler-0.65.0.tar.xz
     plugin: cmake
     configflags:
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -1314,6 +1527,7 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
+  # https://poppler.freedesktop.org/
   poppler-data:
     after:
     - poppler
@@ -1336,6 +1550,7 @@ parts:
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --disable-static
     - --without-caps
     - --without-fftw
     - --without-speex
@@ -1355,7 +1570,10 @@ parts:
     source: https://github.com/pygobject/pycairo/releases/download/v1.17.0/pycairo-1.17.0.tar.gz
     source-checksum: sha256/cdd4d1d357325dec3a21720b85d273408ef83da5f15c184f2eff3212ff236b9f
     build-packages:
+    - libxcb-render0-dev
     - python-pip
+    stage-packages:
+    - libxcb-render0
 
   # https://download.gnome.org/sources/pygobject
   pygobject:
@@ -1368,7 +1586,7 @@ parts:
     source: https://download.gnome.org/sources/pygobject/2.28/pygobject-2.28.7.tar.xz
     source-checksum: sha256/bb9d25a3442ca7511385a7c01b057492095c263784ef31231ffe589d83a96a5a
     build-packages:
-    - python2.7-dev
+    - python-dev
     configflags:
     - --prefix=/usr
     - --enable-cairo
@@ -1379,8 +1597,8 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - python2.7
+    # stage-packages:
+    # - python
 
   # https://download.gnome.org/sources/pygtk
   pygtk:
@@ -1398,7 +1616,7 @@ parts:
     source: https://download.gnome.org/sources/pygtk/2.24/pygtk-2.24.0.tar.bz2
     source-checksum: sha256/cd1c1ea265bd63ff669e92a2d3c2a88eb26bcd9e5363e0f82c896e649f206912
     build-packages:
-    - python2.7-dev
+    - python-dev
     configflags:
     - --prefix=/usr
     override-build: |
@@ -1408,8 +1626,8 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - python2.7
+    # stage-packages:
+    # - python
 
   # https://freedesktop.org/wiki/Software/shared-mime-info
   shared-mime-info:
@@ -1524,6 +1742,7 @@ parts:
   # https://www.gimp.org/downloads
   gimp:
     after:
+    - darktable
     - desktop-launch
     - alsa
     - babl
@@ -1553,10 +1772,11 @@ parts:
     # - webkitgtk
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: md5/5e91357ede5a5d5cb0db981ff8f9726c
+    source-checksum: sha256/1cb0baaecdefe44d371a15f2739a1bcbce4682336b4ccf8eb7b587ce52c333eb
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
     - --enable-binreloc
     override-build: |
       export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
@@ -1567,24 +1787,23 @@ parts:
       sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
         desktop/gimp.desktop.in.in
       if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
-      ./configure --prefix=/usr --sysconfdir=/etc --enable-binreloc
+      ./configure --prefix=/usr --sysconfdir=/etc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/ --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      sed -i -E "s|^(.*python=).*|\1/snap/gimp/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E "s|^(.*python=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
     - intltool
     - iso-codes
     - libaa1-dev
     - libart-2.0-dev
     - libbz2-dev
-    - libcurl4-openssl-dev
+    - libcurl4-gnutls-dev
     - libexif-dev
     - libfftw3-dev
     - libgpm-dev
     - libice-dev
     - libjasper-dev
     - libjpeg8-dev
-    - liblcms2-dev
     - libmng-dev
     - libsm-dev
     - libtiff5-dev
@@ -1595,14 +1814,12 @@ parts:
     - zlib1g-dev
     - patchutils
     - python-dev
-    - python2.7-dev
     - xsltproc
     stage-packages:
-    # - darktable
     - libaa1
     - libart-2.0-2
     - libbz2-1.0
-    - libcurl3
+    - libcurl3-gnutls
     - libexif12
     - libfftw3-double3
     - libfftw3-long3
@@ -1612,7 +1829,6 @@ parts:
     - libice6
     - libjasper1
     - libjpeg8
-    - liblcms2-2
     - libmng2
     - libsm6
     - libtiff5
@@ -1620,7 +1836,7 @@ parts:
     - libxmu6
     - libxpm4
     - libxt6
-    - python2.7-dev
+    - python-dev
     - xdg-utils
     - zlib1g
     # prime:
