@@ -140,6 +140,7 @@ parts:
     - libxkbcommon-dev
     - libxtst-dev
     - python3-pip
+    - python3-setuptools
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
@@ -553,6 +554,7 @@ parts:
     - libgnutls-dev
     - libproxy-dev
     - python3-pip
+    - python3-setuptools
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
@@ -1008,6 +1010,7 @@ parts:
     source-checksum: sha256/2d7709a44749c7318599a6829322e081915bdc73f5be5045882ed120bb686dc8
     build-packages:
     - python3-pip
+    - python3-setuptools
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
@@ -1062,6 +1065,7 @@ parts:
     build-packages:
     - libdbus-1-dev
     - python3-pip
+    - python3-setuptools
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
@@ -1091,6 +1095,7 @@ parts:
     build-packages:
     - libdbus-1-dev
     - python3-pip
+    - python3-setuptools
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
@@ -1573,6 +1578,7 @@ parts:
     build-packages:
     - libxcb-render0-dev
     - python-pip
+    - python-setuptools
     stage-packages:
     - libxcb-render0
 
