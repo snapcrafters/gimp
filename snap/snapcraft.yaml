@@ -1147,61 +1147,61 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # # https://download.gnome.org/sources/libepoxy
-  # libepoxy:
-  #   after:
-  #   - fix-pkgconfig-files
-  #   source: https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.0.tar.xz
-  #   source-checksum: sha256/4c94995398a6ebf691600dda2e9685a0cac261414175c2adf4645cdfab42a5d5
-  #   plugin: autotools
-  #   build-packages:
-  #   - libegl1-mesa-dev
-  #   configflags:
-  #   - --prefix=/usr
-  #   override-build: |
-  #     snapcraftctl build
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   stage-packages:
-  #   - libegl1-mesa
-  #   # prime:
-  #   # - -**/*.a
-  #   # - -**/*.la
+  # https://download.gnome.org/sources/libepoxy
+  libepoxy:
+    after:
+    - fix-pkgconfig-files
+    source: https://download.gnome.org/sources/libepoxy/1.5/libepoxy-1.5.0.tar.xz
+    source-checksum: sha256/4c94995398a6ebf691600dda2e9685a0cac261414175c2adf4645cdfab42a5d5
+    plugin: autotools
+    build-packages:
+    - libegl1-mesa-dev
+    configflags:
+    - --prefix=/usr
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage-packages:
+    - libegl1-mesa
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
-  # # https://gnupg.org/ftp/gcrypt/libgcrypt
-  # libgcrypt:
-  #   after:
-  #   - fix-pkgconfig-files
-  #   - gettext
-  #   - libgpg-error
-  #   source: https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.8.2.tar.bz2
-  #   plugin: autotools
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --disable-doc
-  #   override-build: |
-  #     snapcraftctl build
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   # prime:
-  #   # - -**/*.a
-  #   # - -**/*.la
+  # https://gnupg.org/ftp/gcrypt/libgcrypt
+  libgcrypt:
+    after:
+    - fix-pkgconfig-files
+    - gettext
+    - libgpg-error
+    source: https://gnupg.org/ftp/gcrypt/libgcrypt/libgcrypt-1.8.2.tar.bz2
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --disable-doc
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
-  # # https://gnupg.org/ftp/gcrypt/libgpg-error
-  # libgpg-error:
-  #   after:
-  #   - fix-pkgconfig-files
-  #   - gettext
-  #   source: https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.28.tar.bz2
-  #   plugin: autotools
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --disable-doc
-  #   - --disable-tests
-  #   override-build: |
-  #     snapcraftctl build
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   # prime:
-  #   # - -**/*.a
-  #   # - -**/*.la
+  # https://gnupg.org/ftp/gcrypt/libgpg-error
+  libgpg-error:
+    after:
+    - fix-pkgconfig-files
+    - gettext
+    source: https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.28.tar.bz2
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --disable-doc
+    - --disable-tests
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://sourceforge.net/projects/lensfun/files
   liblensfun:
@@ -1312,68 +1312,68 @@ parts:
     # - -**/*.a
     # - -**/*.la
 
-  # # https://download.gnome.org/sources/libsecret
-  # libsecret:
-  #   after:
-  #   - fix-pkgconfig-files
-  #   - gettext
-  #   - glib
-  #   - gobject-introspection
-  #   - libgcrypt
-  #   - vala
-  #   source: https://download.gnome.org/sources/libsecret/0.18/libsecret-0.18.tar.xz
-  #   source-checksum: sha256/0c73aa762dbd1e38ba7b03de350e23ce818cb810b0784375e95ef61e004b02e3
-  #   plugin: autotools
-  #   build-packages:
-  #   - intltool
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --disable-manpages
-  #   override-build: |
-  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-  #     ./configure --prefix=/usr --disable-manpages
-  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   # prime:
-  #   # - -**/*.a
-  #   # - -**/*.la
+  # https://download.gnome.org/sources/libsecret
+  libsecret:
+    after:
+    - fix-pkgconfig-files
+    - gettext
+    - glib
+    - gobject-introspection
+    - libgcrypt
+    - vala
+    source: https://download.gnome.org/sources/libsecret/0.18/libsecret-0.18.tar.xz
+    source-checksum: sha256/0c73aa762dbd1e38ba7b03de350e23ce818cb810b0784375e95ef61e004b02e3
+    plugin: autotools
+    build-packages:
+    - intltool
+    configflags:
+    - --prefix=/usr
+    - --disable-manpages
+    override-build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --disable-manpages
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
-  # # https://download.gnome.org/sources/libsoup
-  # libsoup:
-  #   after:
-  #   - fix-pkgconfig-files
-  #   - gettext
-  #   - glib
-  #   - glib-networking
-  #   - gobject-introspection
-  #   - vala
-  #   source: https://download.gnome.org/sources/libsoup/2.62/libsoup-2.62.0.tar.xz
-  #   source-checksum: sha256/ab7c7ae8d19d0a27ab3b6ae21599cec8c7f7b773b3f2b1090c5daf178373aaac
-  #   plugin: autotools
-  #   build-packages:
-  #   - libsqlite3-dev
-  #   - libxml2-dev
-  #   configflags:
-  #   - --prefix=/usr
-  #   - --without-gnome
-  #   - --disable-tls-check
-  #   override-build: |
-  #     export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-  #     ./configure --prefix=/usr --without-gnome --disable-tls-check
-  #     make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-  #     make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-  #     $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-  #   stage-packages:
-  #   - libsqlite3-0
-  #   - libxml2
-  #   organize:
-  #     root/build_gimp/stage/usr/share/vala/vapi/*: usr/share/vala/vapi/
-  #   stage:
-  #   - -root
-  #   # prime:
-  #   # - -**/*.a
-  #   # - -**/*.la
+  # https://download.gnome.org/sources/libsoup
+  libsoup:
+    after:
+    - fix-pkgconfig-files
+    - gettext
+    - glib
+    - glib-networking
+    - gobject-introspection
+    - vala
+    source: https://download.gnome.org/sources/libsoup/2.62/libsoup-2.62.0.tar.xz
+    source-checksum: sha256/ab7c7ae8d19d0a27ab3b6ae21599cec8c7f7b773b3f2b1090c5daf178373aaac
+    plugin: autotools
+    build-packages:
+    - libsqlite3-dev
+    - libxml2-dev
+    configflags:
+    - --prefix=/usr
+    - --without-gnome
+    - --disable-tls-check
+    override-build: |
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      ./configure --prefix=/usr --without-gnome --disable-tls-check
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage-packages:
+    - libsqlite3-0
+    - libxml2
+    organize:
+      root/build_gimp/stage/usr/share/vala/vapi/*: usr/share/vala/vapi/
+    stage:
+    - -root
+    # prime:
+    # - -**/*.a
+    # - -**/*.la
 
   # https://chromium.googlesource.com/webm/libwebp
   libwebp:
