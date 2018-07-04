@@ -11,6 +11,12 @@ icon: gimp.png
 grade: stable
 confinement: strict
 
+slots:
+  dbus-gimp:
+    interface: dbus
+    bus: session
+    name: org.gimp.GIMP.UI
+
 apps:
   gimp:
     command: desktop-launch alsa-launch $SNAP/usr/bin/gimp
