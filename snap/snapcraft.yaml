@@ -958,7 +958,7 @@ parts:
     - --with-cairo=no
     override-build: |
       apt-get remove -yyq libfreetype6
-      ln -s ../local/lib/libfreetype.so.6 $SNAPCRAFT_STAGE/usr/lib/
+      ln -fs ../local/lib/libfreetype.so.6 $SNAPCRAFT_STAGE/usr/lib/
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
       rm -f $SNAPCRAFT_STAGE/usr/lib/libfreetype.so*
