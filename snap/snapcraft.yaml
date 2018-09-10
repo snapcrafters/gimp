@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.2'
+version: '2.10.6'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -10,6 +10,17 @@ icon: gimp.png
 
 grade: stable
 confinement: strict
+base: core18
+
+# slots:
+#   dbus-gimp:
+#     interface: dbus
+#     bus: session
+#     name: org.gimp.GIMP.UI
+#   dbus-darktable:
+#     interface: dbus
+#     bus: session
+#     name: org.darktable.service
 
 apps:
   gimp:
@@ -105,62 +116,6 @@ parts:
     - usr/lib
     - usr/share/alsa
 
-  # https://download.gnome.org/sources/adwaita-icon-theme
-  adwaita-icon-theme:
-    after:
-    - gdk-pixbuf
-    - gettext
-    - gnome-icon-theme
-    - gtk2
-    - gtk3
-    - librsvg
-    source: https://download.gnome.org/sources/adwaita-icon-theme/3.28/adwaita-icon-theme-3.28.0.tar.xz
-    source-checksum: sha256/7aae8c1dffd6772fd1a21a3d365a0ea28b7c3988bdbbeafbf8742cda68242150
-    plugin: autotools
-    configflags:
-    - --prefix=/usr
-    override-build: |
-      env GDK_PIXBUF_MODULEDIR=$SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders $SNAPCRAFT_STAGE/usr/bin/gdk-pixbuf-query-loaders > $SNAPCRAFT_STAGE/usr/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-
-  # https://download.gnome.org/sources/at-spi2-core
-  atspi2:
-    after:
-    - fix-pkgconfig-files
-    - gobject-introspection
-    source: https://download.gnome.org/sources/at-spi2-core/2.28/at-spi2-core-2.28.0.tar.xz
-    source-checksum: sha256/42a2487ab11ce43c288e73b2668ef8b1ab40a0e2b4f94e80fca04ad27b6f1c87
-    plugin: meson
-    build-packages:
-    - libx11-dev
-    - libxi-dev
-    - libxkbcommon-dev
-    - libxtst-dev
-    - python3-pip
-    - python3-setuptools
-    meson-parameters:
-    - --prefix=/usr
-    - --buildtype=release
-    override-build: |
-      pip3 install meson
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      meson --prefix=/usr --buildtype=release snapbuild
-      cd snapbuild
-      ninja
-      env DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage-packages:
-    - libx11-6
-    - libxi6
-    - libxkbcommon-x11-0
-    - libxtst6
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
-
   # https://download.gimp.org/pub/babl
   babl:
     after:
@@ -168,8 +123,8 @@ parts:
     - gobject-introspection
     - librsvg
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.50.tar.bz2
-    source-checksum: sha256/b52c1dc081ff9ae8bc4cb7cdb959c762ea692b9f4431bacf8d17a14dbcc85b2d
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.56.tar.bz2
+    source-checksum: sha256/8ad26ca717ec3c74e261f454dd6bb316333a39fd1f87db4ac44706a860dc4d28
     configflags:
     - --prefix=/usr
     - --disable-docs
@@ -273,9 +228,8 @@ parts:
   fontconfig:
     after:
     - fix-pkgconfig-files
-    - fix-symlinks
-    - freetype
-    source: https://www.freedesktop.org/software/fontconfig/release/fontconfig-2.13.0.tar.bz2
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.8.tar.bz2
+    source-checksum: sha256/719468eec56ac5b191626a0cb6238f3abe9117e80594890c246acdc89183ae49
     plugin: autotools
     build-packages:
     - gperf
@@ -545,45 +499,14 @@ parts:
   # https://download.gnome.org/sources/glib-networking
   glib-networking:
     after:
-    - fix-pkgconfig-files
-    - glib
-    - gsettings-desktop-schemas
-    plugin: meson
-    source: https://download.gnome.org/sources/glib-networking/2.57/glib-networking-2.57.1.tar.xz
-    source-checksum: sha256/663878443c636aa0af5b6708ddf715d82effe961989972cb9a1f48d2a3ecb026
-    build-packages:
-    - libgnutls-dev
-    - libproxy-dev
-    - python3-pip
-    - python3-setuptools
-    meson-parameters:
-    - --prefix=/usr
-    - --buildtype=release
-    override-build: |
-      pip3 install meson
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    organize:
-      root/build_gimp/stage/usr/lib/gio/modules/*: usr/lib/gio/modules/
-    stage:
-    - -root
-    stage-packages:
-    - libgnutls30
-    - libproxy1v5
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
-    # - -root
-
-  # https://download.gnome.org/sources/gnome-icon-theme
-  gnome-icon-theme:
-    after:
-    - hicolor-icon-theme
-    source: https://download.gnome.org/sources/gnome-icon-theme/2.31/gnome-icon-theme-2.31.0.tar.bz2
-    source-checksum: sha256/ea7e05b77ead159379392b3b275ca0c9cbacd7d936014e447cc7c5e27a767982
+    - desktop-gtk2
+    - babl
+    - gegl
+    - libmypaint
+    - mypaint-brushes
     plugin: autotools
-    build-packages:
-    - icon-naming-utils
+    source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
+    source-checksum: sha256/4ec8071f828e918384cf7bc7d1219210467c84655123f802bc55a8bf2415101f
     configflags:
     - --prefix=/usr
 
@@ -656,32 +579,18 @@ parts:
     - --with-python=python
     disable-parallel: true
     override-build: |
-      patch -Np1 < $SNAPCRAFT_STAGE/gobject-introspection.patch
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage:
-    - -root
-    - -usr/lib/python2.7/sitecustomize.py
-    stage-packages:
-    - libffi6
-    # - python
-    # prime:
-    # - -**/*.a
-    # - -**/*.la
-
-  graphicsmagick:
-    after:
-    - fix-pkgconfig-files
-    - freetype
-    - lcms2
-    - libpng
-    - libwebp
-    source: http://sourceforge.mirrorservice.org/g/gr/graphicsmagick/graphicsmagick/1.3.28/GraphicsMagick-1.3.28.tar.gz
-    plugin: autotools
-    configflags:
-    - --prefix=/usr
-    - --enable-shared
-    - --disable-static
+      export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
+      export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.4"
+      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      export PYTHON=/usr/bin/python2.7
+      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
+        desktop/gimp.desktop.in.in
+      if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
+      ./configure --prefix=/usr --sysconfdir=/etc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/ --enable-binreloc
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      sed -i -E "s|^(.*python=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E "s|^(.*python2=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python2.7|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
     - libbz2-dev
     - libjbig-dev
