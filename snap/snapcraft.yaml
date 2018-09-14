@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.4'
+version: '2.10.6'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -17,15 +17,15 @@ base: core18
 #     /usr:
 #       bind: $SNAP/usr
 
-slots:
-  dbus-gimp:
-    interface: dbus
-    bus: session
-    name: org.gimp.GIMP.UI
-  dbus-darktable:
-    interface: dbus
-    bus: session
-    name: org.darktable.service
+# slots:
+#   dbus-gimp:
+#     interface: dbus
+#     bus: session
+#     name: org.gimp.GIMP.UI
+#   dbus-darktable:
+#     interface: dbus
+#     bus: session
+#     name: org.darktable.service
 
 apps:
   gimp:
@@ -107,8 +107,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.50.tar.bz2
-    source-checksum: sha256/b52c1dc081ff9ae8bc4cb7cdb959c762ea692b9f4431bacf8d17a14dbcc85b2d
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.56.tar.bz2
+    source-checksum: sha256/8ad26ca717ec3c74e261f454dd6bb316333a39fd1f87db4ac44706a860dc4d28
     configflags:
     - --prefix=/usr
     - --disable-docs
@@ -304,7 +304,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha256/ffb0768de14a2631b3d7ed71f283731441a1b48461766c23f0574dce0706f192
+    source-checksum: sha256/1cb0baaecdefe44d371a15f2739a1bcbce4682336b4ccf8eb7b587ce52c333eb
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
