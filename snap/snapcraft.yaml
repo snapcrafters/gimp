@@ -82,14 +82,6 @@ parts:
     prime:
     - -*
 
-  scripts:
-    source: scripts
-    plugin: dump
-    organize:
-      gimp-launch: bin/gimp-launch
-    stage:
-    - bin/gimp-launch
-
   desktop-patch:
     source: patches
     plugin: dump
