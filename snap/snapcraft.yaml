@@ -27,6 +27,12 @@ base: core18
 #     bus: session
 #     name: org.darktable.service
 
+slots:
+  dbus-gimp:
+    interface: dbus
+    bus: session
+    name: org.gimp.GIMP.UI
+
 apps:
   gimp:
     command: desktop-launch gimp-launch $SNAP/usr/bin/gimp
