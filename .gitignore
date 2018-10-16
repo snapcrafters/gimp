@@ -6,3 +6,5 @@ prime
 .snapcraft
 __pycache__
 *.pyc
+
+.bzr
