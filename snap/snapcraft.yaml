@@ -39,6 +39,7 @@ apps:
       GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
       GIMP2_SYSCONFDIR: $SNAP/etc/gimp/2.0
       PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
+      ALSA_CONFIG_PATH: $SNAP/etc/alsa.conf
     plugs:
     - cups-control
     - desktop
@@ -110,7 +111,7 @@ parts:
     after: [desktop-patch]
     override-pull: |
       snapcraftctl pull
-      patch -Np1 < $SNAPCRAFT_STAGE/launcher-specific.patch
+      patch -Np1 < $SNAPCRAFT_STAGE/desktop-launch.patch
 
   desktop-patch:
     source: patches
@@ -207,41 +208,17 @@ parts:
         fallback "sysdefault"
       }
       EOF
-      cat > alsa-launch <<EOF
-      #!/bin/bash
-      if [ "\$SNAP_ARCH" == "amd64" ]; then
-        ARCH="x86_64-linux-gnu"
-      elif [ "\$SNAP_ARCH" == "armhf" ]; then
-        ARCH="arm-linux-gnueabihf"
-      elif [ "\$SNAP_ARCH" == "arm64" ]; then
-        ARCH="aarch64-linux-gnu"
-      else
-        ARCH="\$SNAP_ARCH-linux-gnu"
-      fi
-      export LD_LIBRARY_PATH="\$SNAP/usr/lib/alsa-lib:\$SNAP/usr/lib/\$ARCH/pulseaudio:\$LD_LIBRARY_PATH"
-      export ALSA_CONFIG_PATH="\$SNAP/etc/alsa.conf"
-      # Make PulseAudio socket available inside the snap-specific $XDG_RUNTIME_DIR
-      if [ -n "$XDG_RUNTIME_DIR" ]; then
-          pulsenative="pulse/native"
-          pulseaudio_sockpath="$XDG_RUNTIME_DIR/../$pulsenative"
-          if [ -S "$pulseaudio_sockpath" ]; then
-              export PULSE_SERVER="unix:${pulseaudio_sockpath}"
-          fi
-      fi
-      exec "\$@"
-      EOF
     override-build: |
       snapcraftctl build
       install -m644 -D -t $SNAPCRAFT_PART_INSTALL/etc alsa.conf
-      install -m755 -D -t $SNAPCRAFT_PART_INSTALL/bin alsa-launch
     
   # https://download.gimp.org/pub/babl
   babl:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.56.tar.bz2
-    source-checksum: sha256/8ad26ca717ec3c74e261f454dd6bb316333a39fd1f87db4ac44706a860dc4d28
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.58.tar.bz2
+    source-checksum: sha256/79c9ae576019b8459896014c8822471bb383414c9f99a1b2055e25b4538ced55
     configflags:
     - --prefix=/usr
     - --disable-static
@@ -262,8 +239,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.2.tar.bz2
-    source-checksum: sha256/6a358bc19d20b8ac1daf645cc8b53cdc2ea6f9c98a6036179a57045a26a07f8d
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.8.tar.bz2
+    source-checksum: sha256/719468eec56ac5b191626a0cb6238f3abe9117e80594890c246acdc89183ae49
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -279,6 +256,7 @@ parts:
     build-packages:
     - gobject-introspection
     - graphviz-dev
+    - libblas-dev
     - libexiv2-dev
     - libfftw3-dev
     - libgexiv2-dev
@@ -458,6 +436,7 @@ parts:
     - libwayland-client0
     - libwayland-egl1-mesa
     - libwebp6
+    - libwebpmux3
     - libwebpdemux2
     - libwoff1
     - libx11-6
@@ -502,7 +481,7 @@ parts:
       ./configure --prefix=/usr --sysconfdir=/etc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/ --enable-binreloc
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      sed -i -E "s|^(.*python=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
     build-packages:
     - glib-networking
     - gobject-introspection
@@ -521,6 +500,7 @@ parts:
     - libgudev-1.0-dev
     - libheif-dev
     - libice-dev
+    - libisocodes-dev
     - libjpeg8-dev
     - libmng-dev
     - libpoppler-glib-dev
@@ -557,6 +537,7 @@ parts:
     - libgudev-1.0-0
     - libheif1
     - libice6
+    - libisocodes1
     - libjpeg8
     - libmng2
     - libpoppler-glib8
@@ -564,6 +545,7 @@ parts:
     - libsm6
     - libtiff5
     - libwebp6
+    - libwebpmux3
     - libwebpdemux2
     - libx11-6
     - libxcursor1
