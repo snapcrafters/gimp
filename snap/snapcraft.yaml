@@ -116,16 +116,6 @@ parts:
     override-pull: |
       snapcraftctl pull
       patch -Np1 < $SNAPCRAFT_STAGE/desktop-launch.patch
-    override-build: |
-      snapcraftctl build
-      # GTK_ARCH="$(pkg-config --variable=gtk_host gtk+-2.0)"
-      # GTK2_VER="$(pkg-config --variable=gtk_binary_version gtk+-2.0)"
-      # GTK3_VER="$(pkg-config --variable=gtk_binary_version gtk+-3.0)"
-      # mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib/
-      # ln -sf $SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
-      # ln -sf $SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
-      # mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0/$GTK2_VER/* $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/$GTK2_VER/
-      # mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0/$GTK3_VER/* $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0/$GTK3_VER/
     organize:
       usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0: usr/lib/gtk-2.0
       usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0: usr/lib/gtk-3.0
