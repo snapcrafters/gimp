@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.6'
+version: '2.10.8'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -488,7 +488,7 @@ parts:
     # - webkitgtk
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha256/4ec8071f828e918384cf7bc7d1219210467c84655123f802bc55a8bf2415101f
+    source-checksum: sha256/d849c1cf35244938ae82e521b92b720ab48b8e9ed092d5de92c2464ef5244b9b
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
