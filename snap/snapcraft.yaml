@@ -37,12 +37,6 @@ slots:
     bus: session
     name: org.gimp.GIMP.UI
 
-slots:
-  dbus-gimp:
-    interface: dbus
-    bus: session
-    name: org.gimp.GIMP.UI
-
 apps:
   gimp:
     command: desktop-launch $SNAP/usr/bin/gimp
@@ -144,6 +138,21 @@ parts:
     source: patches
     plugin: dump
     prime: [-*]
+
+  gtk3-locales:
+    plugin: nil
+    build-packages:
+      - apt
+      - dpkg
+    override-pull: |
+      set -eux
+      apt download "language-pack-gnome-*-base"
+    override-build: |
+      set -eux
+      for deb in *.deb; do dpkg-deb -x $deb .; done
+      find usr/share/locale-langpack -type f -not -name "gtk30*.mo" -exec rm '{}' \;
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
+      cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
 
   alsa-lib:
     plugin: autotools
