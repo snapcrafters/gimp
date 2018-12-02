@@ -560,8 +560,6 @@ parts:
     - libcurl3-gnutls
     - libexif12
     - libfftw3-double3
-    - libfftw3-long3
-    - libfftw3-quad3
     - libfftw3-single3
     - libgirepository-1.0-1
     - libglib2.0-0
@@ -590,3 +588,9 @@ parts:
     - python-gtk2
     - xdg-utils
     - zlib1g
+    - on amd64:
+      - libfftw3-long3
+      - libfftw3-quad3
+    - on i386:
+      - libfftw3-long3
+      - libfftw3-quad3
