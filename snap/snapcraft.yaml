@@ -374,7 +374,8 @@ parts:
     - libslang2-dev
     - libsm-dev
     - libtiff5-dev
-    - libunwind-dev
+    - try:
+      - libunwind-dev # not available in s390x
     - libwebkitgtk-dev
     - libwebp-dev
     - libwmf-dev
@@ -416,7 +417,8 @@ parts:
     - libslang2
     - libsm6
     - libtiff5
-    - libunwind8
+    - try:
+      - libunwind8 # not available in s390x
     - libwebkitgtk-1.0-0
     - libwebp6
     - libwebpmux3
