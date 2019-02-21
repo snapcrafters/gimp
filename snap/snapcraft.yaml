@@ -12,10 +12,25 @@ grade: stable
 confinement: strict
 base: core18
 
-# passthrough:
-#   layout:
-#     /usr:
-#       bind: $SNAP/usr
+layout:
+  /etc/gimp:
+    bind: $SNAP/etc/gimp
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
+  /usr/lib/babl-0.1:
+    bind: $SNAP/usr/lib/babl-0.1
+  /usr/lib/gegl-0.4:
+    bind: $SNAP/usr/lib/gegl-0.4
+  /usr/lib/gimp:
+    bind: $SNAP/usr/lib/gimp
+  /usr/share/color:
+    bind: $SNAP/usr/share/color
+  /usr/share/ghostscript:
+    bind: $SNAP/usr/share/ghostscript
+  /usr/share/gimp:
+    bind: $SNAP/usr/share/gimp
+  /usr/share/mypaint-data:
+    bind: $SNAP/usr/share/mypaint-data
 
 plugs:
   gtk-3-themes:
@@ -43,14 +58,8 @@ apps:
     desktop: usr/share/applications/gimp.desktop
     environment:
       GTK_EXE_PREFIX: $SNAP/usr
-      BABL_PATH: $SNAP/usr/lib/babl-0.1
-      GEGL_PATH: $SNAP/usr/lib/gegl-0.4
-      GIMP2_DATADIR: $SNAP/usr/share/gimp/2.0
       GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-      GIMP2_PLUGINDIR: $SNAP/usr/lib/gimp/2.0
-      GIMP2_SYSCONFDIR: $SNAP/etc/gimp/2.0
       PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
-      ALSA_CONFIG_PATH: $SNAP/etc/alsa.conf
     slots:
     - dbus-gimp
     plugs:
@@ -154,107 +163,13 @@ parts:
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
       cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
 
-  alsa-lib:
-    plugin: autotools
-    source: https://mirrorservice.org/sites/ftp.alsa-project.org/pub/lib/alsa-lib-1.1.6.tar.bz2
-    configflags:
-    - --prefix=/usr
-    - --sysconfdir=/etc
-    - --libexec=/usr/lib
-    - --libdir=/usr/lib
-    - --localstatedir=/var
-    - --with-configdir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/alsa
-    - --with-plugindir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/alsa-lib
-    - --disable-alisp
-    - --disable-aload
-    - --disable-python
-    - --disable-rawmidi
-    - --disable-static
-    - --disable-topology
-    - --disable-ucm
-    - --enable-symbolic-functions
-    override-build: |
-      snapcraftctl build
-      for pcfile in $SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc; do
-        sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\${prefix}~g" $pcfile || true
-        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1/\3~" $pcfile || true
-      done
-    organize:
-      snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/*: usr/lib/
-      snap/$SNAPCRAFT_PROJECT_NAME/current/usr/share/*: usr/share/
-    stage:
-    - usr/include
-    - usr/lib
-    - usr/share/alsa
-    prime:
-    - usr/lib/*.so
-    - usr/lib/*.so.*
-    - usr/share/alsa
-
-  alsa-plugins:
-    after: [alsa-lib]
-    plugin: autotools
-    source: https://mirrorservice.org/sites/ftp.alsa-project.org/pub/plugins/alsa-plugins-1.1.6.tar.bz2
-    configflags:
-    - --prefix=/usr
-    - --sysconfdir=/etc
-    - --libexec=/usr/lib
-    - --libdir=/usr/lib
-    - --localstatedir=/var
-    - --disable-arcamav
-    - --disable-avcodec
-    - --disable-jack
-    - --disable-mix
-    - --disable-oss
-    - --disable-usbstream
-    - --with-plugindir=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/alsa-lib
-    - --disable-static
-    - LDFLAGS=-L$SNAPCRAFT_STAGE/usr/lib
-    organize:
-      snap/$SNAPCRAFT_PROJECT_NAME/current/usr/lib/*: usr/lib/
-    stage:
-    - lib
-    - usr/lib
-    - usr/share/alsa
-    prime:
-    - lib
-    - usr/lib
-    - usr/share/alsa
-    build-packages:
-    - libpulse-dev
-    stage-packages:
-    - libpulse0
-
-  alsa:
-    after: [alsa-plugins, alsa-lib]
-    plugin: nil
-    source: https://github.com/diddledan/snapcraft-alsa.git
-    override-pull: |
-      cat > alsa.conf <<EOF
-      pcm.!default {
-        type pulse
-        fallback "sysdefault"
-        hint {
-          show on
-          description "Default ALSA Output (currently PulseAudio Sound Server)"
-        }
-      }
-      ctl.!default {
-        type pulse
-        fallback "sysdefault"
-      }
-      EOF
-    override-build: |
-      snapcraftctl build
-      install -m644 -D -t $SNAPCRAFT_PART_INSTALL/etc alsa.conf
-
   # https://download.gimp.org/pub/babl
   babl:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.58.tar.bz2
-    source-checksum: sha256/79c9ae576019b8459896014c8822471bb383414c9f99a1b2055e25b4538ced55
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.62.tar.bz2
+    source-checksum: sha256/dc279f174edbcb08821cf37e4ab0bc02e6949369b00b150c759a6c24bfd3f510
     configflags:
     - --prefix=/usr
     - --disable-static
@@ -264,10 +179,14 @@ parts:
     build-packages:
     - gobject-introspection
     - libgirepository1.0-dev
+    - liblcms2-dev
+    - librsvg2-bin
     - librsvg2-dev
     stage-packages:
     - libgirepository-1.0-1
+    - liblcms2-2
     - librsvg2-2
+    - librsvg2-bin
 
   # https://download.gimp.org/pub/gegl
   gegl:
@@ -291,29 +210,38 @@ parts:
     build-packages:
     - gobject-introspection
     - graphviz-dev
-    # - libblas-dev
+    - libavcodec-dev
+    - libavformat-dev
     - libexiv2-dev
     - libfftw3-dev
     - libgexiv2-dev
     - libgirepository1.0-dev
     - libglib2.0-dev
+    - libglu1-mesa-dev
+    - libgs-dev
     - libjpeg8-dev
     - libjson-glib-dev
     - liblcms2-dev
     - liblensfun-dev
     - libopenexr-dev
+    - libpango1.0-dev
     - libpng-dev
     - libraw-dev
     - librsvg2-dev
+    - libsdl1.2-dev
     - libspiro-dev
     - libsuitesparse-dev
+    - libswscale-dev
     - libtiff5-dev
+    - libv4l-dev
     - libwebp-dev
     - python-gobject-2-dev
+    - valac
     stage-packages:
     - graphviz
     - libamd2
-    # - libblas3
+    - libavcodec57
+    - libavformat57
     - libbtf1
     - libcamd2
     - libccolamd2
@@ -324,7 +252,9 @@ parts:
     - libgexiv2-2
     - libgirepository-1.0-1
     - libglib2.0-0
+    - libglu1-mesa
     - libgraphblas1
+    - libgs9
     - libjpeg8
     - libjson-glib-1.0-0
     - libklu1
@@ -333,15 +263,20 @@ parts:
     - libldl2
     - liblensfun1
     - libopenexr22
+    - libpango-1.0-0
+    - libpangocairo-1.0-0
     - libpng16-16
     - libraw16
     - librbio2
     - librsvg2-2
+    - libsdl1.2debian
     - libspiro0
     - libspqr2
     - libsuitesparseconfig5
+    - libswscale4
     - libtiff5
     - libumfpack5
+    - libv4l-0
     - libwebp6
     - python-gobject-2
 
@@ -382,110 +317,6 @@ parts:
     configflags:
     - --prefix=/usr
 
-  # webkitgtk:
-  #   after: [alsa, desktop-gtk3]
-  #   plugin: cmake
-  #   source: https://webkitgtk.org/releases/webkitgtk-2.22.2.tar.xz
-  #   source-checksum: sha256/345487d4d1896e711683f951d1e09387d3b90d7cf59295c0e634af7f515e99ba
-  #   configflags:
-  #   - -DCMAKE_INSTALL_PREFIX=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr
-  #   - -DCMAKE_INSTALL_LIBEXECDIR=lib
-  #   - -DCMAKE_BUILD_TYPE=Release
-  #   - -DENABLE_MINIBROWSER=ON
-  #   - -DPORT=GTK
-  #   build-packages:
-  #   - bison
-  #   - flex
-  #   - gawk
-  #   - geoclue-2.0
-  #   - gobject-introspection
-  #   - gperf
-  #   - gtk-doc-tools
-  #   - libcairo2-dev
-  #   - libegl1-mesa-dev
-  #   - libenchant-dev
-  #   - libfile-copy-recursive-perl
-  #   - libfontconfig1-dev
-  #   - libfreetype6-dev
-  #   - libgcrypt20-dev
-  #   - libgeoclue-2-dev
-  #   - libgirepository1.0-dev
-  #   - libgl1-mesa-dev
-  #   - libgles2-mesa-dev
-  #   - libglib2.0-dev
-  #   - libgstreamer-plugins-base1.0-dev
-  #   - libgstreamer1.0-dev
-  #   - libgtk-3-dev
-  #   - libgtk2.0-dev
-  #   - libgudev-1.0-dev
-  #   - libharfbuzz-dev
-  #   - libhyphen-dev
-  #   - libicu-dev
-  #   - libjpeg-dev
-  #   - libnotify-dev
-  #   - libpango1.0-dev
-  #   - libpng-dev
-  #   - libsecret-1-dev
-  #   - libsoup2.4-dev
-  #   - libsqlite3-dev
-  #   - libtasn1-6-dev
-  #   - libupower-glib-dev
-  #   - libwebp-dev
-  #   - libwoff-dev
-  #   - libxml2-dev
-  #   - libxslt1-dev
-  #   - libxt-dev
-  #   - mesa-common-dev
-  #   - rsync
-  #   - ruby-dev
-  #   - zlib1g-dev
-  #   stage-packages:
-  #   - libatk1.0-0
-  #   - libcairo2
-  #   - libegl1
-  #   - libenchant1c2a
-  #   - libfontconfig1
-  #   - libfreetype6
-  #   - libgcrypt20
-  #   - libgdk-pixbuf2.0-0
-  #   - libgeoclue-2-0
-  #   - libglib2.0-0
-  #   - libglu1-mesa
-  #   - libgstreamer-gl1.0-0
-  #   - libgstreamer-plugins-base1.0-0
-  #   - libgstreamer1.0-0
-  #   - libharfbuzz-icu0
-  #   - libharfbuzz0b
-  #   - libhyphen0
-  #   - libicu60
-  #   - libjpeg8
-  #   - libnotify4
-  #   - libpango-1.0-0
-  #   - libpng16-16
-  #   - libsecret-1-0
-  #   - libsoup2.4-1
-  #   - libsqlite3-0
-  #   - libtasn1-6
-  #   - libwayland-client0
-  #   - libwayland-egl1-mesa
-  #   - libwebp6
-  #   - libwebpmux3
-  #   - libwebpdemux2
-  #   - libwoff1
-  #   - libx11-6
-  #   - libxcomposite1
-  #   - libxml2
-  #   - libxslt1.1
-  #   - zlib1g
-  #   override-stage: |
-  #     rsync -av $SNAPCRAFT_PART_INSTALL/snap/gimp/current/ $SNAPCRAFT_PART_INSTALL/
-  #     snapcraftctl stage
-  #   stage:
-  #   - -usr/lib/**/libasound*
-  #   prime:
-  #   - -snap
-  #   # disable-parallel: true
-
   # https://www.gimp.org/downloads
   gimp:
     after:
@@ -494,15 +325,14 @@ parts:
     - gegl
     - libmypaint
     - mypaint-brushes
-    # - webkitgtk
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
     source-checksum: sha256/d849c1cf35244938ae82e521b92b720ab48b8e9ed092d5de92c2464ef5244b9b
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
+    - --enable-gtk-doc
     - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
-    - --enable-binreloc
     override-build: |
       export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
       export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.4"
@@ -510,14 +340,18 @@ parts:
       export PYTHON=/usr/bin/python2.7
       sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
         desktop/gimp.desktop.in.in
+      
       if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
-      ./configure --prefix=/usr --sysconfdir=/etc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/ --enable-binreloc
+      ./configure --prefix=/usr --sysconfdir=/etc --enable-gtk-doc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      
       sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - glib-networking
     - gobject-introspection
+    - gtk-doc-tools
     - intltool
     - iso-codes
     - libaa1-dev
@@ -529,18 +363,21 @@ parts:
     - libgirepository1.0-dev
     - libglib2.0-dev
     - libgpm-dev
-    - libgs-dev
     - libgudev-1.0-dev
     - libheif-dev
     - libice-dev
     - libisocodes-dev
     - libjpeg8-dev
     - libmng-dev
+    - libopenjp2-7-dev
     - libpoppler-glib-dev
     - libslang2-dev
     - libsm-dev
     - libtiff5-dev
+    - libunwind-dev
+    - libwebkitgtk-dev
     - libwebp-dev
+    - libwmf-dev
     - libx11-dev
     - libxcursor-dev
     - libxmu-dev
@@ -552,6 +389,10 @@ parts:
     - python-gtk2-dev
     - xsltproc
     stage-packages:
+    - ghostscript
+    - gir1.2-glib-2.0
+    - gir1.2-gtk-2.0
+    - gir1.2-poppler-0.18
     - glib-networking
     - iso-codes
     - libaa1
@@ -564,20 +405,23 @@ parts:
     - libgirepository-1.0-1
     - libglib2.0-0
     - libgpm2
-    - libgs9
     - libgudev-1.0-0
     - libheif1
     - libice6
     - libisocodes1
     - libjpeg8
     - libmng2
+    - libopenjp2-7
     - libpoppler-glib8
     - libslang2
     - libsm6
     - libtiff5
+    - libunwind8
+    - libwebkitgtk-1.0-0
     - libwebp6
     - libwebpmux3
     - libwebpdemux2
+    - libwmf0.2-7
     - libx11-6
     - libxcursor1
     - libxmu6
@@ -586,7 +430,6 @@ parts:
     - python-cairo
     - python-dev
     - python-gtk2
-    - xdg-utils
     - zlib1g
     - on amd64:
       - libfftw3-long3
