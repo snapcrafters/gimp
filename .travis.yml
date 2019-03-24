@@ -9,14 +9,14 @@ env:
 addons:
   snaps:
     - name: snapcraft
-      channel: candidate
+      channel: beta/lxd
       classic: true
     - name: http
     - name: transfer
 
 script:
   - sudo apt update
-  - snapcraft --destructive-mode
+  - snapcraft --use-lxd
 after_success:
   - cp *.snap "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
   - timeout 180 /snap/bin/transfer "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
