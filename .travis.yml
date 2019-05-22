@@ -5,6 +5,7 @@ env:
   global:
     - LC_ALL: C.UTF-8
     - LANG: C.UTF-8
+    - SNAPCRAFT_ENABLE_SILENT_REPORT: y
 
 addons:
   snaps:
@@ -22,8 +23,6 @@ script:
   - sudo /snap/bin/lxd waitready
   - sudo /snap/bin/lxd init --auto
   - mkdir -p "$TRAVIS_BUILD_DIR/snaps-cache"
-  - export SNAPCRAFT_ENABLE_ERROR_REPORTING=y
-  - export SNAPCRAFT_ENABLE_SILENT_REPORT=y
   - snapcraft --use-lxd
 after_success:
   - cp *.snap "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
