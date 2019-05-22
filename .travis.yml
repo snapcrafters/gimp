@@ -13,6 +13,8 @@ addons:
       classic: true
     - name: http
     - name: transfer
+    - name: lxd
+      channel: stable
 
 script:
   - sudo apt update
