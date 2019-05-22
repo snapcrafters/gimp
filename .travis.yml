@@ -9,13 +9,16 @@ env:
 addons:
   snaps:
     - name: snapcraft
-      channel: beta/lxd
+      channel: stable
       classic: true
     - name: http
     - name: transfer
 
 script:
   - sudo apt update
+  - sudo /snap/bin/lxd waitready
+  - sudo /snap/bin/lxd init --auto
+  - mkdir -p "$TRAVIS_BUILD_DIR/snaps-cache"
   - snapcraft --use-lxd
 after_success:
   - cp *.snap "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
