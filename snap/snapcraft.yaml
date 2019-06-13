@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.10'
+version: '2.10.12'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -168,8 +168,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.62.tar.bz2
-    source-checksum: sha256/dc279f174edbcb08821cf37e4ab0bc02e6949369b00b150c759a6c24bfd3f510
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.66.tar.bz2
+    source-checksum: sha256/369dd89345489a3949e83d5ad63295029088230626f64a05e530761b176fa163
     configflags:
     - --prefix=/usr
     - --disable-static
@@ -193,8 +193,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.14.tar.bz2
-    source-checksum: sha256/4c01d58599d8ddb3714effd2675ea1863272cf2d7d9ed3d32aee80c89f859901
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.16.tar.bz2
+    source-checksum: sha256/0112df690301d9eb993cc48965fc71b7751c9021a4f4ee08fcae366c326b5e5a
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -327,7 +327,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha256/12d1f243265c7aee1f2c6e97883a5c90ddc0b19b4346cf822e24adbb6c998c77
+    source-checksum: sha256/7d80b58e0784120d57d327294f6a1fda281ff51a61935c2cd764da281acaac71
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
