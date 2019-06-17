@@ -15,6 +15,8 @@ base: core18
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
+  /usr/bin/python2.7:
+    bind-file: $SNAP/usr/bin/python2.7
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
   /usr/lib/babl-0.1:
@@ -23,6 +25,10 @@ layout:
     bind: $SNAP/usr/lib/gegl-0.4
   /usr/lib/gimp:
     bind: $SNAP/usr/lib/gimp
+  /usr/lib/python2.7:
+    bind: $SNAP/usr/lib/python2.7
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs
   /usr/share/color:
     bind: $SNAP/usr/share/color
   /usr/share/ghostscript:
@@ -32,11 +38,16 @@ layout:
   /usr/share/mypaint-data:
     bind: $SNAP/usr/share/mypaint-data
 
+
 plugs:
-  gtk-3-themes:
+  gtk-2-engines:
     interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes:gtk-3-themes
+    target: $SNAP/lib/gtk-2.0
+    default-provider: gtk2-common-themes
+  gtk-2-themes:
+    interface: content
+    target: $SNAP/share/themes
+    default-provider: gtk2-common-themes
   icon-themes:
     interface: content
     target: $SNAP/data-dir/icons
@@ -56,6 +67,7 @@ apps:
   gimp:
     command: desktop-launch $SNAP/usr/bin/gimp
     desktop: usr/share/applications/gimp.desktop
+    common-id: org.gimp.GIMP
     environment:
       GTK_EXE_PREFIX: $SNAP/usr
       GIMP2_LOCALEDIR: $SNAP/usr/share/locale
@@ -148,7 +160,7 @@ parts:
     plugin: dump
     prime: [-*]
 
-  gtk3-locales:
+  gtk-locales:
     plugin: nil
     build-packages:
       - apt
@@ -159,7 +171,7 @@ parts:
     override-build: |
       set -eux
       for deb in *.deb; do dpkg-deb -x $deb .; done
-      find usr/share/locale-langpack -type f -not -name "gtk30*.mo" -exec rm '{}' \;
+      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -and -not -name "gtk30*.mo" -exec rm '{}' \;
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
       cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
 
@@ -198,14 +210,14 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
+    - --disable-docs
     - --disable-rpath
     - --disable-static
+    build-environment:
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      export GIO_MODULE_DIR=$SNAPCRAFT_STAGE/usr/lib/gio/modules
-      ./configure --prefix=/usr --disable-docs --disable-rpath --disable-static
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
     - gobject-introspection
@@ -301,11 +313,10 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-static
+    build-environment:
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      ./configure --prefix=/usr --disable-static
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+      snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
 
   # https://github.com/Jehan/mypaint-brushes/releases
@@ -316,6 +327,25 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
+
+  # https://download.gimp.org/mirror/pub/gimp/help
+  gimp-help:
+    after: [gimp]
+    plugin: autotools
+    source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.8.2.tar.bz2
+    source-checksum: md5/a591c8974b2f4f584d0a769d52ed6c5b
+    configflags:
+    - --prefix=/usr
+    build-environment:
+      # Ensure system python is used, not from staging area
+      - PATH: /usr/bin:$PATH
+    build-packages:
+    - dblatex
+    - docbook2odf
+    - pngcrush
+    - pngnq
+    - python
+    - python-libxml2
 
   # https://www.gimp.org/downloads
   gimp:
@@ -331,22 +361,17 @@ parts:
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
-    - --enable-gtk-doc
     - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
+    build-environment:
+      - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/babl-0.1
+      - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/gegl-0.4
+      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+      - PYTHON: /usr/bin/python2.7
     override-build: |
-      export BABL_PATH="$SNAPCRAFT_STAGE/usr/lib/babl-0.1"
-      export GEGL_PATH="$SNAPCRAFT_STAGE/usr/lib/gegl-0.4"
-      export XDG_DATA_DIRS=$SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      export PYTHON=/usr/bin/python2.7
-      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
-        desktop/gimp.desktop.in.in
-      
-      if [ -x ./autogen.sh ]; then env NOCONFIGURE=1 ./autogen.sh; fi
-      ./configure --prefix=/usr --sysconfdir=/etc --enable-gtk-doc --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      
-      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
+
+      snapcraftctl build
+
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - glib-networking
@@ -395,6 +420,7 @@ parts:
     - gir1.2-gtk-2.0
     - gir1.2-poppler-0.18
     - glib-networking
+    - gvfs
     - iso-codes
     - libaa1
     - libart-2.0-2
@@ -432,6 +458,7 @@ parts:
     - python-cairo
     - python-dev
     - python-gtk2
+    - rawtherapee
     - zlib1g
     - on amd64:
       - libfftw3-long3
