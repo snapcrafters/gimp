@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.12'
+version: '2.10.14' # TODO: Remove patch when >2.10.14
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -168,8 +168,8 @@ parts:
   gtk-locales:
     plugin: nil
     build-packages:
-      - apt
-      - dpkg
+    - apt
+    - dpkg
     override-pull: |
       set -eux
       apt download "language-pack-gnome-*-base"
@@ -184,12 +184,12 @@ parts:
   babl:
     after:
     - fix-pkgconfig-files
-    plugin: autotools
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.66.tar.bz2
-    source-checksum: sha256/369dd89345489a3949e83d5ad63295029088230626f64a05e530761b176fa163
-    configflags:
+    plugin: meson
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.72.tar.xz
+    source-checksum: sha256/64e111097b1fa22f6c9bf044e341a9cd9ee1372c5acfa0b452e7a86fb37c6a42
+    meson-parameters:
     - --prefix=/usr
-    - --disable-static
+    - -Dwith-docs=false
     build-environment:
       - CFLAGS: -O2 -pipe
       - CXXFLAGS: -O2 -pipe
@@ -212,23 +212,21 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.16.tar.bz2
-    source-checksum: sha256/0112df690301d9eb993cc48965fc71b7751c9021a4f4ee08fcae366c326b5e5a
-    plugin: autotools
-    configflags:
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.18.tar.xz
+    source-checksum: sha256/c946dfb45beb7fe0fb95b89a25395b449eda2b205ba3e8a1ffb1ef992d9eca64
+    plugin: meson
+    meson-parameters:
     - --prefix=/usr
-    - --disable-docs
-    - --disable-rpath
-    - --disable-static
     build-environment:
-      - CFLAGS: -O2 -pipe
-      - CXXFLAGS: -O2 -pipe
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
+    - CFLAGS: -O2 -pipe
+    - CXXFLAGS: -O2 -pipe
+    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+    - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
+    - cmake
     - gobject-introspection
     - graphviz-dev
     - libavcodec-dev
@@ -244,19 +242,21 @@ parts:
     - libjson-glib-dev
     - liblcms2-dev
     - liblensfun-dev
+    - libluajit-5.1-dev
+    - libopenjp2-7-dev
     - libopenexr-dev
     - libpango1.0-dev
     - libpng-dev
     - libraw-dev
     - librsvg2-dev
-    - libsdl1.2-dev
+    - libsdl2-dev
     - libspiro-dev
     - libsuitesparse-dev
     - libswscale-dev
     - libtiff5-dev
     - libv4l-dev
     - libwebp-dev
-    - python-gobject-2-dev
+    - python-gi-dev
     - valac
     stage-packages:
     - graphviz
@@ -277,10 +277,12 @@ parts:
     - liblapack3
     - libldl2
     - liblensfun1
+    - libluajit-5.1-2
     - libopenexr22
     - libraw16
     - librbio2
-    - libsdl1.2debian
+    - libsdl2-2.0-0
+    - libopenjp2-7
     - libspiro0
     - libspqr2
     - libsuitesparseconfig5
@@ -288,6 +290,7 @@ parts:
     - libumfpack5
     - libv4l-0
     - python-gobject-2
+    - python-gi
     stage:
     - -**/*.la
     - -etc
@@ -400,8 +403,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://github.com/mypaint/libmypaint/releases/download/v1.3.0/libmypaint-1.3.0.tar.xz
-    source-checksum: sha256/6a07d9d57fea60f68d218a953ce91b168975a003db24de6ac01ad69dcc94a671
+    source: https://github.com/mypaint/libmypaint/releases/download/v1.4.0/libmypaint-1.4.0.tar.xz
+    source-checksum: sha256/59d13b14c6aca0497095f29ee7228ca2499a923ba8e1dd718a2f2ecb45a9cbff
     build-packages:
     - gobject-introspection
     - intltool
@@ -413,9 +416,9 @@ parts:
     - --prefix=/usr
     - --disable-static
     build-environment:
-      - CFLAGS: -O2 -pipe
-      - CXXFLAGS: -O2 -pipe
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+    - CFLAGS: -O2 -pipe
+    - CXXFLAGS: -O2 -pipe
+    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -442,13 +445,12 @@ parts:
   # gimp-help:
   #   after: [gimp]
   #   plugin: autotools
-  #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.8.2.tar.bz2
-  #   source-checksum: md5/a591c8974b2f4f584d0a769d52ed6c5b
+  #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.10.0.tar.bz2
+  #   source-checksum: sha512/2f6d5e7cf0c3b4960c92074ef02d51a1d089c148f6453a66e453a3084cdede280f72c6b77d35f66777adbda8aa273ec2a472fb538142e51bb263c3077eec473a
   #   configflags:
   #   - --prefix=/usr
   #   build-environment:
-  #     # Ensure system python is used, not from staging area
-  #     - PATH: /usr/bin:$PATH
+  #   - PATH: /usr/bin:$PATH # Ensure system python is used, not from staging area
   #   build-packages:
   #   - dblatex
   #   - docbook2odf
@@ -468,29 +470,31 @@ parts:
     - gegl
     - libmypaint
     - mypaint-brushes
+    - patches
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha256/7d80b58e0784120d57d327294f6a1fda281ff51a61935c2cd764da281acaac71
+    source-checksum: sha512/acbd095361d9211a5a23474693dd170ed76bf4ea5b1df69791f1d975ef5cdaba1e5fb9f5be9f592a360db5826d71eaaf464005075397cb6630070fe32833c030
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
     - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
     build-environment:
-      - CFLAGS: -O2 -pipe
-      - CXXFLAGS: -O2 -pipe
-      - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/babl-0.1
-      - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/gegl-0.4
-      - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-      - PYTHON: /usr/bin/python2.7
+    - CFLAGS: -O2 -pipe
+    - CXXFLAGS: -O2 -pipe
+    - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
+    - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
+    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
+    - PYTHON: /usr/bin/python2.7
     override-pull: |
       snapcraftctl pull
-      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
-        desktop/gimp.desktop.in.in
+      sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
+      # TODO: Remove patch when >2.10.14
+      sed -i 's|^LIBS = @LIBS@|LIBS = @LIBS@ -lm|' plug-ins/file-psd/Makefile.in
     override-build: |
       snapcraftctl build
-      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
+    - automake
     - glib-networking
     - gobject-introspection
     - gtk-doc-tools
@@ -563,12 +567,8 @@ parts:
     - rawtherapee
     - try:
       - libunwind8 # not available in s390x
-    - on amd64:
-      - libfftw3-long3
-      - libfftw3-quad3
-    - on i386:
-      - libfftw3-long3
-      - libfftw3-quad3
+      - libfftw3-long3 # only amd64 and i386
+      - libfftw3-quad3 # only amd64 and i386
     stage:
     - -**/*.la
     - -etc/dbus-1
