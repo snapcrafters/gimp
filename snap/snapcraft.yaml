@@ -185,6 +185,9 @@ parts:
     configflags:
     - --prefix=/usr
     - --disable-static
+    build-environment:
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -214,6 +217,8 @@ parts:
     - --disable-rpath
     - --disable-static
     build-environment:
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
       - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     override-build: |
@@ -314,6 +319,8 @@ parts:
     - --prefix=/usr
     - --disable-static
     build-environment:
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
       - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
@@ -327,6 +334,9 @@ parts:
     plugin: autotools
     configflags:
     - --prefix=/usr
+    build-environment:
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
 
   # https://download.gimp.org/mirror/pub/gimp/help
   gimp-help:
@@ -363,15 +373,19 @@ parts:
     - --sysconfdir=/etc
     - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
     build-environment:
+      - CFLAGS: -O2 -pipe
+      - CXXFLAGS: -O2 -pipe
       - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/babl-0.1
       - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/gegl-0.4
       - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
       - PYTHON: /usr/bin/python2.7
+    override-pull: |
+      snapcraftctl pull
+      sed -i 's|^Exec=.*|Exec=gimp %U|;s|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' \
+        desktop/gimp.desktop.in.in
     override-build: |
-      sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
-
       snapcraftctl build
-
+      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - glib-networking
