@@ -15,10 +15,6 @@ base: core18
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0:
-    bind: $SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
   /usr/lib/babl-0.1:
