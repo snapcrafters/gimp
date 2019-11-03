@@ -15,8 +15,10 @@ base: core18
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
-  /usr/bin/python2.7:
-    bind-file: $SNAP/usr/bin/python2.7
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0:
+    bind: $SNAP/gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
   /usr/lib/babl-0.1:
@@ -38,7 +40,6 @@ layout:
   /usr/share/mypaint-data:
     bind: $SNAP/usr/share/mypaint-data
 
-
 plugs:
   gtk-2-engines:
     interface: content
@@ -48,14 +49,22 @@ plugs:
     interface: content
     target: $SNAP/share/themes
     default-provider: gtk2-common-themes
-  icon-themes:
+  gtk-3-themes:
+    default-provider: gtk-common-themes:gtk-3-themes
     interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes:icon-themes
+    target: $SNAP/data-dir/themes
   sound-themes:
+    default-provider: gtk-common-themes:sound-themes
     interface: content
     target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes:sounds-themes
+  gnome-3-28-1804:
+    default-provider: gnome-3-28-1804:gnome-3-28-1804
+    interface: content
+    target: $SNAP/gnome-platform
+  icon-themes:
+    default-provider: gtk-common-themes:icon-themes
+    interface: content
+    target: $SNAP/data-dir/icons
 
 slots:
   dbus-gimp:
@@ -63,15 +72,19 @@ slots:
     bus: session
     name: org.gimp.GIMP.UI
 
+environment:
+  SNAP_DESKTOP_RUNTIME: $SNAP/gnome-platform
+  GTK_EXE_PREFIX: $SNAP/usr
+  GIMP2_LOCALEDIR: $SNAP/usr/share/locale
+  LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$LD_LIBRARY_PATH
+  PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
+
 apps:
   gimp:
-    command: desktop-launch $SNAP/usr/bin/gimp
+    command: usr/bin/gimp
+    command-chain: [snap/command-chain/desktop-launch]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
-    environment:
-      GTK_EXE_PREFIX: $SNAP/usr
-      GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-      PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
     slots:
     - dbus-gimp
     plugs:
@@ -117,45 +130,37 @@ parts:
     prime:
     - -*
 
-  desktop-gtk:
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: gtk
-    plugin: make
-    make-parameters: ["FLAVOR=gtk2"]
+  gnome-extension:
+    after: [patches]
     build-packages:
-    - libgtk2.0-dev
     - libgtk-3-dev
+    - libgtk2.0-dev
     stage-packages:
-    - libxkbcommon0  # XKB_CONFIG_ROOT
-    - ttf-ubuntu-font-family
-    - dmz-cursor-theme
-    - light-themes
-    - adwaita-icon-theme
-    - gnome-themes-standard
-    - shared-mime-info
     - libgtk2.0-0
-    - libgtk-3-0
-    - libgdk-pixbuf2.0-0
-    - libglib2.0-bin
     - libgtk2.0-bin
-    - libgtk-3-bin
     - unity-gtk2-module
-    - unity-gtk3-module
-    - libappindicator3-1
-    - locales-all
-    - xdg-user-dirs
     - ibus-gtk
-    - ibus-gtk3
-    - libibus-1.0-5
-    after: [desktop-patch]
+    plugin: make
+    source: $SNAPCRAFT_EXTENSIONS_DIR/desktop
+    source-subdir: gnome
     override-pull: |
       snapcraftctl pull
-      patch -Np1 < $SNAPCRAFT_STAGE/desktop-launch.patch
-    organize:
-      usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0: usr/lib/gtk-2.0
-      usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0: usr/lib/gtk-3.0
+      # Remove GTK_PATH setting from launch script...
+      # ... we use GTK_EXE_PREFIX instead to support both GTK2 *AND* 3 without conflict
+      patch -Np3 < $SNAPCRAFT_STAGE/desktop-launch.patch
+    override-build: |
+      snapcraftctl build
+      # Make GTK3 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
+      ln -s ../../../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
+      # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
+      mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
+      # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
+      ln -s ../../../../lib/gtk-2.0/2.10.0/engines \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0
 
-  desktop-patch:
+  patches:
     source: patches
     plugin: dump
     prime: [-*]
@@ -171,7 +176,7 @@ parts:
     override-build: |
       set -eux
       for deb in *.deb; do dpkg-deb -x $deb .; done
-      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -and -not -name "gtk30*.mo" -exec rm '{}' \;
+      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -exec rm '{}' \;
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
       cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
 
@@ -197,11 +202,10 @@ parts:
     - liblcms2-dev
     - librsvg2-bin
     - librsvg2-dev
-    stage-packages:
-    - libgirepository-1.0-1
-    - liblcms2-2
-    - librsvg2-2
-    - librsvg2-bin
+    prime:
+    - -usr/include
+    - -usr/lib/pkgconfig
+    - -**/*.la
 
   # https://download.gimp.org/pub/gegl
   gegl:
@@ -267,35 +271,129 @@ parts:
     - libcxsparse3
     - libexiv2-14
     - libgexiv2-2
-    - libgirepository-1.0-1
-    - libglib2.0-0
-    - libglu1-mesa
     - libgraphblas1
     - libgs9
-    - libjpeg8
-    - libjson-glib-1.0-0
     - libklu1
     - liblapack3
-    - liblcms2-2
     - libldl2
     - liblensfun1
     - libopenexr22
-    - libpango-1.0-0
-    - libpangocairo-1.0-0
-    - libpng16-16
     - libraw16
     - librbio2
-    - librsvg2-2
     - libsdl1.2debian
     - libspiro0
     - libspqr2
     - libsuitesparseconfig5
     - libswscale4
-    - libtiff5
     - libumfpack5
     - libv4l-0
-    - libwebp6
     - python-gobject-2
+    stage:
+    - -**/*.la
+    - -etc
+    - -lib
+    - -var/lib/ucf
+    - -usr/bin/fc-*
+    - -usr/lib/X11
+    - -usr/lib/gcc
+    - -usr/lib/mime
+    - -usr/lib/valgrind
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/avahi
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/engines-1.1
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gio
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/glib-2.0
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/krb5
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libasound.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libasyncns.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libavahi-*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcairo.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcroco-*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcrypto.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcups.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdatrie.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdrm.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libexpatw.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libffi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libfontconfig.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libfreetype.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgdk_pixbuf_xlib-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgio-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libglib-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgmodule.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgmp.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgnutls.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgobject-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgraphite2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgssapi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgthread-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libharfbuzz.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libhogweed.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libicudata.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libicui18n.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libicuuc.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libidn.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libjbig.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libjpeg.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libk5crypto.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libkrb5*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/liblcms2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libltdl.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libnettle.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libogg.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libp11-kit.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpango-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpangocairo-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpangoft2-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpixman-1.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpng16.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpulse-simple.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpulse.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/librsvg-2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsndfile.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsqlite3.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libssl.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libtasn1.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libthai.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libtiff.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libunistring.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvorbisenc.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvorbisfile.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwebp.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-render.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-shm.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxml2.so*
+    - -usr/sbin/update-mime
+    - -usr/share/X11
+    - -usr/share/alsa
+    - -usr/share/applications
+    - -usr/share/apport
+    - -usr/share/apps
+    - -usr/share/binfmts
+    - -usr/share/bug
+    - -usr/share/debhelper
+    - -usr/share/doc
+    - -usr/share/doc-base
+    - -usr/share/fonts
+    - -usr/share/glib-2.0
+    - -usr/share/libdrm
+    - -usr/share/libthai
+    - -usr/share/lintian
+    - -usr/share/locale
+    - -usr/share/man
+    - -usr/share/menu
+    - -usr/share/mime
+    - -usr/share/perl5
+    - -usr/share/pixmaps
+    - -usr/share/pkgconfig
+    - -usr/share/python
+    - -usr/share/xml
+    prime:
+    - -usr/include
+    - -usr/lib/pkgconfig
+    - -usr/share/vala
 
   # https://github.com/mypaint/libmypaint/releases
   libmypaint:
@@ -311,10 +409,6 @@ parts:
     - libglib2.0-dev
     - libjson-c-dev
     - libjson-glib-dev
-    stage-packages:
-    - libgirepository-1.0-1
-    - libglib2.0-0
-    - libjson-glib-1.0-0
     configflags:
     - --prefix=/usr
     - --disable-static
@@ -325,6 +419,11 @@ parts:
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+    stage:
+    - -**/*.la
+    prime:
+    - -usr/include
+    - -usr/lib/pkgconfig
 
   # https://github.com/Jehan/mypaint-brushes/releases
   mypaint-brushes:
@@ -338,29 +437,33 @@ parts:
       - CFLAGS: -O2 -pipe
       - CXXFLAGS: -O2 -pipe
 
-  # https://download.gimp.org/mirror/pub/gimp/help
-  gimp-help:
-    after: [gimp]
-    plugin: autotools
-    source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.8.2.tar.bz2
-    source-checksum: md5/a591c8974b2f4f584d0a769d52ed6c5b
-    configflags:
-    - --prefix=/usr
-    build-environment:
-      # Ensure system python is used, not from staging area
-      - PATH: /usr/bin:$PATH
-    build-packages:
-    - dblatex
-    - docbook2odf
-    - pngcrush
-    - pngnq
-    - python
-    - python-libxml2
+  # TODO: Think about splitting to a separate snap and consume via content interface?
+  # # https://download.gimp.org/mirror/pub/gimp/help
+  # gimp-help:
+  #   after: [gimp]
+  #   plugin: autotools
+  #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.8.2.tar.bz2
+  #   source-checksum: md5/a591c8974b2f4f584d0a769d52ed6c5b
+  #   configflags:
+  #   - --prefix=/usr
+  #   build-environment:
+  #     # Ensure system python is used, not from staging area
+  #     - PATH: /usr/bin:$PATH
+  #   build-packages:
+  #   - dblatex
+  #   - docbook2odf
+  #   - pngcrush
+  #   - pngnq
+  #   - python
+  #   - python-libxml2
+  #   organize:
+  #     root/stage/usr: usr
+  #   prime:
+  #   - -root
 
   # https://www.gimp.org/downloads
   gimp:
     after:
-    - desktop-gtk
     - babl
     - gegl
     - libmypaint
@@ -402,6 +505,8 @@ parts:
     - libgirepository1.0-dev
     - libglib2.0-dev
     - libgpm-dev
+    - libgtk-3-dev
+    - libgtk2.0-dev
     - libgudev-1.0-dev
     - libheif-dev
     - libice-dev
@@ -413,8 +518,6 @@ parts:
     - libslang2-dev
     - libsm-dev
     - libtiff5-dev
-    - try:
-      - libunwind-dev # not available in s390x
     - libwebkitgtk-dev
     - libwebp-dev
     - libwmf-dev
@@ -428,44 +531,29 @@ parts:
     - python-cairo-dev
     - python-gtk2-dev
     - xsltproc
+    - try:
+      - libunwind-dev # not available in s390x
     stage-packages:
     - ghostscript
-    - gir1.2-glib-2.0
     - gir1.2-gtk-2.0
     - gir1.2-poppler-0.18
     - glib-networking
     - gvfs
-    - iso-codes
     - libaa1
     - libart-2.0-2
     - libbz2-1.0
-    - libcurl3-gnutls
     - libexif12
     - libfftw3-double3
     - libfftw3-single3
-    - libgirepository-1.0-1
-    - libglib2.0-0
     - libgpm2
-    - libgudev-1.0-0
     - libheif1
-    - libice6
-    - libisocodes1
-    - libjpeg8
     - libmng2
     - libopenjp2-7
     - libpoppler-glib8
     - libslang2
-    - libsm6
-    - libtiff5
-    - try:
-      - libunwind8 # not available in s390x
     - libwebkitgtk-1.0-0
-    - libwebp6
     - libwebpmux3
-    - libwebpdemux2
     - libwmf0.2-7
-    - libx11-6
-    - libxcursor1
     - libxmu6
     - libxpm4
     - libxt6
@@ -473,10 +561,228 @@ parts:
     - python-dev
     - python-gtk2
     - rawtherapee
-    - zlib1g
+    - try:
+      - libunwind8 # not available in s390x
     - on amd64:
       - libfftw3-long3
       - libfftw3-quad3
     - on i386:
       - libfftw3-long3
       - libfftw3-quad3
+    stage:
+    - -**/*.la
+    - -etc/dbus-1
+    - -etc/default
+    - -etc/dictionaries-common
+    - -etc/emacs
+    - -etc/fonts
+    - -etc/glvnd
+    - -etc/gnome
+    - -etc/gss
+    - -etc/gtk-3.0
+    - -etc/init.d
+    - -etc/libblockdev
+    - -etc/libpaper.d
+    - -etc/mailcap.order
+    - -etc/mime.types
+    - -etc/rc*.d
+    - -etc/sensors3.conf
+    - -etc/systemd
+    - -etc/ucf.conf
+    - -etc/udisks2
+    - -etc/X11
+    - -lib/systemd
+    - -lib/udev
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libbsd.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libbz2.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libcom_err.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libdbus-1.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libexpat.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libfdisk.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libhistory.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libkeyutils.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libparted.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/libreadline.so*
+    - -lib/$SNAPCRAFT_ARCH_TRIPLET/security
+    - -sbin/cfdisk
+    - -sbin/cgdisk
+    - -sbin/fdisk
+    - -sbin/fixparts
+    - -sbin/gdisk
+    - -sbin/parted
+    - -sbin/partprobe
+    - -sbin/sfddisk
+    - -sbin/sgdisk
+    - -usr/bin/aspell*
+    - -usr/bin/dbus*
+    - -usr/bin/desktop-file-*
+    - -usr/bin/fc-*
+    - -usr/bin/gtk-update-icon-cache
+    - -usr/bin/ispell*
+    - -usr/bin/mtrace
+    - -usr/bin/rpcgen
+    - -usr/bin/run-*
+    - -usr/bin/select-default-iwrap
+    - -usr/bin/update-*-database
+    - -usr/bin/xdpyinfo
+    - -usr/bin/xdriinfo
+    - -usr/bin/xev
+    - -usr/bin/xfd
+    - -usr/bin/xfontsel
+    - -usr/bin/xkill
+    - -usr/bin/xlsatoms
+    - -usr/bin/xlsclients
+    - -usr/bin/xlsfonts
+    - -usr/bin/xmessage
+    - -usr/bin/xprop
+    - -usr/bin/xvinfo
+    - -usr/bin/xwininfo
+    - -usr/lib/aspell
+    - -usr/lib/dbus-1.0
+    - -usr/lib/dconf
+    - -usr/lib/emacsen-common
+    - -usr/lib/gcc
+    - -usr/lib/gtk-3.0
+    - -usr/lib/gvfs
+    - -usr/lib/ispell
+    - -usr/lib/mime
+    - -usr/lib/systemd
+    - -usr/lib/sysusers.d
+    - -usr/lib/tmpfiles.d
+    - -usr/lib/valgrind
+    - -usr/lib/X11
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libasound.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libaspell.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libatk-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libatk-bridge-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libatspi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libavahi-*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcairo-gobject.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcairo.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcanberra-gtk3.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcanberra.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcolord.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcroco-0.6.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcrypto.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libcups.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdatrie.so
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdconf.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdrm_amdgpu.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libdrm_intel.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libEGL_mesa.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libEGL.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libelf.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libenchant.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libepoxy.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libexpatw.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libffi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libfontconfig.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libfreetype.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgbm.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgck-1.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgcr-base.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgdk_pixbuf_xlib-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgio-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgirepository-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libglapi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libGLdispatch.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libglib-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libGLX_indirect.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libGLX_mesa.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgmodule-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgmp.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgnutls.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgobject-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgraphite2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgssapi_krb5.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstallocators-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstapp-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstaudio-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstbase-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstcheck-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstcontroller-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstfft-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstnet-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstpbutils-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgstreamer-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgthread-2.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libgtk-3.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libharfbuzz-icu.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libharfbuzz.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libhogweed.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libhunspell-1.6.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libICE.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libicudata.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libicuuc.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libidn2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libjbig.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libjpeg.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libjson-glib-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libk5crypto.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libkrb5.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libkrb5support.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/liblcms2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libltdl.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libnettle.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libogg.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/liborc-0.4.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpangocairo-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpangoft2-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpangoxft-1.0.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpciaccess.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpixman.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpng16.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libproxy.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libpspell.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/librest-0.7.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/librsvg-2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsecret-1.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsensors.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libSM.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsoup-2.4.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsoup-gnome-2.4.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libsqlite3.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libssl.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libtasn1.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libthai.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libtiff.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libunistring.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libvorbis.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwayland-client.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwayland-cursor.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwayland-egl.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwayland-server.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libwebp.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libX11-xcb.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXau.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-dri2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-dri3.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-present.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-render.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-shm.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-sync.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxcb-xfixes.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXcomposite.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXcursor.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXfixes.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXft.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXi.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxkbcommon.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxml2.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXrandr.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXrender.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxshmfence.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libxslt.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXtst.so*
+    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libXxf86vm.so*
+    - -var/cache
+    - -var/lib/aspell
+    - -var/lib/dbus
+    - -var/lib/dictionaries-common
+    - -var/lib/emacsen-common
+    - -var/lib/ispell
+    - -var/lib/systemd
+    - -var/lib/ucf
+    prime:
+    - -usr/include
+    - -usr/lib/pkgconfig
