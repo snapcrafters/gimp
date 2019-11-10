@@ -146,15 +146,16 @@ parts:
       patch -Np3 < $SNAPCRAFT_STAGE/desktop-launch.patch
     override-build: |
       snapcraftctl build
+      mkdir -p $SNAPCRAFT_PART_INSTALL/lib/gtk-2.0
       # Make GTK3 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
-      ln -s ../../../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
+      ln -sf ../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
       # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
       mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
       # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      ln -s ../../../../lib/gtk-2.0/2.10.0/engines \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0
+      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
   patches:
     source: patches
