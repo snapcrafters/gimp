@@ -17,10 +17,10 @@ layout:
     bind: $SNAP/etc/gimp
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/webkit2gtk-4.0
-  /usr/lib/babl-0.1:
-    bind: $SNAP/usr/lib/babl-0.1
-  /usr/lib/gegl-0.4:
-    bind: $SNAP/usr/lib/gegl-0.4
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
   /usr/lib/gimp:
     bind: $SNAP/usr/lib/gimp
   /usr/lib/python2.7:
