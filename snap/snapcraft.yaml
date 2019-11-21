@@ -489,6 +489,7 @@ parts:
       sed -i 's|^LIBS = @LIBS@|LIBS = @LIBS@ -lm|' plug-ins/file-psd/Makefile.in
     override-build: |
       snapcraftctl build
+      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - automake
