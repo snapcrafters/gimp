@@ -21,10 +21,10 @@ index ff0b5453..380c1c6c 100755
 -  mkdir -p "$GTK_IM_MODULE_DIR"
 -  ln -s "$SNAP_DESKTOP_RUNTIME"/usr/lib/"$ARCH"/gtk-3.0/3.0.0/immodules/*.so "$GTK_IM_MODULE_DIR"
 -  async_exec "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/libgtk-3-0/gtk-query-immodules-3.0" > "$GTK_IM_MODULE_FILE"
-+  mkdir -p "$GTK_IM_MODULE_DIR/gtk3"
++  mkdir -p "$GTK_IM_MODULE_DIR" "$GTK3_IM_MODULE_DIR"
 +  ln -s "$SNAP"/usr/lib/"$ARCH"/gtk-2.0/2.10.0/immodules/*.so "$GTK_IM_MODULE_DIR"
 +  ln -s "$SNAP_DESKTOP_RUNTIME"/usr/lib/"$ARCH"/gtk-3.0/3.0.0/immodules/*.so "$GTK3_IM_MODULE_DIR"
-+  async_exec "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/libgtk2.0-0/gtk-query-immodules-2.0" > "$GTK_IM_MODULE_FILE"
++  async_exec "$SNAP/usr/lib/$ARCH/libgtk2.0-0/gtk-query-immodules-2.0" > "$GTK_IM_MODULE_FILE"
 +  async_exec "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/libgtk-3-0/gtk-query-immodules-3.0" > "$GTK3_IM_MODULE_FILE"
  fi
  
