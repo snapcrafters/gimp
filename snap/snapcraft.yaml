@@ -14,27 +14,27 @@ base: core18
 
 layout:
   /etc/gimp:
-    symlink: $SNAP/etc/gimp
+    bind: $SNAP/etc/gimp
   /etc/ld.so.cache:
     bind-file: $SNAP_DATA/etc/ld.so.cache
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
   /usr/lib/gimp:
-    symlink: $SNAP/usr/lib/gimp
+    bind: $SNAP/usr/lib/gimp
   /usr/lib/python2.7:
-    symlink: $SNAP/usr/lib/python2.7
+    bind: $SNAP/usr/lib/python2.7
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs:
-    symlink: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs
   /usr/share/color:
-    symlink: $SNAP/usr/share/color
+    bind: $SNAP/usr/share/color
   /usr/share/ghostscript:
-    symlink: $SNAP/usr/share/ghostscript
+    bind: $SNAP/usr/share/ghostscript
   /usr/share/gimp:
-    symlink: $SNAP/usr/share/gimp
+    bind: $SNAP/usr/share/gimp
   /usr/share/mypaint-data:
-    symlink: $SNAP/usr/share/mypaint-data
+    bind: $SNAP/usr/share/mypaint-data
 
 plugs:
   gtk-2-engines:
