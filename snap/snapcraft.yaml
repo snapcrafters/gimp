@@ -37,10 +37,11 @@ layout:
     bind: $SNAP/usr/share/mypaint-data
 
 plugs:
-  gtk-2-engines:
-    interface: content
-    target: $SNAP/lib/gtk-2.0
-    default-provider: gtk2-common-themes
+  ## DISABLED (1 of 4) because gtk2-common-themes only available on amd64
+  # gtk-2-engines:
+  #   interface: content
+  #   target: $SNAP/lib/gtk-2.0
+  #   default-provider: gtk2-common-themes
   gtk-3-themes:
     default-provider: gtk-common-themes:gtk-3-themes
     interface: content
@@ -137,9 +138,15 @@ parts:
   gnome-extension:
     after: [patches]
     build-packages:
+    - libgail-dev
     - libgtk-3-dev
     - libgtk2.0-dev
     stage-packages:
+    - gtk2-engines
+    - gtk2-engines-pixbuf
+    - libatk-adaptor
+    - libcanberra-gtk-module
+    - libgail-common
     - libgtk2.0-0
     - libgtk2.0-bin
     - unity-gtk2-module
@@ -161,9 +168,10 @@ parts:
       # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
       mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
-      # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
+      ## DISABLED (2 of 4) because gtk2-common-themes only available on amd64
+      # # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
+      # ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
+      #   $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
   patches:
     source: patches
@@ -609,7 +617,8 @@ parts:
     - core18
     - gnome-3-28-1804
     - gtk-common-themes
-    - gtk2-common-themes
+    ## DISABLED (3 of 4) because gtk2-common-themes only available on amd64
+    # - gtk2-common-themes
     override-prime: |
       set -eux
       cd /snap/core18/current
@@ -618,5 +627,6 @@ parts:
       find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/{} \;
       cd /snap/gtk-common-themes/current
       find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/{} \;
-      cd /snap/gtk2-common-themes/current/lib
-      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/{} \;
+      ## DISABLED (4 of 4) because gtk2-common-themes only available on amd64
+      # cd /snap/gtk2-common-themes/current/lib
+      # find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/{} \;
