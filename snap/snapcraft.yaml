@@ -41,22 +41,26 @@ plugs:
     interface: content
     target: $SNAP/lib/gtk-2.0
     default-provider: gtk2-common-themes
+  gtk-2-themes:
+    interface: content
+    target: $SNAP/share/themes
+    default-provider: gtk2-common-themes
   gtk-3-themes:
-    default-provider: gtk-common-themes:gtk-3-themes
     interface: content
     target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
   sound-themes:
-    default-provider: gtk-common-themes:sound-themes
     interface: content
     target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
   gnome-3-28-1804:
-    default-provider: gnome-3-28-1804:gnome-3-28-1804
     interface: content
     target: $SNAP/gnome-platform
+    default-provider: gnome-3-28-1804
   icon-themes:
-    default-provider: gtk-common-themes:icon-themes
     interface: content
     target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
 
 slots:
   dbus-gimp:
@@ -80,6 +84,9 @@ environment:
   LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$LD_LIBRARY_PATH
   PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
   FINAL_BINARY: $SNAP/usr/bin/gimp
+  GTK_PATH: $SNAP/lib/gtk-2.0
+  GTK_DATA_PREFIX: $SNAP
+  XDG_DATA_DIRS: $SNAP/share:$XDG_DATA_DIRS
 
 apps:
   gimp:
