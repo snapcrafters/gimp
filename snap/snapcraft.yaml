@@ -12,6 +12,14 @@ grade: stable
 confinement: strict
 base: core18
 
+architectures:
+- build-on: amd64
+- build-on: i386
+- build-on: arm64
+- build-on: armhf
+- build-on: ppc64el
+- build-on: s390x
+
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
@@ -38,10 +46,10 @@ layout:
 
 plugs:
   ## DISABLED (1 of 4) because gtk2-common-themes only available on amd64
-  # gtk-2-engines:
-  #   interface: content
-  #   target: $SNAP/lib/gtk-2.0
-  #   default-provider: gtk2-common-themes
+  gtk-2-engines:
+    interface: content
+    target: $SNAP/lib/gtk-2.0
+    default-provider: gtk2-common-themes
   gtk-3-themes:
     default-provider: gtk-common-themes:gtk-3-themes
     interface: content
@@ -67,11 +75,9 @@ slots:
 
 hooks:
   install:
-    passthrough:
-      command-chain: [snap/command-chain/desktop-launch]
+    command-chain: [snap/command-chain/desktop-launch]
   post-refresh:
-    passthrough:
-      command-chain: [snap/command-chain/desktop-launch]
+    command-chain: [snap/command-chain/desktop-launch]
 
 environment:
   SNAP_DESKTOP_RUNTIME: $SNAP/gnome-platform
@@ -170,9 +176,10 @@ parts:
       mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
       ## DISABLED (2 of 4) because gtk2-common-themes only available on amd64
-      # # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      # ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-      #   $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
+      # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
+      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
   patches:
     source: patches
@@ -218,11 +225,13 @@ parts:
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
+    - git
     - gobject-introspection
     - libgirepository1.0-dev
     - liblcms2-dev
     - librsvg2-bin
     - librsvg2-dev
+    - w3m
     prime:
     - -usr/include
     - -usr/lib/pkgconfig
@@ -252,8 +261,11 @@ parts:
     - graphviz-dev
     - libavcodec-dev
     - libavformat-dev
+    - libavutil-dev
+    - libcairo2-dev
     - libexiv2-dev
     - libfftw3-dev
+    - libgdk-pixbuf2.0-dev
     - libgexiv2-dev
     - libgirepository1.0-dev
     - libglib2.0-dev
@@ -268,11 +280,11 @@ parts:
     - libopenexr-dev
     - libpango1.0-dev
     - libpng-dev
+    - libpoppler-glib-dev
     - libraw-dev
     - librsvg2-dev
     - libsdl2-dev
     - libspiro-dev
-    - libsuitesparse-dev
     - libswscale-dev
     - libtiff5-dev
     - libv4l-dev
@@ -284,30 +296,37 @@ parts:
     - libamd2
     - libavcodec57
     - libavformat57
+    - libavutil55
     - libbtf1
+    - libcairo2
     - libcamd2
     - libccolamd2
     - libcholmod3
     - libcolamd2
     - libcxsparse3
     - libexiv2-14
+    - libgdk-pixbuf2.0-0
     - libgexiv2-2
     - libgraphblas1
     - libgs9
+    - libjpeg8
     - libklu1
     - liblapack3
+    - liblcms2-2
     - libldl2
     - liblensfun1
     - libluajit-5.1-2
     - libopenexr22
+    - libpng16-16
+    - libpoppler-glib8
     - libraw16
     - librbio2
+    - librsvg2-2
     - libsdl2-2.0-0
-    - libopenjp2-7
     - libspiro0
     - libspqr2
-    - libsuitesparseconfig5
     - libswscale4
+    - libtiff5
     - libumfpack5
     - libv4l-0
     - python-gobject-2
@@ -345,6 +364,30 @@ parts:
     - -usr/include
     - -usr/lib/pkgconfig
     - -usr/share/vala
+
+  # https://github.com/strukturag/libheif/releases
+  libheif:
+    source: https://github.com/strukturag/libheif/releases/download/v1.6.2/libheif-1.6.2.tar.gz
+    plugin: autotools
+    configflags:
+    - --prefix=/usr
+    - --disable-go
+    - --disable-examples
+    build-packages:
+    - libde265-dev
+    - libgdk-pixbuf2.0-dev
+    - libjpeg8-dev
+    - libpng-dev
+    - libx265-dev
+    stage-packages:
+    - libde265-0
+    - libgdk-pixbuf2.0-0
+    - libjpeg8
+    - libpng16-16
+    - libx265-146
+    override-build: |
+      snapcraftctl build
+      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
 
   # https://github.com/mypaint/libmypaint/releases
   libmypaint:
@@ -418,6 +461,7 @@ parts:
     - desktop-settings-packages
     - gegl
     - gtk-locales
+    - libheif
     - libmypaint
     - mypaint-brushes
     - patches
@@ -461,7 +505,7 @@ parts:
     - libgtk-3-dev
     - libgtk2.0-dev
     - libgudev-1.0-dev
-    - libheif-dev
+    # - libheif-dev
     - libice-dev
     - libisocodes-dev
     - libjpeg8-dev
@@ -483,6 +527,7 @@ parts:
     - python-dev
     - python-cairo-dev
     - python-gtk2-dev
+    - xdg-utils
     - xsltproc
     - try:
       - libunwind-dev # not available in s390x
@@ -499,7 +544,8 @@ parts:
     - libfftw3-double3
     - libfftw3-single3
     - libgpm2
-    - libheif1
+    # - libheif1
+    - libjpeg8
     - libmng2
     - libopenjp2-7
     - libpoppler-glib8
@@ -617,15 +663,14 @@ parts:
     - gnome-3-28-1804
     - gtk-common-themes
     ## DISABLED (3 of 4) because gtk2-common-themes only available on amd64
-    # - gtk2-common-themes
+    - gtk2-common-themes
     override-prime: |
       set -eux
-      cd /snap/core18/current
-      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/{} \;
-      cd /snap/gnome-3-28-1804/current
-      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/{} \;
-      cd /snap/gtk-common-themes/current
-      find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/{} \;
-      ## DISABLED (4 of 4) because gtk2-common-themes only available on amd64
-      # cd /snap/gtk2-common-themes/current/lib
-      # find . -type f,l -exec rm -f $SNAPCRAFT_PRIME/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/{} \;
+      for snap in "gnome-3-28-1804" "gtk-common-themes" "gtk2-common-themes"; do  # List all content-snaps you're using here
+        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      done
+      for CRUFT in bug lintian man; do
+        rm -rf $SNAPCRAFT_PRIME/usr/share/$CRUFT
+      done
+      find $SNAPCRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
+      find $SNAPCRAFT_PRIME/usr/share -type d -empty -not -path "$SNAPCRAFT_PRIME/usr/share/gimp/*" -delete
