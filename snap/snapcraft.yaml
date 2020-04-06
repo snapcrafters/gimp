@@ -29,6 +29,8 @@ layout:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
+  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/evince/4/backends:
+    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/evince/4/backends
   /usr/lib/gimp:
     bind: $SNAP/usr/lib/gimp
   /usr/lib/python2.7:
@@ -532,6 +534,7 @@ parts:
     - try:
       - libunwind-dev # not available in s390x
     stage-packages:
+    - evince
     - ghostscript
     - gir1.2-gtk-2.0
     - gir1.2-poppler-0.18
