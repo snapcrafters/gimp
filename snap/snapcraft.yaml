@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.18'
+version: '2.10.20'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -48,10 +48,10 @@ layout:
 
 plugs:
   ## DISABLED (1 of 4) because gtk2-common-themes only available on amd64
-  gtk-2-engines:
-    interface: content
-    target: $SNAP/lib/gtk-2.0
-    default-provider: gtk2-common-themes
+  # gtk-2-engines:
+  #   interface: content
+  #   target: $SNAP/lib/gtk-2.0
+  #   default-provider: gtk2-common-themes
   gtk-3-themes:
     default-provider: gtk-common-themes:gtk-3-themes
     interface: content
@@ -179,9 +179,9 @@ parts:
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
       ## DISABLED (2 of 4) because gtk2-common-themes only available on amd64
       # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
-      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
+      # rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
+      # ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
+      #   $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
   patches:
     source: patches
@@ -215,8 +215,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: meson
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.74.tar.xz
-    source-checksum: sha256/9a710b6950da37ada94cd9e2046cbce26de12473da32a7b79b7d1432fc66ce0e
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.78.tar.xz
+    source-checksum: sha256/17d5493633bff5585d9f375bc4df5925157cd1c70ccd7c22a635be75c172523a
     meson-parameters:
     - --prefix=/usr
     - -Dwith-docs=false
@@ -244,8 +244,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.22.tar.xz
-    source-checksum: sha256/1888ec41dfd19fe28273795c2209efc1a542be742691561816683990dc642c61
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.24.tar.xz
+    source-checksum: sha256/7765499f27341b0d16032e665319cbc12876483ff6a944fcdf24a9c58e3e254a
     plugin: meson
     meson-parameters:
     - --prefix=/usr
@@ -369,7 +369,7 @@ parts:
 
   # https://github.com/strukturag/libheif/releases
   libheif:
-    source: https://github.com/strukturag/libheif/releases/download/v1.6.2/libheif-1.6.2.tar.gz
+    source: https://github.com/strukturag/libheif/releases/download/v1.7.0/libheif-1.7.0.tar.gz
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -396,8 +396,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: autotools
-    source: https://github.com/mypaint/libmypaint/releases/download/v1.5.1/libmypaint-1.5.1.tar.xz
-    source-checksum: sha256/aef8150a0c84ce2ff6fb24de8d5ffc564845d006f8bad7ed84ee32ed1dd90c2b
+    source: https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz
+    source-checksum: sha256/741754f293f6b7668f941506da07cd7725629a793108bb31633fb6c3eae5315f
     build-packages:
     - gobject-introspection
     - intltool
@@ -469,7 +469,7 @@ parts:
     - patches
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/88990f2d70508b22f4acadeab6b687e20af19b765ebc6f245d0c99b3dd853fcd3d237c3b7607e50133aa95a1d71931069029dfd7ee94441ff419c542c141bc9f
+    source-checksum: sha512/7cd0b1833af87a167fdfee59fb491a72727fe3071c21c0de1813adb0f8272a92473e1e300517395b1b4593c8cb6781ee30f7a63966756e5a7f523a164308aba6
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
@@ -666,10 +666,10 @@ parts:
     - gnome-3-28-1804
     - gtk-common-themes
     ## DISABLED (3 of 4) because gtk2-common-themes only available on amd64
-    - gtk2-common-themes
+    # - gtk2-common-themes
     override-prime: |
       set -eux
-      for snap in "gnome-3-28-1804" "gtk-common-themes" "gtk2-common-themes"; do  # List all content-snaps you're using here
+      for snap in "gnome-3-28-1804" "gtk-common-themes"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
