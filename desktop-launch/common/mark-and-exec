@@ -1,0 +1,123 @@
+#!/bin/bash
+###############################
+# Mark update and exec binary #
+###############################
+
+# Keep an array of data dirs, for looping through them
+IFS=':' read -r -a data_dirs_array <<< "$XDG_DATA_DIRS"
+
+
+function make_user_fontconfig {
+  echo "<fontconfig>"
+  if [ -d "$REALHOME/.local/share/fonts" ]; then
+    echo "  <dir>$REALHOME/.local/share/fonts</dir>"
+  fi
+  if [ -d "$REALHOME/.fonts" ]; then
+    echo "  <dir>$REALHOME/.fonts</dir>"
+  fi
+  for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+    if [ -d "${data_dirs_array[$i]}/fonts" ]; then
+      echo "  <dir>${data_dirs_array[$i]}/fonts</dir>"
+    fi
+  done
+  echo '  <include ignore_missing="yes">conf.d</include>'
+  # We need to include this default cachedir first so that caching
+  # works: without it, fontconfig will try to write to the real user home
+  # cachedir and be blocked by AppArmor.
+  echo '  <cachedir prefix="xdg">fontconfig</cachedir>'
+  if [ -d "$REALHOME/.cache/fontconfig" ]; then
+    echo "  <cachedir>$REALHOME/.cache/fontconfig</cachedir>"
+  fi
+  echo "</fontconfig>"
+}
+
+if [ "$needs_update" = true ]; then
+  rm -rf "$XDG_DATA_HOME"/{fontconfig,fonts,fonts-*,themes,.themes}
+
+  # This fontconfig fragment is installed in a location that is
+  # included by the system fontconfig configuration: namely the
+  # etc/fonts/conf.d/50-user.conf file.
+  ensure_dir_exists "$XDG_CONFIG_HOME/fontconfig"
+  async_exec make_user_fontconfig > "$XDG_CONFIG_HOME/fontconfig/fonts.conf"
+
+  # the themes symlink are needed for GTK 3.18 when the prefix isn't changed
+  # GTK 3.20 looks into XDG_DATA_DIRS which has connected themes.
+  if [ -d "$SNAP/data-dir/themes" ]; then
+    ln -sf "$SNAP/data-dir/themes" "$XDG_DATA_HOME"
+    ln -sfn "$SNAP/data-dir/themes" "$SNAP_USER_DATA/.themes"
+  elif [ -d "$SNAP_DESKTOP_RUNTIME/usr/share/themes" ]; then
+    ln -sf "$SNAP_DESKTOP_RUNTIME/usr/share/themes" "$XDG_DATA_HOME"
+    ln -sfn "$SNAP_DESKTOP_RUNTIME/usr/share/themes" "$SNAP_USER_DATA/.themes"
+  fi
+fi
+
+# Setup compiled gsettings schema
+GS_SCHEMA_DIR="$XDG_DATA_HOME/glib-2.0/schemas"
+function compile_schemas {
+  if [ -f "$1" ]; then
+    rm -rf "$GS_SCHEMA_DIR"
+    ensure_dir_exists "$GS_SCHEMA_DIR"
+    for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+      if [ "${data_dirs_array[$i]}" = "$XDG_DATA_HOME" ]; then
+        continue
+      fi
+      schema_dir="${data_dirs_array[$i]}/glib-2.0/schemas"
+      if [ -f "$schema_dir/gschemas.compiled" ]; then
+        # This directory already has compiled schemas
+        continue
+      fi
+      if [ -n "$(ls -A "$schema_dir"/*.xml 2>/dev/null)" ]; then
+        ln -sf "$schema_dir"/*.xml "$GS_SCHEMA_DIR"
+      fi
+      if [ -n "$(ls -A "$schema_dir"/*.override 2>/dev/null)" ]; then
+        ln -sf "$schema_dir"/*.override "$GS_SCHEMA_DIR"
+      fi
+    done
+    # Only compile schemas if we copied anything
+    if [ -n "$(ls -A "$GS_SCHEMA_DIR"/*.xml "$GS_SCHEMA_DIR"/*.override 2>/dev/null)" ]; then
+      "$1" "$GS_SCHEMA_DIR"
+    fi
+  fi
+}
+if [ "$needs_update" = true ]; then
+  async_exec compile_schemas "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/glib-2.0/glib-compile-schemas"
+fi
+
+# Icon themes cache
+if [ "$needs_update" = true ]; then
+  rm -rf "$XDG_DATA_HOME/icons"
+  ensure_dir_exists "$XDG_DATA_HOME/icons"
+  for ((i = 0; i < ${#data_dirs_array[@]}; i++)); do
+    # The runtime and theme content snaps should already contain icon caches
+    # so we skip them to optimise app start time.
+    if [[ "${data_dirs_array[$i]}" == "$SNAP/data-dir" || "${data_dirs_array[$i]}" == "$SNAP_DESKTOP_RUNTIME/"* ]]; then
+      continue
+    fi  
+    for theme in "${data_dirs_array[$i]}"/icons/*; do
+      if [ -f "$theme/index.theme" ] && [ ! -f "$theme/icon-theme.cache" ]; then
+        theme_dir="$XDG_DATA_HOME/icons/$(basename "$theme")"
+        if [ ! -d "$theme_dir" ]; then
+          ensure_dir_exists "$theme_dir"
+          ln -sf "$theme"/* "$theme_dir"
+          if [ -f "$SNAP_DESKTOP_RUNTIME/usr/sbin/update-icon-caches" ]; then
+            async_exec "$SNAP_DESKTOP_RUNTIME/usr/sbin/update-icon-caches" "$theme_dir"
+          elif [ -f "$SNAP_DESKTOP_RUNTIME/usr/sbin/update-icon-cache.gtk2" ]; then
+            async_exec "$SNAP_DESKTOP_RUNTIME/usr/sbin/update-icon-cache.gtk2" "$theme_dir"
+          fi
+        fi
+      fi
+    done
+  done
+fi
+
+# shellcheck disable=SC2154
+[ "$needs_update" = true ] && echo "SNAP_DESKTOP_LAST_REVISION=$SNAP_REVISION" > "$SNAP_USER_DATA/.last_revision"
+
+wait_for_async_execs
+
+if [ -n "$SNAP_DESKTOP_DEBUG" ]; then
+  echo "desktop-launch elapsed time: $(date +%s.%N --date="$START seconds ago")"
+  echo "Now running: exec $*"
+fi
+
+exec "$@"

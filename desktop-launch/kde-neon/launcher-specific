@@ -1,0 +1,93 @@
+#!/bin/bash
+###################################
+# KDE NEON launcher specific part #
+###################################
+
+append_dir LD_LIBRARY_PATH "$SNAP/data-dir/kf5/lib/$ARCH"
+append_dir LD_LIBRARY_PATH "$SNAP/data-dir/kf5/usr/lib/$ARCH"
+append_dir LD_LIBRARY_PATH "$SNAP/data-dir/kf5/usr/lib"
+append_dir LD_LIBRARY_PATH "$SNAP/data-dir/kf5/lib"
+append_dir PATH "$SNAP/data-dir/kf5/usr/bin"
+
+# Set XCursors path
+append_dir XCURSOR_PATH "$SNAP/data-dir/kf5/icons"
+
+# XDG Config
+prepend_dir XDG_CONFIG_DIRS "$SNAP/data-dir/kf5/etc/xdg"
+
+# Define snaps' own data dir
+prepend_dir XDG_DATA_DIRS "$SNAP/data-dir/kf5/usr/share"
+
+# Ensure a sane default for QT_QPA_PLATFORMTHEME.
+export QT_QPA_PLATFORMTHEME=${QT_QPA_PLATFORMTHEME:-kde}
+
+# Add paths for games
+append_dir PATH "$SNAP/usr/games"
+append_dir PATH "$SNAP/data-dir/kf5/usr/games"
+
+# Qt Libs
+prepend_dir LD_LIBRARY_PATH "$SNAP/data-dir/kf5/usr/lib/$ARCH/qt5/libs"
+
+# Add QT_PLUGIN_PATH (Qt Modules).
+append_dir QT_PLUGIN_PATH "$SNAP/usr/lib/$ARCH/qt5/plugins"
+append_dir QT_PLUGIN_PATH "$SNAP/usr/lib/$ARCH"
+append_dir QT_PLUGIN_PATH "$SNAP/data-dir/kf5/usr/lib/$ARCH/qt5/plugins"
+append_dir QT_PLUGIN_PATH "$SNAP/data-dir/kf5/usr/lib/$ARCH"
+# And QML2_IMPORT_PATH (Qt Modules).
+append_dir QML2_IMPORT_PATH "$SNAP/usr/lib/$ARCH/qt5/qml"
+append_dir QML2_IMPORT_PATH "$SNAP/lib/$ARCH"
+append_dir QML2_IMPORT_PATH "$SNAP/data-dir/kf5/usr/lib/$ARCH/qt5/qml"
+append_dir QML2_IMPORT_PATH "$SNAP/data-dir/kf5/lib/$ARCH"
+
+# GI repository
+append_dir GI_TYPELIB_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/girepository-1.0"
+append_dir GI_TYPELIB_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/girepository-1.0"
+append_dir GI_TYPELIB_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/gjs/girepository-1.0"
+
+# Fix locating the QtWebEngineProcess executable
+export QTWEBENGINEPROCESS_PATH="$SNAP/data-dir/kf5/usr/lib/$ARCH/qt5/libexec/QtWebEngineProcess"
+
+# Removes Qt warning: Could not find a location
+# of the system Compose files
+export QTCOMPOSE="$SNAP/data-dir/kf5/usr/share/X11/locale"
+export QT_XKB_CONFIG_ROOT="/usr/share/X11/xkb"
+
+# KIO specific
+# Directly fork slaves.
+export KDE_FORK_SLAVES=1
+# Path to KIO slaves.
+export KF5_LIBEXEC_DIR="$SNAP/data-dir/kf5/usr/lib/$ARCH/libexec/kf5"
+
+# Add path to VLC plugins
+export VLC_PLUGIN_PATH="$SNAP/data-dir/kf5/usr/lib/x86_64-linux-gnu/vlc/plugins"
+
+# Ensure QtChooser behaves.
+export QTCHOOSER_NO_GLOBAL_DIR=1
+export QT_SELECT=5
+# qtchooser hardcodes reference paths, we'll need to rewrite them properly
+ensure_dir_exists "$XDG_CONFIG_HOME/qtchooser"
+echo "$SNAP/usr/lib/qt5/bin" > "$XDG_CONFIG_HOME/qtchooser/5.conf"
+echo "$SNAP/usr/lib/$ARCH" >> "$XDG_CONFIG_HOME/qtchooser/5.conf"
+echo "$SNAP/usr/lib/qt5/bin" > "$XDG_CONFIG_HOME/qtchooser/default.conf"
+echo "$SNAP/usr/lib/$ARCH" >> "$XDG_CONFIG_HOME/qtchooser/default.conf"
+
+# This relies on qtbase patch
+# 0001-let-qlibraryinfo-fall-back-to-locate-qt.conf-via-XDG.patch
+# to make QLibraryInfo look in XDG_* locations for qt.conf. The paths configured
+# here are applied to everything that uses QLibraryInfo as final fallback and
+# has no XDG_* fallback before that. Currently the most interesting offender
+# is QtWebEngine which will not work unless the Data path is correctly set.
+cat << EOF > "$XDG_CONFIG_HOME/qt.conf"
+[Paths]
+Data = $SNAP/data-dir/kf5/usr/share/qt5/
+Translations = $SNAP/data-dir/kf5/usr/share/qt5/translations
+EOF
+
+if [ -e "$SNAP/data-dir/kf5/usr/share/i18n" ]; then
+    export I18NPATH="$SNAP/data-dir/kf5/usr/share/i18n"
+    locpath="$XDG_DATA_HOME/locale"
+    ensure_dir_exists "$locpath"
+    prepend_dir LOCPATH "$locpath"
+    append_dir LOCPATH "/usr/lib/locale"
+    LC_ALL=C.UTF-8 async_exec "$SNAP/snap/command-chain/locale-gen"
+fi
