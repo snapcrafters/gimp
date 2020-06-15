@@ -1,0 +1,29 @@
+#!/bin/bash
+##############################
+# GTK launcher specific part #
+##############################
+
+# shellcheck disable=SC2154
+if [ "$wayland_available" = true ]; then
+  export GDK_BACKEND="wayland"
+  export CLUTTER_BACKEND="wayland"
+  # Does not hurt to specify this as well, just in case
+  export QT_QPA_PLATFORM=wayland-egl
+fi
+
+# ibus and fcitx integration
+GTK_IM_MODULE_DIR="$XDG_CACHE_HOME/immodules/gtk2"
+GTK3_IM_MODULE_DIR="$XDG_CACHE_HOME/immodules/gtk3"
+export GTK_IM_MODULE_FILE="$GTK_IM_MODULE_DIR/gtk2-immodules.cache"
+export GTK3_IM_MODULE_FILE="$GTK_IM_MODULE_DIR/gtk3-immodules.cache"
+# shellcheck disable=SC2154
+if [ "$needs_update" = true ]; then
+  rm -rf "$GTK_IM_MODULE_DIR" "$GTK3_IM_MODULE_DIR"
+  ensure_dir_exists "$GTK_IM_MODULE_DIR"
+  ensure_dir_exists "$GTK3_IM_MODULE_DIR"
+  ln -sf "$SNAP"/usr/lib/"$ARCH"/gtk-2.0/2.10.0/immodules/*.so "$GTK_IM_MODULE_DIR"
+  ln -sf "$SNAP_DESKTOP_RUNTIME"/usr/lib/"$ARCH"/gtk-3.0/3.0.0/immodules/*.so "$GTK3_IM_MODULE_DIR"
+  async_exec "$SNAP/usr/lib/$ARCH/libgtk2.0-0/gtk-query-immodules-2.0" > "$GTK_IM_MODULE_FILE"
+  async_exec "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/libgtk-3-0/gtk-query-immodules-3.0" > "$GTK3_IM_MODULE_FILE"
+fi
+
