@@ -9,7 +9,6 @@ env:
     - LC_ALL: C.UTF-8
     - LANG: C.UTF-8
     - SNAPCRAFT_ENABLE_SILENT_REPORT: y
-    - SNAPCRAFT_ENABLE_DEVELOPER_DEBUG: y
 
 addons:
   snaps:
