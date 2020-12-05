@@ -105,7 +105,7 @@ environment:
   GTK_EXE_PREFIX: $SNAP/usr
   GTK_USE_PORTAL: '1'
   GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-  LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas:$LD_LIBRARY_PATH
+  LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas
   PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
   FINAL_BINARY: $SNAP/usr/bin/gimp
 
