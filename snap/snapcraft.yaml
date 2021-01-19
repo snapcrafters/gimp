@@ -129,7 +129,7 @@ apps:
     - unity7
     - wayland
     - x11
-  
+
   # darktable:
   #   command: usr/bin/darktable
   #   command-chain: [snap/command-chain/desktop-launch]
