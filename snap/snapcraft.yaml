@@ -392,9 +392,25 @@ parts:
     - -usr/lib/pkgconfig
     - -usr/share/vala
 
+  libaom:
+    source: https://aomedia.googlesource.com/aom
+    source-type: git
+    plugin: cmake
+    configflags:
+    - -DCMAKE_BUILD_TYPE=Release
+    - -DCMAKE_INSTALL_PREFIX=/usr
+    - -DENABLE_DOCS=OFF
+    - -DENABLE_EXAMPLES=OFF
+    - -DENABLE_TESTDATA=OFF
+    - -DENABLE_TESTS=OFF
+    - -DCONFIG_PIC=1
+    build-packages:
+    - yasm
+
   # https://github.com/strukturag/libheif/releases
   libheif:
-    source: https://github.com/strukturag/libheif/releases/download/v1.9.1/libheif-1.9.1.tar.gz
+    after: [libaom]
+    source: https://github.com/strukturag/libheif/releases/download/v1.11.0/libheif-1.11.0.tar.gz
     plugin: autotools
     configflags:
     - --prefix=/usr
