@@ -259,6 +259,11 @@ parts:
     - librsvg2-bin
     - librsvg2-dev
     - w3m
+    stage-packages:
+    - gobject-introspection
+    - libgirepository-1.0-1
+    - liblcms2-2
+    - librsvg2-2
     prime:
     - -usr/include
     - -usr/lib/pkgconfig
@@ -542,18 +547,26 @@ parts:
     - libcurl4-gnutls-dev
     - libexif-dev
     - libfftw3-dev
+    - libgexiv2-dev
     - libgirepository1.0-dev
     - libglib2.0-dev
     - libgpm-dev
+    - libgs-dev
     - libgtk-3-dev
     - libgtk2.0-dev
     - libgudev-1.0-dev
     # - libheif-dev
     - libice-dev
+    - libilmbase-dev
     - libisocodes-dev
     - libjpeg8-dev
+    - libjson-glib-dev
+    - liblcms2-dev
+    - liblzma-dev
     - libmng-dev
+    - libopenexr-dev
     - libopenjp2-7-dev
+    - libpng-dev
     - libpoppler-glib-dev
     - libslang2-dev
     - libsm-dev
@@ -566,12 +579,12 @@ parts:
     - libxmu-dev
     - libxpm-dev
     - libxt-dev
-    - zlib1g-dev
     - python-dev
     - python-cairo-dev
     - python-gtk2-dev
     - xdg-utils
     - xsltproc
+    - zlib1g-dev
     - try:
       - libunwind-dev # not available in s390x
     stage-packages:
@@ -586,16 +599,27 @@ parts:
     - libbz2-1.0
     - libcurl3-gnutls
     - libexif12
+    - libgexiv2-2
     - libfftw3-double3
     - libfftw3-single3
     - libgpm2
+    - libgs9
     # - libheif1
+    - libilmbase25
     - libjpeg8
+    - libjson-glib-1.0-0
+    - liblcms2-2
+    - liblzma5
     - libmng2
+    - libopenexr25
     - libopenjp2-7
+    - libpng16-16
     - libpoppler-glib8
     - libslang2
+    - libtiff5
     - libwebkitgtk-1.0-0
+    - libwebp6
+    - libwebpdemux2
     - libwebpmux3
     - libwmf0.2-7
     - libxmu6
@@ -606,6 +630,7 @@ parts:
     - python-gi
     - python-gtk2
     - rawtherapee
+    - zlib1g
     - try:
       - libunwind8 # not available in s390x
       - libfftw3-long3 # only amd64 and i386
