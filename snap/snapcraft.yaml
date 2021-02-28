@@ -119,6 +119,7 @@ apps:
     - dbus-gimp
     plugs:
     - cups-control
+    - browser-support
     - desktop
     - desktop-legacy
     - gsettings
@@ -605,13 +606,13 @@ parts:
     - libgpm2
     - libgs9
     # - libheif1
-    - libilmbase25
+    - libilmbase12
     - libjpeg8
     - libjson-glib-1.0-0
     - liblcms2-2
     - liblzma5
     - libmng2
-    - libopenexr25
+    - libopenexr22
     - libopenjp2-7
     - libpng16-16
     - libpoppler-glib8
