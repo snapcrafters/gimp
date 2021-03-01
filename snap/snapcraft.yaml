@@ -80,11 +80,6 @@ plugs:
     interface: content
     target: $SNAP/data-dir/gnome-platform
     default-provider: gnome-3-28-1804:gnome-3-28-1804
-  kde-frameworks-5-plug:
-    content: kde-frameworks-5-core18-all
-    interface: content
-    default-provider: kde-frameworks-5-core18
-    target: $SNAP/data-dir/kf5
 
 slots:
   dbus-gimp:
@@ -546,6 +541,7 @@ parts:
     - libart-2.0-dev
     - libbz2-dev
     - libcurl4-gnutls-dev
+    - libdbus-glib-1-dev
     - libexif-dev
     - libfftw3-dev
     - libgexiv2-dev
@@ -589,6 +585,7 @@ parts:
     - try:
       - libunwind-dev # not available in s390x
     stage-packages:
+    - dbus-x11
     - evince
     - ghostscript
     - gir1.2-gtk-2.0
@@ -599,6 +596,7 @@ parts:
     - libart-2.0-2
     - libbz2-1.0
     - libcurl3-gnutls
+    - libdbus-glib-1-2
     - libexif12
     - libgexiv2-2
     - libfftw3-double3
@@ -908,7 +906,7 @@ parts:
     # - gtk2-common-themes
     override-prime: |
       set -eux
-      for snap in "gnome-3-28-1804" "kde-frameworks-5-core18" "gtk-common-themes"; do  # List all content-snaps you're using here
+      for snap in "gnome-3-28-1804" "gtk-common-themes"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
