@@ -193,7 +193,6 @@ parts:
       - libgtk2.0-bin
       - unity-gtk2-module
       - ibus-gtk
-      - g++
     override-build: |
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/lib/gtk-2.0
@@ -772,6 +771,7 @@ parts:
       - zlib1g-dev
     stage-packages:
       - libcurl3-gnutls
+      - libdouble-conversion1
       - libfftw3-double3
       - libfftw3-single3
       - libgraphicsmagick-q16-3
@@ -780,10 +780,12 @@ parts:
       - libopencv-core3.2
       - libopencv-highgui3.2
       - libopencv-videoio3.2
-      # - libopencv-imgcodecs3.2
-      # - libopencv-imgproc3.2
       - libopenexr22
       - libpng16-16
+      - libqt5core5a
+      - libqt5gui5
+      - libqt5network5
+      - libqt5widgets5
       - libtiff5
       - zlib1g
       - on amd64:
