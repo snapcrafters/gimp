@@ -235,8 +235,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: meson
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.82.tar.xz
-    source-checksum: sha256/c62d93d4ad6774cb8e3231bbbc7f2e61e551e7242d78640d757505ee1a9fadc5
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.86.tar.xz
+    source-checksum: sha256/0b3f595159ad1b216cd729c0504c3a5f6cf780c641f4dc63fc164f3c0382c8f0
     meson-parameters:
     - --prefix=/usr
     - -Dwith-docs=false
@@ -253,6 +253,7 @@ parts:
     - liblcms2-dev
     - librsvg2-bin
     - librsvg2-dev
+    - valac
     - w3m
     stage-packages:
     - gobject-introspection
@@ -269,23 +270,24 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.26.tar.xz
-    source-checksum: sha256/0f371e2ed2b92162fefd3dde743e648ca08a6a1b2b05004867fbddc7e211e424
+    # source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.30.tar.xz
+    # source-checksum: sha256/c112782cf4096969e23217ccdfabe42284e35d5435ff0c43d40e4c70faeca8dd
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.28.tar.xz
+    source-checksum: sha256/1d110d8577d54cca3b34239315bd37c57ccb27dd4355655074a2d2b3fd897900
     plugin: meson
     meson-parameters:
     - --prefix=/usr
     build-environment:
     - CFLAGS: -O3 -pipe
     - CXXFLAGS: -O3 -pipe
-    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
+    - PKG_CONFIG_PATH: /usr/lib/$SNAPCRAFTARCH_TRIPLET/pkgconfig:$PKG_CONFIG_PATH
+    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
-    - cmake
     - gobject-introspection
-    - graphviz-dev
     - libavcodec-dev
     - libavformat-dev
     - libavutil-dev
@@ -297,14 +299,16 @@ parts:
     - libgirepository1.0-dev
     - libglib2.0-dev
     - libglu1-mesa-dev
+    - libgraphviz-dev
     - libgs-dev
     - libjpeg8-dev
     - libjson-glib-dev
     - liblcms2-dev
     - liblensfun-dev
     - libluajit-5.1-dev
-    - libopenjp2-7-dev
+    - libmaxflow-dev
     - libopenexr-dev
+    - libopenjp2-7-dev
     - libpango1.0-dev
     - libpng-dev
     - libpoppler-glib-dev
@@ -316,10 +320,10 @@ parts:
     - libtiff5-dev
     - libv4l-dev
     - libwebp-dev
+    - pkg-config
     - python-gi-dev
     - valac
     stage-packages:
-    - graphviz
     - libamd2
     - libavcodec57
     - libavformat57
@@ -328,6 +332,8 @@ parts:
     - libcairo2
     - libcamd2
     - libccolamd2
+    - libcdt5
+    - libcgraph6
     - libcholmod3
     - libcolamd2
     - libcxsparse3
@@ -336,14 +342,20 @@ parts:
     - libgexiv2-2
     - libgraphblas1
     - libgs9
+    - libgvc6
+    - libgvc6-plugins-gtk
+    - libgvpr2
     - libjpeg8
     - libklu1
+    - liblab-gamut1
     - liblapack3
     - liblcms2-2
     - libldl2
     - liblensfun1
     - libluajit-5.1-2
+    - libmaxflow0
     - libopenexr22
+    - libpathplan4
     - libpng16-16
     - libpoppler-glib8
     - libraw16
@@ -356,8 +368,9 @@ parts:
     - libtiff5
     - libumfpack5
     - libv4l-0
-    - python-gobject-2
+    - libxdot4
     - python-gi
+    - python-gobject-2
     stage:
     - -**/*.la
     - -etc
@@ -393,6 +406,7 @@ parts:
     - -usr/share/vala
 
   libaom:
+    after: [gegl]
     source: https://aomedia.googlesource.com/aom
     source-type: git
     plugin: cmake
@@ -405,6 +419,7 @@ parts:
     - -DENABLE_TESTS=OFF
     - -DCONFIG_PIC=1
     build-packages:
+    - cmake
     - yasm
 
   # https://github.com/strukturag/libheif/releases
@@ -742,10 +757,9 @@ parts:
       - PATH: /snap/bin:$PATH
       - CFLAGS: -O3 -pipe
       - CXXFLAGS: -O3 -pipe
-    build-snaps:
-      - cmake
     build-packages:
       - cimg-dev
+      - cmake
       - curl
       - g++
       - gcc
@@ -813,6 +827,7 @@ parts:
   #     - CFLAGS: -O3 -pipe
   #     - CXXFLAGS: -O3 -pipe
   #   build-packages:
+  #     - cmake
   #     - curl
   #     - freeglut3-dev
   #     - fop
