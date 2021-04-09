@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.22'
+version: '2.10.24'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -10,7 +10,7 @@ icon: gimp.png
 
 grade: stable
 confinement: strict
-base: core18
+base: core20
 
 architectures:
 - build-on: amd64
@@ -37,8 +37,12 @@ layout:
     bind: $SNAP/usr/lib/gimp
   /usr/lib/python2.7:
     bind: $SNAP/usr/lib/python2.7
+  /usr/lib/gvfs:
+    bind: $SNAP/usr/lib/gvfs
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs
+  /usr/libexec:
+    bind: $SNAP/usr/libexec
   /usr/share/color:
     bind: $SNAP/usr/share/color
   # /usr/share/darktable:
@@ -47,6 +51,8 @@ layout:
     bind: $SNAP/usr/share/ghostscript
   /usr/share/gimp:
     bind: $SNAP/usr/share/gimp
+  /usr/share/gvfs:
+    bind: $SNAP/usr/share/gvfs
   /usr/share/iso-codes:
     bind: $SNAP/data-dir/gnome-platform/usr/share/iso-codes
   /usr/share/lensfun:
@@ -76,10 +82,15 @@ plugs:
     interface: content
     target: $SNAP/data-dir/icons
     default-provider: gtk-common-themes:icon-themes
-  gnome-3-28-1804:
+  gnome-3-38-2004:
     interface: content
     target: $SNAP/data-dir/gnome-platform
-    default-provider: gnome-3-28-1804:gnome-3-28-1804
+    default-provider: gnome-3-38-2004:gnome-3-38-2004
+
+  color-profiles:
+    interface: system-files
+    read:
+    - /usr/share/color/icc
 
 slots:
   dbus-gimp:
@@ -270,10 +281,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    # source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.30.tar.xz
-    # source-checksum: sha256/c112782cf4096969e23217ccdfabe42284e35d5435ff0c43d40e4c70faeca8dd
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.28.tar.xz
-    source-checksum: sha256/1d110d8577d54cca3b34239315bd37c57ccb27dd4355655074a2d2b3fd897900
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.30.tar.xz
+    source-checksum: sha256/c112782cf4096969e23217ccdfabe42284e35d5435ff0c43d40e4c70faeca8dd
     plugin: meson
     meson-parameters:
     - --prefix=/usr
@@ -301,7 +310,7 @@ parts:
     - libglu1-mesa-dev
     - libgraphviz-dev
     - libgs-dev
-    - libjpeg8-dev
+    - libjpeg-dev
     - libjson-glib-dev
     - liblcms2-dev
     - liblensfun-dev
@@ -316,6 +325,7 @@ parts:
     - librsvg2-dev
     - libsdl2-dev
     - libspiro-dev
+    - libsuitesparse-dev
     - libswscale-dev
     - libtiff5-dev
     - libv4l-dev
@@ -325,9 +335,9 @@ parts:
     - valac
     stage-packages:
     - libamd2
-    - libavcodec57
-    - libavformat57
-    - libavutil55
+    - libavcodec58
+    - libavformat58
+    - libavutil56
     - libbtf1
     - libcairo2
     - libcamd2
@@ -337,15 +347,15 @@ parts:
     - libcholmod3
     - libcolamd2
     - libcxsparse3
-    - libexiv2-14
+    - libexiv2-27
     - libgdk-pixbuf2.0-0
     - libgexiv2-2
-    - libgraphblas1
+    - libgraphblas3
     - libgs9
     - libgvc6
     - libgvc6-plugins-gtk
     - libgvpr2
-    - libjpeg8
+    - libjpeg-turbo8
     - libklu1
     - liblab-gamut1
     - liblapack3
@@ -354,17 +364,17 @@ parts:
     - liblensfun1
     - libluajit-5.1-2
     - libmaxflow0
-    - libopenexr22
+    - libopenexr24
     - libpathplan4
     - libpng16-16
     - libpoppler-glib8
-    - libraw16
+    - libraw19
     - librbio2
     - librsvg2-2
     - libsdl2-2.0-0
-    - libspiro0
+    - libspiro1
     - libspqr2
-    - libswscale4
+    - libswscale5
     - libtiff5
     - libumfpack5
     - libv4l-0
@@ -410,7 +420,7 @@ parts:
     source: https://aomedia.googlesource.com/aom
     source-type: git
     plugin: cmake
-    configflags:
+    cmake-parameters:
     - -DCMAKE_BUILD_TYPE=Release
     - -DCMAKE_INSTALL_PREFIX=/usr
     - -DENABLE_DOCS=OFF
@@ -427,22 +437,22 @@ parts:
     after: [libaom]
     source: https://github.com/strukturag/libheif/releases/download/v1.11.0/libheif-1.11.0.tar.gz
     plugin: autotools
-    configflags:
+    autotools-configure-parameters:
     - --prefix=/usr
     - --disable-go
     - --disable-examples
     build-packages:
     - libde265-dev
     - libgdk-pixbuf2.0-dev
-    - libjpeg8-dev
+    - libjpeg-dev
     - libpng-dev
     - libx265-dev
     stage-packages:
     - libde265-0
     - libgdk-pixbuf2.0-0
-    - libjpeg8
+    - libjpeg-turbo8
     - libpng16-16
-    - libx265-146
+    - libx265-179
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -461,7 +471,7 @@ parts:
     - libglib2.0-dev
     - libjson-c-dev
     - libjson-glib-dev
-    configflags:
+    autotools-configure-parameters:
     - --prefix=/usr
     - --disable-static
     build-environment:
@@ -483,11 +493,13 @@ parts:
     - libmypaint
     source: https://github.com/Jehan/mypaint-brushes/archive/v1.3.0.tar.gz
     plugin: autotools
-    configflags:
+    autotools-configure-parameters:
     - --prefix=/usr
     build-environment:
       - CFLAGS: -O3 -pipe
       - CXXFLAGS: -O3 -pipe
+    build-packages:
+    - automake-1.15
 
   # TODO: Think about splitting to a separate snap and consume via content interface?
   # # https://download.gimp.org/mirror/pub/gimp/help
@@ -496,7 +508,7 @@ parts:
   #   plugin: autotools
   #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.10.0.tar.bz2
   #   source-checksum: sha512/2f6d5e7cf0c3b4960c92074ef02d51a1d089c148f6453a66e453a3084cdede280f72c6b77d35f66777adbda8aa273ec2a472fb538142e51bb263c3077eec473a
-  #   configflags:
+  #   autotools-configure-parameters:
   #   - --prefix=/usr
   #   build-environment:
   #   - PATH: /usr/bin:$PATH # Ensure system python is used, not from staging area
@@ -512,7 +524,7 @@ parts:
   #   prime:
   #   - -root
 
-  # https://www.gimp.org/downloads
+  # https://download.gimp.org/mirror/pub/gimp/v2.10/
   gimp:
     after:
     - babl
@@ -524,25 +536,31 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/13841ac4a186df47e4155095ca888a903b2db9e25a73fbb834fe981ccf915cb67a3e08506e5c13b6c5f35e27b1de24befbccf871e438b1a35f67f069bebd8fd0
-    configflags:
+    source-checksum: sha512/828350ad5c53b8409463c24693821d78a1940f18c221249ae7b864ad9db5cf01ab41d6ec5bbefd96115f0e91809ecdc61451d71881b56b07920c442f4a514936
+    autotools-configure-parameters:
     - --prefix=/usr
     - --sysconfdir=/etc
     - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
+    - --with-build-id=org.gimp.GIMP.snapcraft.stable
+    - --disable-check-update
+    - --disable-docs
+    - --disable-gtk-doc
+    - --disable-gtk-doc-html
+    - --disable-python
     build-environment:
     - CFLAGS: -O3 -pipe
     - CXXFLAGS: -O3 -pipe
     - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
     - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
+    # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
+    - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-    - PYTHON: /usr/bin/python2.7
     override-pull: |
       snapcraftctl pull
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     override-build: |
       rm -f $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
       snapcraftctl build
-      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - automake
@@ -570,7 +588,7 @@ parts:
     - libice-dev
     - libilmbase-dev
     - libisocodes-dev
-    - libjpeg8-dev
+    - libjpeg-dev
     - libjson-glib-dev
     - liblcms2-dev
     - liblzma-dev
@@ -582,7 +600,6 @@ parts:
     - libslang2-dev
     - libsm-dev
     - libtiff5-dev
-    - libwebkitgtk-dev
     - libwebp-dev
     - libwmf-dev
     - libx11-dev
@@ -590,9 +607,6 @@ parts:
     - libxmu-dev
     - libxpm-dev
     - libxt-dev
-    - python-dev
-    - python-cairo-dev
-    - python-gtk2-dev
     - xdg-utils
     - xsltproc
     - zlib1g-dev
@@ -605,7 +619,7 @@ parts:
     - gir1.2-gtk-2.0
     - gir1.2-poppler-0.18
     - glib-networking
-    - gvfs
+    - gvfs-backends
     - libaa1
     - libart-2.0-2
     - libbz2-1.0
@@ -618,19 +632,18 @@ parts:
     - libgpm2
     - libgs9
     # - libheif1
-    - libilmbase12
-    - libjpeg8
+    - libilmbase24
+    - libjpeg-turbo8
     - libjson-glib-1.0-0
     - liblcms2-2
     - liblzma5
     - libmng2
-    - libopenexr22
+    - libopenexr24
     - libopenjp2-7
     - libpng16-16
     - libpoppler-glib8
     - libslang2
     - libtiff5
-    - libwebkitgtk-1.0-0
     - libwebp6
     - libwebpdemux2
     - libwebpmux3
@@ -638,10 +651,6 @@ parts:
     - libxmu6
     - libxpm4
     - libxt6
-    - python-cairo
-    - python-dev
-    - python-gi
-    - python-gtk2
     - rawtherapee
     - zlib1g
     - try:
@@ -767,7 +776,7 @@ parts:
       - libfftw3-dev
       - libgraphicsmagick++1-dev
       - libgraphicsmagick1-dev
-      - libjpeg8-dev
+      - libjpeg-dev
       - libopencv-core-dev
       - libopencv-highgui-dev
       - libopencv-videoio-dev
@@ -785,16 +794,16 @@ parts:
       - zlib1g-dev
     stage-packages:
       - libcurl3-gnutls
-      - libdouble-conversion1
+      - libdouble-conversion3
       - libfftw3-double3
       - libfftw3-single3
       - libgraphicsmagick-q16-3
       - libgraphicsmagick++-q16-12
-      - libjpeg8
-      - libopencv-core3.2
-      - libopencv-highgui3.2
-      - libopencv-videoio3.2
-      - libopenexr22
+      - libjpeg-turbo8
+      - libopencv-core4.2
+      - libopencv-highgui4.2
+      - libopencv-videoio4.2
+      - libopenexr24
       - libpng16-16
       - libqt5core5a
       - libqt5gui5
@@ -802,14 +811,9 @@ parts:
       - libqt5widgets5
       - libtiff5
       - zlib1g
-      - on amd64:
+      - try:
         - libfftw3-long3
         - libfftw3-quad3
-      - on i386:
-        - libfftw3-long3
-        - libfftw3-quad3
-      - on s390x:
-        - libfftw3-long3
 
   # # https://github.com/darktable-org/darktable/releases
   # darktable:
@@ -820,7 +824,7 @@ parts:
   #   override-pull: |
   #     snapcraftctl pull
   #     sed -i 's|Exec=.*|Exec=darktable %U|;s|TryExec=.*|TryExec=darktable|;s|Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/darktable.svg|' data/darktable.desktop.in
-  #   configflags:
+  #   cmake-parameters:
   #     - -DCMAKE_BUILD_TYPE=Release
   #     - -DCMAKE_INSTALL_PREFIX=/usr
   #   build-environment:
@@ -843,7 +847,7 @@ parts:
   #     - libgphoto2-dev
   #     - libgraphicsmagick1-dev
   #     - libgtk-3-dev
-  #     - libjpeg8-dev
+  #     - libjpeg-dev
   #     - libjson-glib-dev
   #     - liblcms2-dev
   #     - liblensfun-dev
@@ -868,18 +872,18 @@ parts:
   #     - libcolord-gtk1
   #     - libcups2
   #     - libdbus-glib-1-2
-  #     - libexiv2-14
+  #     - libexiv2-27
   #     - libflickcurl0
   #     - libgnome-keyring0
   #     - libgphoto2-6
   #     - libgraphicsmagick-q16-3
-  #     - libjpeg8
+  #     - libjpeg-turbo8
   #     - libjson-glib-1.0-0
   #     - liblcms2-2
   #     - liblensfun1
   #     - liblensfun-data-v1
   #     - liblua5.3-0
-  #     - libopenexr22
+  #     - libopenexr24
   #     - libopenjp2-7
   #     - libosmgpsmap-1.0-1
   #     - libpng16-16
@@ -916,14 +920,14 @@ parts:
     after: [ gimp, gmic, desktop-settings-build ]
     plugin: nil
     build-snaps:
-    - core18
-    - gnome-3-28-1804
+    - core20
+    - gnome-3-38-2004
     - gtk-common-themes
     ## DISABLED (3 of 4) because gtk2-common-themes only available on amd64
     # - gtk2-common-themes
     override-prime: |
       set -eux
-      for snap in "gnome-3-28-1804" "gtk-common-themes"; do  # List all content-snaps you're using here
+      for snap in "gnome-3-38-2004" "gtk-common-themes"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
