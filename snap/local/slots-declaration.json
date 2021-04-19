@@ -1,0 +1,10 @@
+{
+    "dbus": {
+        "allow-connection": {
+            "slot-attributes": {
+                "bus": "session",
+                "name": "org.gimp.GIMP.UI"
+            }
+        }
+    }
+}
