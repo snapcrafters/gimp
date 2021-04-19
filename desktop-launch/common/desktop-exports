@@ -289,6 +289,7 @@ function compile_giomodules {
     rm -rf "$GIO_MODULE_DIR"
     ensure_dir_exists "$GIO_MODULE_DIR"
     ln -sf "$1"/gio/modules/*.so "$GIO_MODULE_DIR"
+    ln -sf $SNAP/usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so "$GIO_MODULE_DIR/libgvfsdbus.so"
     "$1/glib-2.0/gio-querymodules" "$GIO_MODULE_DIR"
   fi
 }
