@@ -87,10 +87,10 @@ plugs:
     target: $SNAP/data-dir/gnome-platform
     default-provider: gnome-3-38-2004:gnome-3-38-2004
 
-  color-profiles:
-    interface: system-files
-    read:
-    - /usr/share/color/icc
+  # color-profiles:
+  #   interface: system-files
+  #   read:
+  #   - /usr/share/color/icc
 
 slots:
   dbus-gimp:
