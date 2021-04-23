@@ -10,7 +10,7 @@ jobs:
       matrix:
         architecture:
         - amd64
-        - armhf
+        # - armhf
         - arm64
     steps:
     - uses: actions/checkout@v2
