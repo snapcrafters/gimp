@@ -14,11 +14,8 @@ base: core20
 
 architectures:
 - build-on: amd64
-- build-on: i386
 - build-on: arm64
 - build-on: armhf
-- build-on: ppc64el
-- build-on: s390x
 
 layout:
   /etc/gimp:
@@ -415,48 +412,6 @@ parts:
     - -usr/lib/pkgconfig
     - -usr/share/vala
 
-  libaom:
-    after: [gegl]
-    source: https://aomedia.googlesource.com/aom
-    source-type: git
-    plugin: cmake
-    cmake-parameters:
-    - -DCMAKE_BUILD_TYPE=Release
-    - -DCMAKE_INSTALL_PREFIX=/usr
-    - -DENABLE_DOCS=OFF
-    - -DENABLE_EXAMPLES=OFF
-    - -DENABLE_TESTDATA=OFF
-    - -DENABLE_TESTS=OFF
-    - -DCONFIG_PIC=1
-    build-packages:
-    - cmake
-    - yasm
-
-  # https://github.com/strukturag/libheif/releases
-  libheif:
-    after: [libaom]
-    source: https://github.com/strukturag/libheif/releases/download/v1.11.0/libheif-1.11.0.tar.gz
-    plugin: autotools
-    autotools-configure-parameters:
-    - --prefix=/usr
-    - --disable-go
-    - --disable-examples
-    build-packages:
-    - libde265-dev
-    - libgdk-pixbuf2.0-dev
-    - libjpeg-dev
-    - libpng-dev
-    - libx265-dev
-    stage-packages:
-    - libde265-0
-    - libgdk-pixbuf2.0-0
-    - libjpeg-turbo8
-    - libpng16-16
-    - libx265-179
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-
   # https://github.com/mypaint/libmypaint/releases
   libmypaint:
     after:
@@ -531,7 +486,6 @@ parts:
     - desktop-settings-packages
     - gegl
     - gtk-locales
-    - libheif
     - libmypaint
     - mypaint-brushes
     plugin: autotools
@@ -584,7 +538,7 @@ parts:
     - libgtk-3-dev
     - libgtk2.0-dev
     - libgudev-1.0-dev
-    # - libheif-dev
+    - libheif-dev
     - libice-dev
     - libilmbase-dev
     - libisocodes-dev
@@ -631,7 +585,7 @@ parts:
     - libfftw3-single3
     - libgpm2
     - libgs9
-    # - libheif1
+    - libheif1
     - libilmbase24
     - libjpeg-turbo8
     - libjson-glib-1.0-0
