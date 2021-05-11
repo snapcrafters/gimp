@@ -14,11 +14,8 @@ base: core18
 
 architectures:
 - build-on: amd64
-- build-on: i386
 - build-on: arm64
 - build-on: armhf
-- build-on: ppc64el
-- build-on: s390x
 
 layout:
   /etc/gimp:
@@ -531,7 +528,6 @@ parts:
     - desktop-settings-packages
     - gegl
     - gtk-locales
-    - libheif
     - libmypaint
     - mypaint-brushes
     plugin: autotools
@@ -588,7 +584,7 @@ parts:
     - libgtk-3-dev
     - libgtk2.0-dev
     - libgudev-1.0-dev
-    # - libheif-dev
+    - libheif-dev
     - libice-dev
     - libilmbase-dev
     - libisocodes-dev
