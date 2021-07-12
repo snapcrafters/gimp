@@ -425,6 +425,26 @@ parts:
     - -DENABLE_TESTDATA=OFF
     - -DENABLE_TESTS=OFF
     - -DCONFIG_PIC=1
+    override-build: |
+      EXTRA=""
+      if [ $SNAPCRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+        EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
+      fi
+
+      export DESTDIR="$SNAPCRAFT_PART_INSTALL"
+
+      cmake $SNAPCRAFT_PART_SRC \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DENABLE_DOCS=OFF \
+        -DENABLE_EXAMPLES=OFF \
+        -DENABLE_TESTDATA=OFF \
+        -DENABLE_TESTS=OFF \
+        -DCONFIG_PIC=1 $EXTRA
+      
+      cmake --build . -- -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+
+      cmake --build . --target install
     build-packages:
     - cmake
     - yasm
