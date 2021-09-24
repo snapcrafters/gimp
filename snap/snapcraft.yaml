@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.24'
+version: '2.10.28'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -243,8 +243,8 @@ parts:
     after:
     - fix-pkgconfig-files
     plugin: meson
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.86.tar.xz
-    source-checksum: sha256/0b3f595159ad1b216cd729c0504c3a5f6cf780c641f4dc63fc164f3c0382c8f0
+    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.88.tar.xz
+    source-checksum: sha256/4f0d7f4aaa0bb2e725f349adf7b351a957d9fb26d555d9895a7af816b4167039
     meson-parameters:
     - --prefix=/usr
     - -Dwith-docs=false
@@ -278,8 +278,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.30.tar.xz
-    source-checksum: sha256/c112782cf4096969e23217ccdfabe42284e35d5435ff0c43d40e4c70faeca8dd
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.32.tar.xz
+    source-checksum: sha256/668e3c6b9faf75fb00512701c36274ab6f22a8ba05ec62dbf187d34b8d298fa1
     plugin: meson
     meson-parameters:
     - --prefix=/usr
@@ -441,7 +441,7 @@ parts:
         -DENABLE_TESTDATA=OFF \
         -DENABLE_TESTS=OFF \
         -DCONFIG_PIC=1 $EXTRA
-      
+
       cmake --build . -- -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
 
       cmake --build . --target install
@@ -452,7 +452,7 @@ parts:
   # https://github.com/strukturag/libheif/releases
   libheif:
     after: [libaom]
-    source: https://github.com/strukturag/libheif/releases/download/v1.11.0/libheif-1.11.0.tar.gz
+    source: https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz
     plugin: autotools
     configflags:
     - --prefix=/usr
@@ -552,7 +552,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/828350ad5c53b8409463c24693821d78a1940f18c221249ae7b864ad9db5cf01ab41d6ec5bbefd96115f0e91809ecdc61451d71881b56b07920c442f4a514936
+    source-checksum: sha512/587f6f46741672f0700fd642a5b779694d2d8bc8ad70e7677ccdbfc2266dc62203ed347d6aaffaa4b8e7d84a84a25f7d5a51507dfd64b21b4c05970856d3ab94
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
