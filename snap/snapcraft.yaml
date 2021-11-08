@@ -250,8 +250,8 @@ parts:
     - --prefix=/usr
     - -Dwith-docs=false
     build-environment:
-      - CFLAGS: -O3 -pipe
-      - CXXFLAGS: -O3 -pipe
+      - CFLAGS: -O2 -g -pipe
+      - CXXFLAGS: -O2 -g -pipe
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -284,9 +284,10 @@ parts:
     plugin: meson
     meson-parameters:
     - --prefix=/usr
+    - -Dworkshop=true
     build-environment:
-    - CFLAGS: -O3 -pipe
-    - CXXFLAGS: -O3 -pipe
+    - CFLAGS: -O2 -g -pipe
+    - CXXFLAGS: -O2 -g -pipe
     - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
@@ -493,8 +494,8 @@ parts:
     - --prefix=/usr
     - --disable-static
     build-environment:
-    - CFLAGS: -O3 -pipe
-    - CXXFLAGS: -O3 -pipe
+    - CFLAGS: -O2 -g -pipe
+    - CXXFLAGS: -O2 -g -pipe
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
@@ -514,8 +515,8 @@ parts:
     configflags:
     - --prefix=/usr
     build-environment:
-      - CFLAGS: -O3 -pipe
-      - CXXFLAGS: -O3 -pipe
+      - CFLAGS: -O2 -g -pipe
+      - CXXFLAGS: -O2 -g -pipe
     build-packages:
     - automake-1.15
 
@@ -565,8 +566,8 @@ parts:
     - --disable-gtk-doc-html
     - --disable-python
     build-environment:
-    - CFLAGS: -O3 -pipe
-    - CXXFLAGS: -O3 -pipe
+    - CFLAGS: -O2 -g -pipe
+    - CXXFLAGS: -O2 -g -pipe
     - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
     - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
     # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
@@ -796,8 +797,8 @@ parts:
       # chmod +x $SNAPCRAFT_PART_INSTALL/usr/bin/gmic
     build-environment:
       - PATH: /snap/bin:$PATH
-      - CFLAGS: -O3 -pipe
-      - CXXFLAGS: -O3 -pipe
+      - CFLAGS: -O2 -g -pipe
+      - CXXFLAGS: -O2 -g -pipe
     build-packages:
       - cimg-dev
       - cmake
@@ -864,8 +865,8 @@ parts:
   #     - -DCMAKE_BUILD_TYPE=Release
   #     - -DCMAKE_INSTALL_PREFIX=/usr
   #   build-environment:
-  #     - CFLAGS: -O3 -pipe
-  #     - CXXFLAGS: -O3 -pipe
+  #     - CFLAGS: -O2 -g -pipe
+  #     - CXXFLAGS: -O2 -g -pipe
   #   build-packages:
   #     - cmake
   #     - curl
