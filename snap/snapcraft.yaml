@@ -847,6 +847,7 @@ parts:
       - libtiff5
       - libxkbfile1
       - libxres1
+      - qtwayland5
       - zlib1g
       - try:
         - libfftw3-long3
