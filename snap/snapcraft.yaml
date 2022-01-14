@@ -285,6 +285,7 @@ parts:
     meson-parameters:
     - --prefix=/usr
     - -Dworkshop=true
+    - -Dvapigen=disabled # disabled for now - TODO: remove after migration to core20
     build-environment:
     - CFLAGS: -O2 -g -pipe
     - CXXFLAGS: -O2 -g -pipe
@@ -550,6 +551,7 @@ parts:
     - desktop-settings-packages
     - gegl
     - gtk-locales
+    - libheif
     - libmypaint
     - mypaint-brushes
     plugin: autotools
