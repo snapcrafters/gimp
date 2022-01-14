@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.28'
+version: '2.10.30'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -279,8 +279,8 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.32.tar.xz
-    source-checksum: sha256/668e3c6b9faf75fb00512701c36274ab6f22a8ba05ec62dbf187d34b8d298fa1
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.34.tar.xz
+    source-checksum: sha256/ef63f0bca5b431c6119addd834ca7fbb507c900c4861c57b3667b6f4ccfcaaaa
     plugin: meson
     meson-parameters:
     - --prefix=/usr
@@ -554,7 +554,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/587f6f46741672f0700fd642a5b779694d2d8bc8ad70e7677ccdbfc2266dc62203ed347d6aaffaa4b8e7d84a84a25f7d5a51507dfd64b21b4c05970856d3ab94
+    source-checksum: sha256/88815daa76ed7d4277eeb353358bafa116cd2fcd2c861d95b95135c1d52b67dc
     configflags:
     - --prefix=/usr
     - --sysconfdir=/etc
