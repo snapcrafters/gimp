@@ -63,11 +63,10 @@ layout:
     bind: $SNAP/data-dir/gnome-platform/usr/share/xml/iso-codes
 
 plugs:
-  ## DISABLED (1 of 4) because gtk2-common-themes only available on amd64
-  # gtk-2-engines:
-  #   interface: content
-  #   target: $SNAP/lib/gtk-2.0
-  #   default-provider: gtk2-common-themes
+  gtk-2-engines:
+    interface: content
+    target: $SNAP/lib/gtk-2.0
+    default-provider: gtk2-common-themes
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -205,17 +204,19 @@ parts:
     override-build: |
       snapcraftctl build
       mkdir -p $SNAPCRAFT_PART_INSTALL/lib/gtk-2.0
+
       # Make GTK3 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
       ln -sf ../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
+
       # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
       mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
-      ## DISABLED (2 of 4) because gtk2-common-themes only available on amd64
+
       # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      # rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
-      # ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-      #   $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
+      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
+      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
+        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
   scripts:
     source: scripts
@@ -962,11 +963,10 @@ parts:
     - core18
     - gnome-3-28-1804
     - gtk-common-themes
-    ## DISABLED (3 of 4) because gtk2-common-themes only available on amd64
-    # - gtk2-common-themes
+    - gtk2-common-themes
     override-prime: |
       set -eux
-      for snap in "gnome-3-28-1804" "gtk-common-themes"; do  # List all content-snaps you're using here
+      for snap in "gnome-3-28-1804" "gtk-common-themes" "gtk2-common-themes"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
