@@ -609,7 +609,6 @@ parts:
     - libgtk-3-dev
     - libgtk2.0-dev
     - libgudev-1.0-dev
-    - libheif-dev
     - libice-dev
     - libilmbase-dev
     - libisocodes-dev
@@ -662,7 +661,6 @@ parts:
     - libglib2.0-0
     - libgpm2
     - libgs9
-    # - libheif1
     - libilmbase12
     - libjpeg-turbo8
     - libjson-glib-1.0-0
