@@ -336,9 +336,9 @@ parts:
     - valac
     stage-packages:
     - libamd2
-    - libavcodec57
-    - libavformat57
-    - libavutil55
+    - libavcodec58
+    - libavformat58
+    - libavutil56
     - libbtf1
     - libcairo2
     - libcamd2
@@ -348,10 +348,10 @@ parts:
     - libcholmod3
     - libcolamd2
     - libcxsparse3
-    - libexiv2-14
+    - libexiv2-27
     - libgdk-pixbuf2.0-0
     - libgexiv2-2
-    - libgraphblas1
+    - libgraphblas3
     - libgs9
     - libgvc6
     - libgvc6-plugins-gtk
@@ -365,17 +365,17 @@ parts:
     - liblensfun1
     - libluajit-5.1-2
     - libmaxflow0
-    - libopenexr22
+    - libopenexr24
     - libpathplan4
     - libpng16-16
     - libpoppler-glib8
-    - libraw16
+    - libraw19
     - librbio2
     - librsvg2-2
     - libsdl2-2.0-0
-    - libspiro0
+    - libspiro1
     - libspqr2
-    - libswscale4
+    - libswscale5
     - libtiff5
     - libumfpack5
     - libv4l-0
@@ -489,7 +489,7 @@ parts:
     - libgdk-pixbuf2.0-0
     - libjpeg-turbo8
     - libpng16-16
-    - libx265-146
+    - libx265-179
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
