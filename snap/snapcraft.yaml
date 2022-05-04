@@ -10,7 +10,7 @@ icon: gimp.png
 
 grade: stable
 confinement: strict
-base: core18
+base: core20
 compression: lzo
 
 architectures:
@@ -33,8 +33,8 @@ layout:
     bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/evince/4/backends
   /usr/lib/gimp:
     bind: $SNAP/usr/lib/gimp
-  /usr/lib/python2.7:
-    bind: $SNAP/usr/lib/python2.7
+  /usr/lib/python3.8:
+    bind: $SNAP/usr/lib/python3.8
   /usr/lib/gvfs:
     bind: $SNAP/usr/lib/gvfs
   /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs:
@@ -79,10 +79,10 @@ plugs:
     interface: content
     target: $SNAP/data-dir/icons
     default-provider: gtk-common-themes:icon-themes
-  gnome-3-28-1804:
+  gnome-3-38-2004:
     interface: content
     target: $SNAP/data-dir/gnome-platform
-    default-provider: gnome-3-28-1804:gnome-3-28-1804
+    default-provider: gnome-3-38-2004:gnome-3-38-2004
 
   # color-profiles:
   #   interface: system-files
@@ -242,10 +242,15 @@ parts:
     source-checksum: sha256/f667735028944b6375ad18f160a64ceb93f5c7dccaa9d8751de359777488a2c1
     meson-parameters:
     - --prefix=/usr
+    - --buildtype=release
+    - -Db_lto=true
     - -Dwith-docs=false
     build-environment:
-      - CFLAGS: -O2 -g -pipe
-      - CXXFLAGS: -O2 -g -pipe
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
+    override-pull: |
+      snapcraftctl pull
+      sed -i 's/not stable, Description:/not stable, description:/' meson.build
     override-build: |
       snapcraftctl build
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
@@ -278,11 +283,13 @@ parts:
     plugin: meson
     meson-parameters:
     - --prefix=/usr
+    - --buildtype=release
+    - -Db_lto=true
     - -Dworkshop=true
     - -Dvapigen=disabled # disabled for now - TODO: remove after migration to core20
     build-environment:
-    - CFLAGS: -O2 -g -pipe
-    - CXXFLAGS: -O2 -g -pipe
+    - CFLAGS: -Ofast -g -pipe
+    - CXXFLAGS: -Ofast -g -pipe
     - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
@@ -415,6 +422,10 @@ parts:
     source-type: git
     plugin: cmake
     build-snaps: [cmake]
+    build-environment:
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     cmake-parameters:
     - -DCMAKE_BUILD_TYPE=Release
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -459,6 +470,10 @@ parts:
     after: [libaom]
     source: https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz
     plugin: autotools
+    build-environment:
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     autotools-configure-parameters:
     - --prefix=/usr
     - --disable-go
@@ -493,12 +508,13 @@ parts:
     - libglib2.0-dev
     - libjson-c-dev
     - libjson-glib-dev
-    configflags:
+    autotools-configure-parameters:
     - --prefix=/usr
     - --disable-static
     build-environment:
-    - CFLAGS: -O2 -g -pipe
-    - CXXFLAGS: -O2 -g -pipe
+    - CFLAGS: -Ofast -g -pipe -flto
+    - CXXFLAGS: -Ofast -g -pipe -flto
+    - LDFLAGS: -flto
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
@@ -515,11 +531,12 @@ parts:
     - libmypaint
     source: https://github.com/Jehan/mypaint-brushes/archive/v1.3.0.tar.gz
     plugin: autotools
-    configflags:
+    autotools-configure-parameters:
     - --prefix=/usr
     build-environment:
-      - CFLAGS: -O2 -g -pipe
-      - CXXFLAGS: -O2 -g -pipe
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     build-packages:
     - automake-1.15
 
@@ -530,7 +547,7 @@ parts:
   #   plugin: autotools
   #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.10.0.tar.bz2
   #   source-checksum: sha512/2f6d5e7cf0c3b4960c92074ef02d51a1d089c148f6453a66e453a3084cdede280f72c6b77d35f66777adbda8aa273ec2a472fb538142e51bb263c3077eec473a
-  #   configflags:
+  #   autotools-configure-parameters:
   #   - --prefix=/usr
   #   build-environment:
   #   - PATH: /usr/bin:$PATH # Ensure system python is used, not from staging area
@@ -570,21 +587,22 @@ parts:
     - --disable-gtk-doc-html
     - --disable-python
     build-environment:
-    - CFLAGS: -O2 -g -pipe
-    - CXXFLAGS: -O2 -g -pipe
+    - CFLAGS: -Ofast -g -pipe -flto
+    - CXXFLAGS: -Ofast -g -pipe -flto
+    - LDFLAGS: -flto
     - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
     - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
     # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
     - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-    - PYTHON: /usr/bin/python2.7
+    - PYTHON: /usr/bin/python3.8
     override-pull: |
       snapcraftctl pull
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     override-build: |
       rm -f $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
       snapcraftctl build
-      sed -i -E "s|^(.*python2?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
+      sed -i -E "s|^(.*python3?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
     build-packages:
     - automake
@@ -787,17 +805,11 @@ parts:
         -DCMAKE_BUILD_TYPE=Release
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
-      # mv $SNAPCRAFT_PART_INSTALL/usr/bin/gmic $SNAPCRAFT_PART_INSTALL/usr/bin/gmic.real
-      # cat <<'EOF' > $SNAPCRAFT_PART_INSTALL/usr/bin/gmic
-      # export SNAP_DESKTOP_RUNTIME="$SNAP/kf5"
-      # export FINAL_BINARY="$SNAP/usr/bin/gmic.real"
-      # exec $SNAP/snap/command-chain/kde-desktop-launch $SNAP/bin/check-ld-cache $SNAP/usr/bin/gmic.real "$@"
-      # EOF
-      # chmod +x $SNAPCRAFT_PART_INSTALL/usr/bin/gmic
     build-environment:
       - PATH: /snap/bin:$PATH
-      - CFLAGS: -O2 -g -pipe
-      - CXXFLAGS: -O2 -g -pipe
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     build-packages:
       - curl
       - g++
@@ -859,8 +871,9 @@ parts:
   #     - -DCMAKE_BUILD_TYPE=Release
   #     - -DCMAKE_INSTALL_PREFIX=/usr
   #   build-environment:
-  #     - CFLAGS: -O2 -g -pipe
-  #     - CXXFLAGS: -O2 -g -pipe
+  #     - CFLAGS: -Ofast -g -pipe -flto
+  #     - CXXFLAGS: -Ofast -g -pipe -flto
+  #     - LDFLAGS: -flto
   #   build-snaps: [cmake]
   #   build-packages:
   #     - curl
