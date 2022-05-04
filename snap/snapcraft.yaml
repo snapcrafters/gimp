@@ -218,13 +218,6 @@ parts:
       ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
         $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
 
-  scripts:
-    source: scripts
-    plugin: dump
-    organize:
-      build-ld-cache: bin/build-ld-cache
-      check-ld-cache: bin/check-ld-cache
-
   gtk-locales:
     plugin: nil
     build-packages:
