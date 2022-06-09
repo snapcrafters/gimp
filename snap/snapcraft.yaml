@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.30'
+version: '2.99.10'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -50,39 +50,14 @@ layout:
     bind: $SNAP/usr/share/gimp
   /usr/share/gvfs:
     bind: $SNAP/usr/share/gvfs
-  /usr/share/iso-codes:
-    bind: $SNAP/data-dir/gnome-platform/usr/share/iso-codes
   /usr/share/lensfun:
     bind: $SNAP/usr/share/lensfun
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
   /usr/share/mypaint-data:
     bind: $SNAP/usr/share/mypaint-data
-  /usr/share/xml/iso-codes:
-    bind: $SNAP/data-dir/gnome-platform/usr/share/xml/iso-codes
 
-plugs:
-  gtk-2-engines:
-    interface: content
-    target: $SNAP/lib/gtk-2.0
-    default-provider: gtk2-common-themes
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes:gtk-3-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes:sound-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes:icon-themes
-  gnome-3-38-2004:
-    interface: content
-    target: $SNAP/data-dir/gnome-platform
-    default-provider: gnome-3-38-2004:gnome-3-38-2004
-
+# plugs:
   # color-profiles:
   #   interface: system-files
   #   read:
@@ -94,27 +69,16 @@ slots:
     bus: session
     name: org.gimp.GIMP.UI
 
-hooks:
-  install:
-    command-chain:
-      - snap/command-chain/desktop-launch
-  post-refresh:
-    command-chain:
-      - snap/command-chain/desktop-launch
-
 environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/data-dir/gnome-platform
-  GTK_EXE_PREFIX: $SNAP/usr
   GTK_USE_PORTAL: '1'
   GIMP2_LOCALEDIR: $SNAP/usr/share/locale
   LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas
-  PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
-  FINAL_BINARY: $SNAP/usr/bin/gimp
+  PYTHONPATH: $SNAP/usr/lib/python3.8:$SNAP/usr/lib/python3.8/site-packages:$PYTHONPATH
 
 apps:
   gimp:
     command: usr/bin/gimp
-    command-chain: [snap/command-chain/desktop-launch]
+    extensions: [gnome-3-38]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
     slots:
@@ -180,57 +144,6 @@ parts:
       chmod +x $SNAPCRAFT_PART_INSTALL/fix-symlinks.sh
     prime:
     - -*
-
-  desktop-launch:
-    plugin: make
-    source: desktop-launch
-    build-packages:
-      - rsync
-      - libgail-dev
-      - libgtk-3-dev
-      - libgtk2.0-dev
-    stage-packages:
-      - appmenu-gtk2-module
-      - gtk2-engines
-      - gtk2-engines-pixbuf
-      - libatk-adaptor
-      - libcanberra-gtk-module
-      - libgail-common
-      - libgtk2.0-0
-      - libgtk2.0-bin
-      - unity-gtk2-module
-      - ibus-gtk
-    override-build: |
-      snapcraftctl build
-      mkdir -p $SNAPCRAFT_PART_INSTALL/lib/gtk-2.0
-
-      # Make GTK3 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
-      ln -sf ../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
-
-      # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
-      mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
-
-      # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
-      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
-
-  gtk-locales:
-    plugin: nil
-    build-packages:
-    - apt
-    - dpkg
-    override-pull: |
-      set -eux
-      apt download "language-pack-gnome-*-base"
-    override-build: |
-      set -eux
-      for deb in *.deb; do dpkg-deb -x $deb .; done
-      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -and -not -name "gtk30*.mo" -exec rm '{}' \;
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
-      cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
 
   # https://download.gimp.org/pub/babl
   babl:
@@ -630,15 +543,13 @@ parts:
   gimp:
     after:
     - babl
-    - desktop-settings-packages
     - gegl
-    - gtk-locales
     - libheif
     - libmypaint
     - mypaint-brushes
     plugin: autotools
-    source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/02ca9e8846dc2ae856f720b92f3c6af69984cf0b3ce85ba5a67479e5c3c813315a0551b7d011dcf7a6c83dc771e550cc31041126bbea0be3fd483176e0eb2851
+    source: https://download.gimp.org/pub/gimp/v2.99/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
+    source-checksum: sha512/898c1e1ffd2270ccc965db9a8263e04d95455535361b47f92256b4028808e1e91eb1924cf6cef7ff9e988194ebbc67535bd9cfbf0243159824e58551a2b91ba3
     autotools-configure-parameters:
     - --prefix=/usr
     - --sysconfdir=/etc
@@ -694,7 +605,6 @@ parts:
     - libgpm-dev
     - libgs-dev
     - libgtk-3-dev
-    - libgtk2.0-dev
     - libgudev-1.0-dev
     - libice-dev
     - libilmbase-dev
@@ -729,7 +639,6 @@ parts:
     - dbus-x11
     - evince
     - ghostscript
-    - gir1.2-gtk-2.0
     - gir1.2-poppler-0.18
     - glib-networking
     - gvfs-backends
@@ -887,11 +796,15 @@ parts:
       - curl
       - g++
       - gcc
+      - libappstream-glib-dev
+      - libarchive-dev
       - libcurl4-openssl-dev
       - libfftw3-dev
+      - libgexiv2-dev
       - libgraphicsmagick++1-dev
       - libgraphicsmagick1-dev
       - libjpeg-dev
+      - libluajit-5.1-dev
       - libopencv-core-dev
       - libopencv-highgui-dev
       - libopencv-videoio-dev
@@ -902,6 +815,7 @@ parts:
       - libtiff5-dev
       - libxkbfile-dev
       - libxres-dev
+      - luajit
       - make
       - pkg-config
       - qt5-default
@@ -910,12 +824,16 @@ parts:
       - wget
       - zlib1g-dev
     stage-packages:
+      - libappstream-glib8
+      - libarchive13
       - libcurl4
       - libdouble-conversion3
       - libfftw3-3
+      - libgexiv2-2
       - libgraphicsmagick-q16-3
       - libgraphicsmagick++-q16-12
       - libjpeg-turbo8
+      - libluajit-5.1-2
       - libopencv-core4.2
       - libopencv-highgui4.2
       - libopencv-videoio4.2
@@ -928,6 +846,7 @@ parts:
       - libtiff5
       - libxkbfile1
       - libxres1
+      - luajit
       - qtwayland5
       - zlib1g
 
@@ -1013,37 +932,16 @@ parts:
   #     - libtiff5
   #     - libwebp6
 
-  # Ship a default set of GSettings schemas so that the correct theme is used
-  # in Wayland sessions on Ubuntu (see https://forum.snapcraft.io/t/7806/3).
-  desktop-settings-packages:
-    after: [ desktop-launch ]
-    plugin: nil
-    build-packages:
-    - libglib2.0-bin
-    stage-packages:
-    - gsettings-desktop-schemas
-    - ubuntu-settings
-    prime:
-    - usr/share/glib-2.0/schemas/*
-
-  desktop-settings-build:
-    plugin: nil
-    after: [ gimp, gmic, desktop-settings-packages ]
-    override-prime: |
-      set -eux
-      glib-compile-schemas usr/share/glib-2.0/schemas
-
   cleanup:
-    after: [ gimp, gmic, desktop-settings-build ]
+    after: [ gimp, gmic ]
     plugin: nil
     build-snaps:
-    - core18
+    - core20
     - gnome-3-38-2004
     - gtk-common-themes
-    - gtk2-common-themes
     override-prime: |
       set -eux
-      for snap in "gnome-3-38-2004" "gtk-common-themes" "gtk2-common-themes"; do  # List all content-snaps you're using here
+      for snap in "gnome-3-38-2004" "gtk-common-themes"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
