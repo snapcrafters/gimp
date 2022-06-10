@@ -260,7 +260,7 @@ parts:
 
       # LTO fails on armhf
       LTO=-Db_lto=true
-      if [ $SNAPCRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
         LTO=-Db_lto=false
       fi
 
@@ -321,7 +321,7 @@ parts:
 
       # LTO fails on armhf
       LTO=-Db_lto=true
-      if [ $SNAPCRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
         LTO=-Db_lto=false
       fi
 
@@ -487,7 +487,7 @@ parts:
     #   - -DAOM_NEON_INTRIN_FLAG=-mfpu=neon
     override-build: |
       EXTRA=""
-      if [ $SNAPCRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
         EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
       fi
 
