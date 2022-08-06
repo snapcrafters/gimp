@@ -297,7 +297,7 @@ parts:
     after:
     - babl
     - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.36.tar.xz
+    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.38.tar.xz
     source-checksum: sha256/6fd58a0cdcc7702258adaeffb573a389228ae8f0eff47578efda2309b61b2ca6
     plugin: meson
     meson-parameters:
