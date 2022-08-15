@@ -163,7 +163,6 @@ parts:
     - --enable-libx264
     - --enable-libx265
     - --enable-libxvid
-    - --enable-libmfx
     build-environment:
     - to armhf:
       - CFLAGS: -Ofast -g -pipe -mfpu=neon
@@ -173,8 +172,9 @@ parts:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
     build-packages:
+    - to amd64:
+      - libmfx-dev
     - libbz2-dev
-    - libmfx-dev
     - libsdl2-dev
     - libtheora-dev
     - libv4l-dev
@@ -186,8 +186,9 @@ parts:
     - libxvidcore-dev
     - nasm
     stage-packages:
+    - to amd64:
+      - libmfx1
     - libbz2-1.0
-    - libmfx1
     - libsdl2-2.0-0
     - libtheora0
     - libv4l-0
