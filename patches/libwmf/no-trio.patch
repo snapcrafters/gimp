@@ -1,0 +1,19 @@
+diff --git a/configure.ac b/configure.ac
+index 6e08583..708ec9f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -876,7 +876,6 @@ include/Makefile
+ include/libwmf/Makefile
+ src/Makefile
+ src/extra/Makefile
+-src/extra/trio/Makefile
+ src/extra/gd/Makefile
+ src/ipa/Makefile
+ src/convert/Makefile
+diff --git a/src/extra/Makefile.am b/src/extra/Makefile.am
+index 5454b66..9b72534 100644
+--- a/src/extra/Makefile.am
++++ b/src/extra/Makefile.am
+@@ -1 +1 @@
+-SUBDIRS = trio gd
++SUBDIRS = gd

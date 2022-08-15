@@ -1,0 +1,77 @@
+diff --git a/configure.ac b/configure.ac
+index 6e08583..cedcae9 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -376,62 +376,16 @@ WMF_FT_CONFIG_CFLAGS=""
+ WMF_FT_CFLAGS=""
+ WMF_FT_LDFLAGS=""
+ 
+-_cppflags=$CPPFLAGS
+-_ldflags=$LDFLAGS
+-
+-have_freetype=no
+-
+-AC_ARG_WITH(freetype,[  --with-freetype=DIR     use freetype2 in DIR],[
+-	if [ test "x$withval" != "xno" ]; then
+-		if [ test "x$withval" != "xyes" ]; then
+-			FREETYPE_DIR=$withval
+-		fi
+-	else
+-		AC_MSG_ERROR(* * * libwmf requires freetype2 * * *)
+-	fi
+-])
+-
+-if [ test -n "$FREETYPE_DIR" ]; then
+-	AC_PATH_PROG(FREETYPE_CONFIG,freetype-config, ,[$FREETYPE_DIR/bin:$PATH])
+-else
+-	AC_PATH_PROG(FREETYPE_CONFIG,freetype-config)
+-fi
+-
+-if [ test -n "$FREETYPE_CONFIG" ]; then
+-	if [ test -n "$FREETYPE_DIR" ]; then
+-		freetype_cflags="`$FREETYPE_CONFIG --cflags` -I$FREETYPE_DIR/include"
+-		freetype_libs=`$FREETYPE_CONFIG --libs`
+-	else
+-		freetype_cflags=`$FREETYPE_CONFIG --cflags`
+-		freetype_libs=`$FREETYPE_CONFIG --libs`
+-	fi
+-else
+-	if [ test -n "$FREETYPE_DIR" ]; then
+-		freetype_cflags="-I$FREETYPE_DIR/include/freetype2 -I$FREETYPE_DIR/include"
+-		freetype_libs="-L$FREETYPE_DIR/lib -lfreetype"
+-	else
+-		freetype_cflags=""
+-		freetype_libs="-lfreetype"
+-	fi
+-fi
+-
+-CPPFLAGS="$freetype_cflags $CPPFLAGS"
+-LDFLAGS="$LDFLAGS $freetype_libs"
+-
+-AC_CHECK_LIB(freetype,FT_Init_FreeType,[
+-	WMF_FT_LDFLAGS="$freetype_libs"
+-],[	AC_MSG_ERROR([* * * freetype(2) is required * * *])
+-])
+-AC_CHECK_HEADER(ft2build.h,[
+-	WMF_FT_CFLAGS="$freetype_cflags"
+-	WMF_FT_CONFIG_CFLAGS="$freetype_cflags"
+-],[	AC_MSG_ERROR([* * * freetype(2) is required * * *])
+-])
+-
+-GD_DEFS="$GD_DEFS -DHAVE_LIBFREETYPE"
+-
+-CPPFLAGS=$_cppflags
+-LDFLAGS=$_ldflags
++PKG_CHECK_MODULES(
++	[FREETYPE],
++	[freetype2],
++	[
++		WMF_FT_CONFIG_CFLAGS="$FREETYPE_CFLAGS"
++		WMF_FT_CFLAGS="$FREETYPE_CFLAGS"
++		WMF_FT_LDFLAGS="$FREETYPE_LIBS"
++		GD_DEFS="$GD_DEFS -DHAVE_LIBFREETYPE"
++	],
++	[AC_MSG_ERROR([Can't find Freetype library])])
+ 
+ dnl (4) zlib     {-lz}
+ 
