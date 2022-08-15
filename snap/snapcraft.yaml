@@ -163,7 +163,6 @@ parts:
     - --enable-libx264
     - --enable-libx265
     - --enable-libxvid
-    - --enable-libmfx
     build-environment:
     - to armhf:
       - CFLAGS: -Ofast -g -pipe -mfpu=neon
@@ -173,8 +172,9 @@ parts:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
     build-packages:
+    - to amd64:
+      - libmfx-dev
     - libbz2-dev
-    - libmfx-dev
     - libsdl2-dev
     - libtheora-dev
     - libv4l-dev
@@ -186,8 +186,9 @@ parts:
     - libxvidcore-dev
     - nasm
     stage-packages:
+    - to amd64:
+      - libmfx1
     - libbz2-1.0
-    - libmfx1
     - libsdl2-2.0-0
     - libtheora0
     - libv4l-0
@@ -692,7 +693,6 @@ parts:
     - PYTHON: /usr/bin/python3.10
     override-pull: |
       craftctl default
-      # patch -Np1 -i $CRAFT_PROJECT_DIR/patches/gimp-2.99-glib-core22.patch
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     override-build: |
       # rm -f $CRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
