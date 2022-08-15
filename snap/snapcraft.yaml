@@ -693,7 +693,6 @@ parts:
     - PYTHON: /usr/bin/python3.10
     override-pull: |
       craftctl default
-      # patch -Np1 -i $CRAFT_PROJECT_DIR/patches/gimp-2.99-glib-core22.patch
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     override-build: |
       # rm -f $CRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
