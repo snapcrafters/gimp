@@ -270,7 +270,7 @@ parts:
     - else:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
-    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/x86_64-linux-gnu/gio/modules
+    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules
     override-build: |
       # LTO fails on armhf
       LTO=-Db_lto=true
@@ -581,7 +581,7 @@ parts:
         --prefix=/usr \
         --disable-compile-inits \
         --enable-dynamic
-      make -j$CRAFT_PARALLEL_BUILD_COUNT 
+      make -j$CRAFT_PARALLEL_BUILD_COUNT
       make -j$CRAFT_PARALLEL_BUILD_COUNT so
       make DESTDIR=$CRAFT_PART_INSTALL install
       make DESTDIR=$CRAFT_PART_INSTALL soinstall
@@ -689,7 +689,7 @@ parts:
     - LIBRARY_PATH: $CRAFT_STAGE/usr/lib
     # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
     - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET
-    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/x86_64-linux-gnu/gio/modules
+    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules
     - PYTHON: /usr/bin/python3.10
     override-pull: |
       craftctl default
