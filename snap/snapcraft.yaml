@@ -279,7 +279,7 @@ parts:
     - babl
     - fix-pkgconfig-files
     source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.38.tar.xz
-    source-checksum: sha256/6fd58a0cdcc7702258adaeffb573a389228ae8f0eff47578efda2309b61b2ca6
+    source-checksum: sha256/e4a33c8430a5042fba8439b595348e71870f0d95fbf885ff553f9020c1bed750
     plugin: meson
     meson-parameters:
     - --prefix=/usr
@@ -575,7 +575,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/02ca9e8846dc2ae856f720b92f3c6af69984cf0b3ce85ba5a67479e5c3c813315a0551b7d011dcf7a6c83dc771e550cc31041126bbea0be3fd483176e0eb2851
+    source-checksum: sha512/aa999c1ec388154965f84d995a9b5517e9c38608d03a0d0bb6ec9fa55de946f9da106e7d6f7c02052b61d2b6806e7a378e786539f0de5b5ffaa2fcd1bbd9c7f1
     autotools-configure-parameters:
     - --prefix=/usr
     - --sysconfdir=/etc
