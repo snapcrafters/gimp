@@ -6,7 +6,6 @@ description: |
   GIMP provides you with sophisticated tools to get your job done. You can
   further enhance your productivity with GIMP thanks to many customization
   options and 3rd party plugins.
-icon: gimp.png
 
 grade: stable
 confinement: strict
@@ -246,13 +245,33 @@ parts:
     - -Db_lto=true
     - -Dwith-docs=false
     build-environment:
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
+      - LDFLAGS: -mfpu=neon
+    - else:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
     override-pull: |
       snapcraftctl pull
       sed -i 's/not stable, Description:/not stable, description:/' meson.build
     override-build: |
-      snapcraftctl build
+      /usr/bin/python3 -m pip install -U meson
+
+      # LTO fails on armhf
+      LTO=-Db_lto=true
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
+        LTO=-Db_lto=false
+      fi
+
+      meson \
+        --prefix=/usr \
+        --buildtype=release \
+        -Dwith-docs=false \
+        $LTO \
+        $SNAPCRAFT_PART_SRC
+      ninja
+      DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
     - git
@@ -284,17 +303,36 @@ parts:
     meson-parameters:
     - --prefix=/usr
     - --buildtype=release
-    - -Db_lto=true
     - -Dworkshop=true
-    - -Dvapigen=disabled # disabled for now - TODO: remove after migration to core20
+    - -Db_lto=true
     build-environment:
-    - CFLAGS: -Ofast -g -pipe
-    - CXXFLAGS: -Ofast -g -pipe
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
+      - LDFLAGS: -mfpu=neon
+    - else:
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
     - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       sed -i 's/Version:.*/Version: 1.5.2/' /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/libjpeg.pc
-      snapcraftctl build
+      /usr/bin/python3 -m pip install -U meson
+
+      # LTO fails on armhf
+      LTO=-Db_lto=true
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
+        LTO=-Db_lto=false
+      fi
+
+      meson \
+        --prefix=/usr \
+        --buildtype=release \
+        -Dworkshop=true \
+        $LTO \
+        $SNAPCRAFT_PART_SRC
+      ninja
+      DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
       $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
     build-packages:
     - gobject-introspection
@@ -423,6 +461,12 @@ parts:
     plugin: cmake
     build-snaps: [cmake]
     build-environment:
+    - to armhf:
+      # LTO succeeds here, but breaks libheif build on armhf
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
+      - LDFLAGS: -mfpu=neon
+    - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
@@ -437,9 +481,13 @@ parts:
     - -DCONFIG_AV1_ENCODER=1
     - -DCONFIG_AV1_DECODER=1
     - -DCONFIG_MULTITHREAD=1
+    # Needs advanced grammar support from Snapcraft that isn't available here
+    # Tested against Snapcraft 7.0 (beta - 2022-05-05 (7468)).
+    # - to armhf:
+    #   - -DAOM_NEON_INTRIN_FLAG=-mfpu=neon
     override-build: |
       EXTRA=""
-      if [ $SNAPCRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
         EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
       fi
 
@@ -462,7 +510,6 @@ parts:
 
       cmake --build . --target install
     build-packages:
-    - cmake
     - yasm
 
   # https://github.com/strukturag/libheif/releases
@@ -471,6 +518,12 @@ parts:
     source: https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz
     plugin: autotools
     build-environment:
+    - to armhf:
+      # LTO fails on armhf
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
+      - LDFLAGS: -mfpu=neon
+    - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
@@ -512,9 +565,14 @@ parts:
     - --prefix=/usr
     - --disable-static
     build-environment:
-    - CFLAGS: -Ofast -g -pipe -flto
-    - CXXFLAGS: -Ofast -g -pipe -flto
-    - LDFLAGS: -flto
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - LDFLAGS: -mfpu=neon -flto
+    - else:
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
     override-build: |
       snapcraftctl build
@@ -534,6 +592,11 @@ parts:
     autotools-configure-parameters:
     - --prefix=/usr
     build-environment:
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - LDFLAGS: -mfpu=neon -flto
+    - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
@@ -587,9 +650,14 @@ parts:
     - --disable-gtk-doc-html
     - --disable-python
     build-environment:
-    - CFLAGS: -Ofast -g -pipe -flto
-    - CXXFLAGS: -Ofast -g -pipe -flto
-    - LDFLAGS: -flto
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - LDFLAGS: -mfpu=neon -flto
+    - else:
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
     - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
     # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
@@ -806,7 +874,12 @@ parts:
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     build-environment:
-      - PATH: /snap/bin:$PATH
+    - PATH: /snap/bin:$PATH
+    - to armhf:
+      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+      - LDFLAGS: -mfpu=neon -flto
+    - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
