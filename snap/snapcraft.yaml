@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.32'
+version: '2.10.34'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -638,7 +638,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/aa999c1ec388154965f84d995a9b5517e9c38608d03a0d0bb6ec9fa55de946f9da106e7d6f7c02052b61d2b6806e7a378e786539f0de5b5ffaa2fcd1bbd9c7f1
+    source-checksum: sha512/4802ce3758daba868570f1ac97a3f1cb41e1130fcc6376f9bf4c999441f8fd25937aa71b6f726d82d7c780f4153b11d2595bb76bc2356a42266909fbcc0bd34a
     autotools-configure-parameters:
     - --prefix=/usr
     - --sysconfdir=/etc
@@ -850,12 +850,12 @@ parts:
     after: [gimp]
     plugin: nil
     override-pull: |
-      git clone https://github.com/dtschump/gmic.git
-      git clone https://github.com/dtschump/CImg.git
+      git clone https://github.com/GreycLab/gmic.git
+      git clone https://github.com/GreycLab/CImg.git
       git clone https://github.com/c-koi/gmic-qt.git
       cd gmic-qt
       # VERSION="$(git tag -l 'v.*.*' --sort=version:refname | tail -n1)"
-      VERSION=v.2.9.6
+      VERSION=v.3.3.1
       git checkout "$VERSION"
       cd ../gmic
       git checkout "$VERSION"
@@ -864,13 +864,14 @@ parts:
     override-build: |
       make -C gmic/src CImg.h gmic_stdlib.h
       cd gmic-qt
-      mkdir build
-      cd build
-      cmake .. \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DGMIC_QT_HOST=gimp \
-        -DGMIC_PATH=$SNAPCRAFT_PART_BUILD/gmic/src \
-        -DCMAKE_BUILD_TYPE=Release
+      # mkdir build
+      # cd build
+      # cmake .. \
+      #   -DCMAKE_INSTALL_PREFIX=/usr \
+      #   -DGMIC_QT_HOST=gimp \
+      #   -DGMIC_PATH=$SNAPCRAFT_PART_BUILD/gmic/src \
+      #   -DCMAKE_BUILD_TYPE=Release
+      qmake HOST=gimp
       make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
       make DESTDIR=$SNAPCRAFT_PART_INSTALL install
     build-environment:
@@ -903,6 +904,7 @@ parts:
       - libxkbfile-dev
       - libxres-dev
       - make
+      - qt5-qmake-bin
       - pkg-config
       - qt5-default
       - qtbase5-dev
