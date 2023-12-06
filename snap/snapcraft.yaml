@@ -1,5 +1,5 @@
 name: gimp
-version: '2.10.34'
+version: '2.10.36'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -639,7 +639,7 @@ parts:
     - mypaint-brushes
     plugin: autotools
     source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    source-checksum: sha512/4802ce3758daba868570f1ac97a3f1cb41e1130fcc6376f9bf4c999441f8fd25937aa71b6f726d82d7c780f4153b11d2595bb76bc2356a42266909fbcc0bd34a
+    source-checksum: sha512/dbe6152ea6ff99cca59bbf2c88a64fb4ff6b529d98ace7723eadf5dfb0e10d9cbaf2de1e0d5251e9ecf9abca73da9ae1a501f229997802fd4077fb9594f4ba66
     autotools-configure-parameters:
     - --prefix=/usr
     - --sysconfdir=/etc
