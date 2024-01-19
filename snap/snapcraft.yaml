@@ -748,6 +748,8 @@ parts:
     - luajit
     - poppler-data
     - libunwind8
+    - libsndio7.0
+    - libxv1
     stage:
     - -**/*.la
     - -etc/dbus-1
