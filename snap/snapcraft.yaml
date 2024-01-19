@@ -15,41 +15,41 @@ compression: lzo
 architectures:
   - build-on: amd64
   - build-on: arm64
-# - build-on: armhf
+  # - build-on: armhf
 
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
   /etc/ld.so.cache:
     bind-file: $SNAP_DATA/etc/ld.so.cache
+  /usr/bin/gjs:
+    symlink: $SNAP/gnome-platform/usr/bin/gjs
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends
-  /usr/lib/gimp:
-    bind: $SNAP/usr/lib/gimp
-  /usr/lib/python3.10:
-    bind: $SNAP/usr/lib/python3.10
   /usr/lib/gvfs:
     bind: $SNAP/usr/lib/gvfs
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gvfs:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gvfs
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lua:
+    symlink: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lua
   /usr/libexec:
     bind: $SNAP/usr/libexec
   /usr/share/color:
     bind: $SNAP/usr/share/color
   /usr/share/ghostscript:
     bind: $SNAP/usr/share/ghostscript
-  /usr/share/gimp:
-    bind: $SNAP/usr/share/gimp
   /usr/share/gvfs:
     bind: $SNAP/usr/share/gvfs
   /usr/share/lensfun:
     bind: $SNAP/usr/share/lensfun
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
+  /usr/share/lua:
+    bind: $SNAP/usr/share/lua
   /usr/share/mypaint-data:
     bind: $SNAP/usr/share/mypaint-data
 
@@ -61,9 +61,11 @@ slots:
 
 environment:
   GTK_USE_PORTAL: "1"
+  GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0
   GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-  LD_LIBRARY_PATH: $SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas
-  PYTHONPATH: $SNAP/usr/lib/python3.10:$SNAP/usr/lib/python3.10/site-packages:$PYTHONPATH
+  LD_LIBRARY_PATH: $SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas
+  PYTHONHOME: $SNAP/gnome-platform/usr
+  PYTHONPATH: $SNAP/gnome-platform/usr/lib/python3.10
 
 apps:
   gimp:
@@ -152,6 +154,8 @@ parts:
       - libsdl2-dev
       - libtheora-dev
       - libv4l-dev
+      - libva-drm2
+      - libva-x11-2
       - libva-dev
       - libvdpau-dev
       - libvpx-dev
@@ -214,10 +218,6 @@ parts:
       - git
       - meson
       - w3m
-    prime:
-      - -usr/include
-      - -usr/lib/pkgconfig
-      - -**/*.la
 
   # https://download.gimp.org/pub/gegl
   gegl:
@@ -299,39 +299,6 @@ parts:
       - libspqr2
       - libumfpack5
       - libv4l-0
-    stage:
-      - -**/*.la
-      - -etc
-      - -var/lib/ucf
-      - -usr/sbin/update-mime
-      - -usr/share/X11
-      - -usr/share/alsa
-      - -usr/share/applications
-      - -usr/share/apport
-      - -usr/share/apps
-      - -usr/share/binfmts
-      - -usr/share/bug
-      - -usr/share/debhelper
-      - -usr/share/doc
-      - -usr/share/doc-base
-      - -usr/share/fonts
-      - -usr/share/glib-2.0
-      - -usr/share/libdrm
-      - -usr/share/libthai
-      - -usr/share/lintian
-      - -usr/share/locale
-      - -usr/share/man
-      - -usr/share/menu
-      - -usr/share/mime
-      - -usr/share/perl5
-      - -usr/share/pixmaps
-      - -usr/share/pkgconfig
-      - -usr/share/python
-      - -usr/share/xml
-    prime:
-      - -usr/include
-      - -usr/lib/pkgconfig
-      - -usr/share/vala
 
   # https://aomedia.googlesource.com
   libaom:
@@ -645,14 +612,17 @@ parts:
       - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues/
       - -Dcheck-update=no
       - -Dpython=enabled
+      - -Denable-default-bin=enabled
+      - -Drelocatable-bundle=yes
+      - -Dlibunwind=true
     build-environment:
       - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
+          - CFLAGS: -Ofast -pipe -mfpu=neon -flto
+          - CXXFLAGS: -Ofast -pipe -mfpu=neon -flto
           - LDFLAGS: -mfpu=neon -flto
       - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
+          - CFLAGS: -Ofast -pipe -flto
+          - CXXFLAGS: -Ofast -pipe -flto
           - LDFLAGS: -flto
       - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
@@ -690,6 +660,7 @@ parts:
       - libopenexr-dev
       - libslang2-dev
       - libsm-dev
+      - libunwind-dev
       - libwebp-dev
       - libxmu-dev
       - libxpm-dev
@@ -697,8 +668,8 @@ parts:
       - poppler-data
       - xdg-utils
       - xsltproc
-      - libunwind-dev
     stage-packages:
+      - iso-codes
       - libaa1
       - libart-2.0-2
       - libbz2-1.0
@@ -711,89 +682,17 @@ parts:
       - libmng2
       - libopenexr25
       - libslang2
+      - libsndio7.0
+      - libunwind8
       - libwebp7
       - libwebpdemux2
       - libwebpmux3
       - libxmu6
       - libxpm4
+      - libxv1
+      - lua-lgi
       - luajit
       - poppler-data
-      - libunwind8
-      - libsndio7.0
-      - libxv1
-    stage:
-      - -**/*.la
-      - -etc/dbus-1
-      - -etc/default
-      - -etc/dictionaries-common
-      - -etc/emacs
-      - -etc/fonts
-      - -etc/glvnd
-      - -etc/gnome
-      - -etc/gss
-      - -etc/gtk-3.0
-      - -etc/init.d
-      - -etc/libblockdev
-      - -etc/libpaper.d
-      - -etc/mailcap.order
-      - -etc/mime.types
-      - -etc/rc*.d
-      - -etc/sensors3.conf
-      - -etc/systemd
-      - -etc/ucf.conf
-      - -etc/udisks2
-      - -etc/X11
-      - -sbin/cfdisk
-      - -sbin/cgdisk
-      - -sbin/fdisk
-      - -sbin/fixparts
-      - -sbin/gdisk
-      - -sbin/parted
-      - -sbin/partprobe
-      - -sbin/sfddisk
-      - -sbin/sgdisk
-      - -usr/bin/aspell*
-      - -usr/bin/dbus*
-      - -usr/bin/desktop-file-*
-      - -usr/bin/fc-*
-      - -usr/bin/gtk-update-icon-cache
-      - -usr/bin/ispell*
-      - -usr/bin/mtrace
-      - -usr/bin/rpcgen
-      - -usr/bin/run-*
-      - -usr/bin/select-default-iwrap
-      - -usr/bin/update-*-database
-      - -usr/bin/xdpyinfo
-      - -usr/bin/xdriinfo
-      - -usr/bin/xev
-      - -usr/bin/xfd
-      - -usr/bin/xfontsel
-      - -usr/bin/xkill
-      - -usr/bin/xlsatoms
-      - -usr/bin/xlsclients
-      - -usr/bin/xlsfonts
-      - -usr/bin/xmessage
-      - -usr/bin/xprop
-      - -usr/bin/xvinfo
-      - -usr/bin/xwininfo
-      - -usr/lib/aspell
-      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig/libcrypt.pc
-      - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig/libxcrypt.pc
-      - -usr/share/doc/libjpeg*
-      - -usr/share/ghostscript
-      - -usr/share/pkgconfig/iso-codes.pc
-      - -**/iso-codes
-      - -var/cache
-      - -var/lib/aspell
-      - -var/lib/dbus
-      - -var/lib/dictionaries-common
-      - -var/lib/emacsen-common
-      - -var/lib/ispell
-      - -var/lib/systemd
-      - -var/lib/ucf
-    prime:
-      - -usr/include
-      - -usr/lib/pkgconfig
 
   cleanup:
     after: [gimp]
@@ -805,10 +704,10 @@ parts:
     override-prime: |
       set -eux
       for snap in "gnome-42-2204" "gtk-common-themes"; do  # List all content-snaps you're using here
-        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$CRAFT_PRIME/{}" \;
+        cd "/snap/$snap/current" && find . -type f,l -not -path "./usr/share/xml/iso-codes/*" -exec rm -f "$CRAFT_PRIME/{}" \;
       done
       for CRUFT in bug lintian man; do
         rm -rf $CRAFT_PRIME/usr/share/$CRUFT
       done
       find $CRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
-      find $CRAFT_PRIME/usr/share -type d -empty -not -path "$CRAFT_PRIME/usr/share/gimp/*" -delete
+      find $CRAFT_PRIME/usr/share -type d -empty -delete
