@@ -26,8 +26,6 @@ layout:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
-  # /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/darktable:
-  #   bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/darktable
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends
   /usr/lib/gimp:
@@ -42,8 +40,6 @@ layout:
     bind: $SNAP/usr/libexec
   /usr/share/color:
     bind: $SNAP/usr/share/color
-  # /usr/share/darktable:
-  #   bind: $SNAP/usr/share/darktable
   /usr/share/ghostscript:
     bind: $SNAP/usr/share/ghostscript
   /usr/share/gimp:
@@ -56,12 +52,6 @@ layout:
     bind: $SNAP/usr/share/locale
   /usr/share/mypaint-data:
     bind: $SNAP/usr/share/mypaint-data
-
-# plugs:
-  # color-profiles:
-  #   interface: system-files
-  #   read:
-  #   - /usr/share/color/icc
 
 slots:
   dbus-gimp:
@@ -96,24 +86,6 @@ apps:
     - unity7
     - wayland
     - x11
-
-  # darktable:
-  #   command: usr/bin/darktable
-  #   command-chain: [snap/command-chain/desktop-launch]
-  #   desktop: usr/share/applications/darktable.desktop
-  #   common-id: darktable.desktop
-  #   plugs:
-  #   - cups-control
-  #   - desktop
-  #   - desktop-legacy
-  #   - gsettings
-  #   - home
-  #   - network
-  #   - opengl
-  #   - removable-media
-  #   - unity7
-  #   - wayland
-  #   - x11
 
 parts:
   gexiv:
@@ -727,7 +699,6 @@ parts:
     - xsltproc
     - libunwind-dev
     stage-packages:
-    # - gvfs-backends
     - libaa1
     - libart-2.0-2
     - libbz2-1.0
@@ -824,137 +795,8 @@ parts:
     - -usr/include
     - -usr/lib/pkgconfig
 
-  # gmic:
-  #   after: [appstream-glib, gexiv, gimp]
-  #   plugin: nil
-  #   override-pull: |
-  #     git clone https://github.com/dtschump/gmic.git
-  #     git clone https://github.com/dtschump/CImg.git
-  #     git clone https://github.com/c-koi/gmic-qt.git
-  #     cd gmic-qt
-  #     # VERSION="$(git tag -l 'v.*.*' --sort=version:refname | tail -n1)"
-  #     VERSION=v.2.9.6
-  #     git checkout "$VERSION"
-  #     cd ../gmic
-  #     git checkout "$VERSION"
-  #     cd ../CImg
-  #     git checkout "$VERSION"
-  #   override-build: |
-  #     make -C gmic/src CImg.h gmic_stdlib.h
-  #     cd gmic-qt
-  #     mkdir build
-  #     cd build
-  #     cmake .. \
-  #       -DCMAKE_INSTALL_PREFIX=/usr \
-  #       -DGMIC_QT_HOST=gimp \
-  #       -DGMIC_PATH=$CRAFT_PART_BUILD/gmic/src \
-  #       -DCMAKE_BUILD_TYPE=Release
-  #     make -j$CRAFT_PARALLEL_BUILD_COUNT
-  #     make DESTDIR=$CRAFT_PART_INSTALL install
-  #   build-environment:
-  #   - PATH: /snap/bin:$PATH
-  #   - to armhf:
-  #     - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-  #     - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-  #     - LDFLAGS: -mfpu=neon -flto
-  #   - else:
-  #     - CFLAGS: -Ofast -g -pipe -flto
-  #     - CXXFLAGS: -Ofast -g -pipe -flto
-  #     - LDFLAGS: -flto
-  #   build-packages:
-  #     - curl
-  #     - libarchive-dev
-  #     - libfftw3-dev
-  #     - libgraphicsmagick++1-dev
-  #     - libgraphicsmagick1-dev
-  #     - libluajit-5.1-dev
-  #     - libopencv-core-dev
-  #     - libopencv-highgui-dev
-  #     - libopencv-videoio-dev
-  #     # - libopencv-imgcodecs-dev
-  #     # - libopencv-imgproc-dev
-  #     - libopenexr-dev
-  #     - libxres-dev
-  #     - luajit
-  #     - make
-  #     - qt5-qmake
-  #     - qtbase5-dev
-  #     - qtbase5-dev-tools
-  #     - qtchooser
-  #     - qttools5-dev
-  #     - wget
-  #   stage-packages:
-  #     - libarchive13
-  #     - libdouble-conversion3
-  #     - libfftw3-3
-  #     - libgraphicsmagick-q16-3
-  #     - libgraphicsmagick++-q16-12
-  #     - libluajit-5.1-2
-  #     - libopencv-core4.5d
-  #     - libopencv-highgui4.5d
-  #     - libopencv-videoio4.5d
-  #     - libopenexr25
-  #     - libqt5core5a
-  #     - libqt5gui5
-  #     - libqt5network5
-  #     - libqt5widgets5
-  #     - libxres1
-  #     - luajit
-  #     - qtwayland5
-
-  # # https://github.com/darktable-org/darktable/releases
-  # darktable:
-  #   after: [gimp, gmic]
-  #   source: https://github.com/darktable-org/darktable/releases/download/release-3.0.2/darktable-3.0.2.tar.xz
-  #   source-checksum: sha256/6abaf661fe9414e92bdb33b58b98ef024ccf6132b7876abaf0751ec2109f36fb
-  #   plugin: cmake
-  #   build-snaps: [cmake]
-  #   override-pull: |
-  #     craftctl default
-  #     sed -i 's|Exec=.*|Exec=darktable %U|;s|TryExec=.*|TryExec=darktable|;s|Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/darktable.svg|' data/darktable.desktop.in
-  #   cmkae-parameters:
-  #     - -DCMAKE_BUILD_TYPE=Release
-  #     - -DCMAKE_INSTALL_PREFIX=/usr
-  #   build-environment:
-  #     - CFLAGS: -Ofast -g -pipe -flto
-  #     - CXXFLAGS: -Ofast -g -pipe -flto
-  #     - LDFLAGS: -flto
-  #   build-snaps: [cmake]
-  #   build-packages:
-  #     - curl
-  #     - freeglut3-dev
-  #     - fop
-  #     - intltool
-  #     - libflickcurl-dev
-  #     - libgnome-keyring-dev
-  #     - libgphoto2-dev
-  #     - libgraphicsmagick1-dev
-  #     - liblensfun-dev
-  #     - liblua5.3-dev
-  #     - libopenexr-dev
-  #     - libosmgpsmap-1.0-dev
-  #     - libpugixml-dev
-  #     - libsdl1.2-dev
-  #     - libwebp-dev
-  #     - xsltproc
-  #   stage-packages:
-  #     - freeglut3
-  #     - libexiv2-27
-  #     - libflickcurl0
-  #     - libgnome-keyring0
-  #     - libgphoto2-6
-  #     - libgraphicsmagick-q16-3
-  #     - liblensfun1
-  #     - liblensfun-data-v1
-  #     - liblua5.3-0
-  #     - libopenexr25
-  #     - libosmgpsmap-1.0-1
-  #     - libpugixml1v5
-  #     - libsdl1.2debian
-  #     - libwebp7
-
   cleanup:
-    after: [ gimp ] #, gmic ]
+    after: [ gimp ]
     plugin: nil
     build-snaps:
     - core22
