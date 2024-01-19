@@ -67,7 +67,7 @@ environment:
 
 apps:
   gimp:
-    command: usr/bin/gimp
+    command: usr/bin/gimp-2.99
     extensions: [gnome]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
