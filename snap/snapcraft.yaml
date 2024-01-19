@@ -22,22 +22,22 @@ layout:
     bind: $SNAP/etc/gimp
   /etc/ld.so.cache:
     bind-file: $SNAP_DATA/etc/ld.so.cache
-  /usr/lib/$CRAFT_ARCH_TRIPLET/babl-0.1:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/babl-0.1
-  /usr/lib/$CRAFT_ARCH_TRIPLET/gegl-0.4:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gegl-0.4
-  # /usr/lib/$CRAFT_ARCH_TRIPLET/darktable:
-  #   bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/darktable
-  /usr/lib/$CRAFT_ARCH_TRIPLET/evince/4/backends:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/evince/4/backends
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
+  # /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/darktable:
+  #   bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/darktable
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/evince/4/backends
   /usr/lib/gimp:
     bind: $SNAP/usr/lib/gimp
   /usr/lib/python3.10:
     bind: $SNAP/usr/lib/python3.10
   /usr/lib/gvfs:
     bind: $SNAP/usr/lib/gvfs
-  /usr/lib/$CRAFT_ARCH_TRIPLET/gvfs:
-    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/gvfs
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gvfs:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gvfs
   /usr/libexec:
     bind: $SNAP/usr/libexec
   /usr/share/color:
@@ -72,7 +72,7 @@ slots:
 environment:
   GTK_USE_PORTAL: '1'
   GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-  LD_LIBRARY_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/blas
+  LD_LIBRARY_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas
   PYTHONPATH: $SNAP/usr/lib/python3.10:$SNAP/usr/lib/python3.10/site-packages:$PYTHONPATH
 
 apps:
@@ -226,7 +226,7 @@ parts:
     override-build: |
       # LTO fails on armhf
       LTO=-Db_lto=true
-      if [ $CRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
         LTO=-Db_lto=false
       fi
 
@@ -272,11 +272,11 @@ parts:
     - else:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
-    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules
+    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
     override-build: |
       # LTO fails on armhf
       LTO=-Db_lto=true
-      if [ $CRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
         LTO=-Db_lto=false
       fi
 
@@ -396,7 +396,7 @@ parts:
     #   - -DAOM_NEON_INTRIN_FLAG=-mfpu=neon
     override-build: |
       EXTRA=""
-      if [ $CRAFT_ARCH_TRIPLET = "arm-linux-gnueabihf" ]; then
+      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
         EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
       fi
 
@@ -682,13 +682,13 @@ parts:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
-    - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/babl-0.1
-    - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET/gegl-0.4
+    - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
+    - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
     # the LIBRARY_PATH is to fix ld unable to find libwmf
     - LIBRARY_PATH: $CRAFT_STAGE/usr/lib
     # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
-    - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET
-    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET/gio/modules
+    - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+    - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
     - PYTHON: /usr/bin/python3.10
     override-pull: |
       craftctl default
@@ -806,8 +806,8 @@ parts:
     - -usr/bin/xvinfo
     - -usr/bin/xwininfo
     - -usr/lib/aspell
-    - -usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig/libcrypt.pc
-    - -usr/lib/$CRAFT_ARCH_TRIPLET/pkgconfig/libxcrypt.pc
+    - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig/libcrypt.pc
+    - -usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig/libxcrypt.pc
     - -usr/share/doc/libjpeg*
     - -usr/share/ghostscript
     - -usr/share/pkgconfig/iso-codes.pc
