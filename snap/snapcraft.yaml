@@ -636,9 +636,7 @@ parts:
       craftctl default
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     override-build: |
-      # rm -f $CRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
       craftctl default
-      # sed -i -E "s|^(.*python3?=).*|\1/snap/$CRAFT_PROJECT_NAME/current/usr/bin/python|" $CRAFT_PART_INSTALL/usr/lib/gimp/2.99/interpreters/pygimp.interp || true
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $CRAFT_PART_INSTALL/etc/gimp/2.99/gimprc
     build-packages:
       - automake
@@ -694,8 +692,93 @@ parts:
       - luajit
       - poppler-data
 
-  cleanup:
+  gmic:
     after: [gimp]
+    plugin: nil
+    override-pull: |
+      VERSION=v.3.3.3
+      git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
+      git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
+      git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
+
+      # Force this extra online fetch to happen during the pull phase.
+      # This build takes a long time on Launchpad, and if we wait until
+      # the build phase, by the time we get there the proxy token has
+      # expired - so force it to happen here.
+      wget -qO gmic/src/gmic_stdlib_community.h "https://gmic.eu/gmic_stdlib_community$(echo "${VERSION}" | tr -d "v.").h"
+    build-environment:
+      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+      - PATH: /snap/bin:$PATH
+      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig:${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+      - QT_SELECT: qt6
+      - to armhf:
+          - CFLAGS: -Ofast -g -pipe -mfpu=neon
+          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
+          - LDFLAGS: -mfpu=neon
+      - else:
+          - CFLAGS: -Ofast -g -pipe -flto
+          - CXXFLAGS: -Ofast -g -pipe -flto
+          - LDFLAGS: -flto
+    build-packages:
+      - curl
+      - g++
+      - gcc
+      - libcurl4-openssl-dev
+      - libffi7
+      - libfftw3-dev
+      - libgraphicsmagick++1-dev
+      - libgraphicsmagick1-dev
+      - libjpeg-dev
+      - libopencv-core-dev
+      - libopencv-highgui-dev
+      - libopencv-videoio-dev
+      - libopenexr-dev
+      - libpng-dev
+      - libtiff5-dev
+      - libxkbfile-dev
+      - libxres-dev
+      - make
+      - pkg-config
+      - qmake6-bin
+      - qt6-base-dev
+      - qt6-l10n-tools
+      - qt6-tools-dev
+      - qt6-wayland-dev
+      - qtchooser
+      - wget
+      - zlib1g-dev
+    override-build: |
+      qtchooser -install qt6 $(which qmake6) || true
+      make -C gmic/src CImg.h gmic_stdlib_community.h
+      cd gmic-qt
+      qmake HOST=gimp3
+      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
+      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+    stage-packages:
+      - libcurl4
+      - libdouble-conversion3
+      - libfftw3-3
+      - libffi7
+      - libgraphicsmagick-q16-3
+      - libgraphicsmagick++-q16-12
+      - libjpeg-turbo8
+      - libopencv-core4.5d
+      - libopencv-highgui4.5d
+      - libopencv-videoio4.5d
+      - libopenexr25
+      - libpng16-16
+      - libqt6core6
+      - libqt6gui6
+      - libqt6network6
+      - libqt6widgets6
+      - libtiff5
+      - libxkbfile1
+      - libxres1
+      - qt6-wayland
+      - zlib1g
+
+  cleanup:
+    after: [gimp, gmic]
     plugin: nil
     build-snaps:
       - core22
