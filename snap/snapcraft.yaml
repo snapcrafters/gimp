@@ -365,6 +365,7 @@ parts:
   libaom:
     source: https://aomedia.googlesource.com/aom
     source-type: git
+    source-tag: v3.4.0
     plugin: cmake
     build-environment:
     - to armhf:
