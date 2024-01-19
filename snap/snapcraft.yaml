@@ -168,9 +168,11 @@ parts:
       - CFLAGS: -Ofast -g -pipe -mfpu=neon
       - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
       - LDFLAGS: -mfpu=neon
+      - PATH: /usr/bin:$PATH
     - else:
       - CFLAGS: -Ofast -g -pipe
       - CXXFLAGS: -Ofast -g -pipe
+      - PATH: /usr/bin:$PATH
     build-packages:
     - to amd64:
       - libmfx-dev
@@ -364,17 +366,18 @@ parts:
     source: https://aomedia.googlesource.com/aom
     source-type: git
     plugin: cmake
-    build-snaps: [cmake]
     build-environment:
     - to armhf:
       # LTO succeeds here, but breaks libheif build on armhf
       - CFLAGS: -Ofast -g -pipe -mfpu=neon
       - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
       - LDFLAGS: -mfpu=neon
+      - PATH: /usr/bin:$PATH
     - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
+      - PATH: /usr/bin:$PATH
     cmake-parameters:
     - -DCMAKE_BUILD_TYPE=Release
     - -DCMAKE_INSTALL_PREFIX=/usr
@@ -428,10 +431,12 @@ parts:
       - CFLAGS: -Ofast -g -pipe -mfpu=neon
       - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
       - LDFLAGS: -mfpu=neon
+      - PATH: /usr/bin:$PATH
     - else:
       - CFLAGS: -Ofast -g -pipe -flto
       - CXXFLAGS: -Ofast -g -pipe -flto
       - LDFLAGS: -flto
+      - PATH: /usr/bin:$PATH
     autotools-configure-parameters:
     - --prefix=/usr
     - --disable-go
