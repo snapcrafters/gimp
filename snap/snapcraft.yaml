@@ -1,5 +1,5 @@
 name: gimp
-version: '2.99.10'
+version: '2.99.16'
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -662,24 +662,17 @@ parts:
     - libwmf
     - mypaint-brushes
     - rawtherapee
-    plugin: autotools
-    source: https://gitlab.gnome.org/GNOME/gimp.git
-    # meson-parameters:
-    # - --prefix=/usr
-    # - --buildtype=release
-    # - -Dgi-docgen=disabled
-    # - -Dbuild-id=org.gimp.GIMP.snapcraft.edge
-    # - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues/
-    # - -Dcheck-update=no
-    autotools-configure-parameters:
+    plugin: meson
+    source: https://download.gimp.org/gimp/v2.99/gimp-${SNAPCRAFT_PROJECT_VERSION}.tar.xz
+    meson-parameters:
     - --prefix=/usr
-    - --sysconfdir=/etc
-    - --with-build-id=org.gimp.GIMP.snapcraft.edge
-    - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
-    - --enable-check-update=no
-    - --enable-gi-docgen=no
-    - --enable-g-ir-doc=no
-    - --enable-default-binary=yes
+    - --buildtype=release
+    - -Dgi-docgen=disabled
+    - -Dg-ir-doc=false
+    - -Dbuild-id=org.gimp.GIMP.snapcraft.preview
+    - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues/
+    - -Dcheck-update=no
+    - -Dpython=enabled
     build-environment:
     - to armhf:
       - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
