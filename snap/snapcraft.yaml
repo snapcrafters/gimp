@@ -15,7 +15,6 @@ compression: lzo
 architectures:
   - build-on: amd64
   - build-on: arm64
-  # - build-on: armhf
 
 layout:
   /etc/gimp:
@@ -102,13 +101,8 @@ parts:
       - -Dpython3=false
       - -Dvapi=false
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -Ofast -g -pipe
-          - CXXFLAGS: -Ofast -g -pipe
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
     build-packages:
       - libexiv2-dev
       - libcodec2-dev
@@ -138,15 +132,9 @@ parts:
       - --enable-libx265
       - --enable-libxvid
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-          - PATH: /usr/bin:$PATH
-      - else:
-          - CFLAGS: -Ofast -g -pipe
-          - CXXFLAGS: -Ofast -g -pipe
-          - PATH: /usr/bin:$PATH
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
+      - PATH: /usr/bin:$PATH
     build-packages:
       - to amd64:
           - libmfx-dev
@@ -189,31 +177,11 @@ parts:
       - -Db_lto=true
       - -Dwith-docs=false
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -Ofast -g -pipe
-          - CXXFLAGS: -Ofast -g -pipe
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
     override-pull: |
       craftctl default
       sed -i 's/not stable, Description:/not stable, description:/' meson.build
-    override-build: |
-      # LTO fails on armhf
-      LTO=-Db_lto=true
-      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
-        LTO=-Db_lto=false
-      fi
-
-      meson \
-        --prefix=/usr \
-        --buildtype=release \
-        -Dwith-docs=false \
-        $LTO \
-        $CRAFT_PART_SRC
-      ninja
-      DESTDIR=$CRAFT_PART_INSTALL ninja install
     build-packages:
       - git
       - meson
@@ -237,29 +205,9 @@ parts:
       - -Dworkshop=true
       - -Db_lto=true
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -Ofast -g -pipe
-          - CXXFLAGS: -Ofast -g -pipe
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
       - GIO_MODULE_DIR: /snap/gnome-42-2204-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
-    override-build: |
-      # LTO fails on armhf
-      LTO=-Db_lto=true
-      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
-        LTO=-Db_lto=false
-      fi
-
-      meson \
-        --prefix=/usr \
-        --buildtype=release \
-        -Dworkshop=true \
-        $LTO \
-        $CRAFT_PART_SRC
-      ninja
-      DESTDIR=$CRAFT_PART_INSTALL ninja install
     build-packages:
       - libexiv2-dev
       - libfftw3-dev
@@ -307,17 +255,10 @@ parts:
     source-tag: v3.4.0
     plugin: cmake
     build-environment:
-      - to armhf:
-          # LTO succeeds here, but breaks libheif build on armhf
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-          - PATH: /usr/bin:$PATH
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
-          - PATH: /usr/bin:$PATH
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
+      - PATH: /usr/bin:$PATH
     cmake-parameters:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_PREFIX=/usr
@@ -329,34 +270,6 @@ parts:
       - -DCONFIG_AV1_ENCODER=1
       - -DCONFIG_AV1_DECODER=1
       - -DCONFIG_MULTITHREAD=1
-    # Needs advanced grammar support from Snapcraft that isn't available here
-    # Tested against Snapcraft 7.0 (beta - 2022-05-05 (7468)).
-    # - to armhf:
-    #   - -DAOM_NEON_INTRIN_FLAG=-mfpu=neon
-    override-build: |
-      EXTRA=""
-      if [ $CRAFT_ARCH_TRIPLET_BUILD_FOR = "arm-linux-gnueabihf" ]; then
-        EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
-      fi
-
-      export DESTDIR="$CRAFT_PART_INSTALL"
-
-      cmake $CRAFT_PART_SRC \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DENABLE_DOCS=OFF \
-        -DENABLE_EXAMPLES=OFF \
-        -DENABLE_TESTDATA=OFF \
-        -DENABLE_TESTS=OFF \
-        -DCONFIG_PIC=1 \
-        -DCONFIG_AV1_ENCODER=1 \
-        -DCONFIG_AV1_DECODER=1 \
-        -DCONFIG_MULTITHREAD=1 \
-        $EXTRA
-
-      cmake --build . -- -j$CRAFT_PARALLEL_BUILD_COUNT
-
-      cmake --build . --target install
     build-packages:
       - yasm
 
@@ -366,17 +279,10 @@ parts:
     source: https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz
     plugin: autotools
     build-environment:
-      - to armhf:
-          # LTO fails on armhf
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-          - PATH: /usr/bin:$PATH
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
-          - PATH: /usr/bin:$PATH
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
+      - PATH: /usr/bin:$PATH
     autotools-configure-parameters:
       - --prefix=/usr
       - --disable-go
@@ -400,14 +306,9 @@ parts:
       - --prefix=/usr
       - --disable-static
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     stage:
       - -**/*.la
     prime:
@@ -424,14 +325,9 @@ parts:
     autotools-configure-parameters:
       - --prefix=/usr
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     build-packages:
       - automake
 
@@ -440,13 +336,8 @@ parts:
     plugin: meson
     source: https://github.com/hughsie/appstream-glib.git
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -Ofast -g -pipe
-          - CXXFLAGS: -Ofast -g -pipe
+      - CFLAGS: -Ofast -g -pipe
+      - CXXFLAGS: -Ofast -g -pipe
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
@@ -471,14 +362,9 @@ parts:
     source-branch: "gnome-42"
     plugin: meson
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     meson-parameters:
       - --prefix=/snap/$SNAPCRAFT_PROJECT_NAME/current/usr
       - --buildtype=release
@@ -493,8 +379,6 @@ parts:
       - intltool
       - libarchive-dev
       - libdjvulibre-dev
-      # - libgstreamer-plugins-base1.0-dev
-      # - libgstreamer1.0-dev
       - libkpathsea-dev
       - libsm-dev
     stage-packages:
@@ -502,21 +386,15 @@ parts:
       - libdjvulibre21
       - libkpathsea6
       - libnspr4
-    # - libnss3
 
   # https://github.com/ArtifexSoftware/ghostpdl-downloads
   ghostscript:
     plugin: autotools
     source: https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs9561/ghostscript-9.56.1.tar.xz
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     autotools-configure-parameters:
       - --prefix=/usr
       - --disable-compile-inits
@@ -544,14 +422,8 @@ parts:
       - -DWITH_LTO=ON
       - -DCACHE_NAME_SUFFIX=""
     build-environment:
-      # -Ofast enables -ffast-math which is incompatible with rawtherapee so use -O3 instead
-      - to armhf:
-          - CFLAGS: -O3 -g -pipe -mfpu=neon
-          - CXXFLAGS: -O3 -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -O3 -g -pipe
-          - CXXFLAGS: -O3 -g -pipe
+      - CFLAGS: -O3 -g -pipe
+      - CXXFLAGS: -O3 -g -pipe
     build-packages:
       - libiptcdata0-dev
       - liblensfun-dev
@@ -573,14 +445,9 @@ parts:
       - --prefix=/usr
       - --with-gsfontmap=/usr/share/ghostscript/9.56.1/Resource/Init/Fontmap.GS
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     override-build: |
       craftctl default
       sed -i "s|/usr/lib/libwmflite.la|$CRAFT_STAGE/usr/lib/libwmflite.la|" $CRAFT_PART_INSTALL/usr/lib/libwmf.la
@@ -616,14 +483,9 @@ parts:
       - -Drelocatable-bundle=yes
       - -Dlibunwind=true
     build-environment:
-      - to armhf:
-          - CFLAGS: -Ofast -pipe -mfpu=neon -flto
-          - CXXFLAGS: -Ofast -pipe -mfpu=neon -flto
-          - LDFLAGS: -mfpu=neon -flto
-      - else:
-          - CFLAGS: -Ofast -pipe -flto
-          - CXXFLAGS: -Ofast -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -pipe -flto
+      - CXXFLAGS: -Ofast -pipe -flto
+      - LDFLAGS: -flto
       - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
       # the LIBRARY_PATH is to fix ld unable to find libwmf
@@ -711,14 +573,9 @@ parts:
       - PATH: /snap/bin:$PATH
       - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig:${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
       - QT_SELECT: qt6
-      - to armhf:
-          - CFLAGS: -Ofast -g -pipe -mfpu=neon
-          - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-          - LDFLAGS: -mfpu=neon
-      - else:
-          - CFLAGS: -Ofast -g -pipe -flto
-          - CXXFLAGS: -Ofast -g -pipe -flto
-          - LDFLAGS: -flto
+      - CFLAGS: -Ofast -g -pipe -flto
+      - CXXFLAGS: -Ofast -g -pipe -flto
+      - LDFLAGS: -flto
     build-packages:
       - curl
       - g++
