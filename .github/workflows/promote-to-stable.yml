@@ -16,6 +16,7 @@ jobs:
     if: |
       ( !github.event.issue.pull_request )
       && contains(github.event.comment.body, '/promote ')
+      && contains(github.event.comment.body, 'preview/stable ')
       && contains(github.event.*.labels.*.name, 'testing')
     steps:
       - name: ⬆️ Promote to preview/stable
