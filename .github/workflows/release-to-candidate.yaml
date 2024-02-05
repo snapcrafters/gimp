@@ -29,7 +29,8 @@ jobs:
   release:
     name: 🚢 Release to preview/candidate
     needs: get-architectures
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    timeout-minutes: 1440
     environment: "Preview Candidate Branch"
     strategy:
       matrix:
@@ -65,7 +66,7 @@ jobs:
     name: 📸 Gather screenshots
     needs: call-for-testing
     environment: "Preview Candidate Branch"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: 📸 Gather screenshots
         uses: snapcrafters/ci/get-screenshots@main
