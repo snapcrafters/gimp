@@ -20,7 +20,7 @@ jobs:
       - name: 🔄 Sync version with upstream
         uses: snapcrafters/ci/sync-version@main
         with:
-          branch: preview/candidate
+          branch: preview
           token: ${{ secrets.SNAPCRAFTERS_BOT_COMMIT }}
           update-script: |
             VERSION=$(curl -s https://www.gimp.org/downloads/devel/ | grep -Po "The current development release of GIMP is <b>\K[^<]+")

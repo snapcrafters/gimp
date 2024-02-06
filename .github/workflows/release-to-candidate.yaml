@@ -3,7 +3,7 @@ name: Release
 on:
   # Run the workflow each time new commits are pushed to the candidate branch.
   push:
-    branches: ["preview/candidate"]
+    branches: ["preview"]
   workflow_dispatch:
 
 concurrency:
