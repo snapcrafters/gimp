@@ -415,7 +415,7 @@ parts:
     plugin: cmake
     override-pull: |
       craftctl default
-      patch -Np1 -i $CRAFT_PROJECT_DIR/patches/rawtherapee.patch
+      patch -Np1 -i $CRAFT_PROJECT_DIR/snap/local/patches/rawtherapee.patch
     cmake-parameters:
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_INSTALL_PREFIX=/usr
@@ -438,8 +438,8 @@ parts:
     source: https://github.com/caolanm/libwmf/archive/refs/tags/v0.2.12.tar.gz
     override-pull: |
       craftctl default
-      patch -Np1 -i $CRAFT_PROJECT_DIR/patches/libwmf/no-trio.patch
-      patch -Np1 -i $CRAFT_PROJECT_DIR/patches/libwmf/freetype-pkg-config.patch
+      patch -Np1 -i $CRAFT_PROJECT_DIR/snap/local/patches/libwmf/no-trio.patch
+      patch -Np1 -i $CRAFT_PROJECT_DIR/snap/local/patches/libwmf/freetype-pkg-config.patch
       autoreconf --force --install --include=patches
     autotools-configure-parameters:
       - --prefix=/usr
