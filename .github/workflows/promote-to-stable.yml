@@ -9,17 +9,37 @@ permissions:
   issues: write
 
 jobs:
-  promote:
-    name: ⬆️ Promote to stable
+  promote-latest:
+    name: ⬆️ Promote to latest/stable
     environment: "Candidate Branch"
     runs-on: ubuntu-latest
     if: |
       ( !github.event.issue.pull_request )
       && contains(github.event.comment.body, '/promote ')
+      && contains(github.event.comment.body, 'latest/stable')
+      && contains(github.event.issue.body, 'latest/stable')
       && contains(github.event.*.labels.*.name, 'testing')
     steps:
-      - name: ⬆️ Promote to stable
+      - name: ⬆️ Promote to latest/stable
         uses: snapcrafters/ci/promote-to-stable@main
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          store-token: ${{ secrets.SNAP_STORE_STABLE }}
+  
+  promote-preview:
+    name: ⬆️ Promote to preview/stable
+    environment: "Preview Candidate Branch"
+    runs-on: ubuntu-latest
+    if: |
+      ( !github.event.issue.pull_request )
+      && contains(github.event.comment.body, '/promote ')
+      && contains(github.event.comment.body, 'preview/stable')
+      && contains(github.event.issue.body, 'preview/stable')
+      && contains(github.event.*.labels.*.name, 'testing')
+    steps:
+      - name: ⬆️ Promote to preview/stable
+        uses: snapcrafters/ci/promote-to-stable@main
+        with:
+          channel: preview/stable
           github-token: ${{ secrets.GITHUB_TOKEN }}
           store-token: ${{ secrets.SNAP_STORE_STABLE }}
