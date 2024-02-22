@@ -497,6 +497,9 @@ parts:
     override-pull: |
       craftctl default
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
+      # TODO: Drop this on next release.
+      # See: https://gitlab.gnome.org/GNOME/gimp/-/commit/11892f1d83ffc465346dab7e2e8c6e790f555a64
+      patch -Np1 -i $CRAFT_PROJECT_DIR/snap/local/patches/gimpchoice-fix.patch
     override-build: |
       craftctl default
       sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $CRAFT_PART_INSTALL/etc/gimp/2.99/gimprc
