@@ -3,7 +3,7 @@ name: Update
 on:
   # Runs at 10:00 UTC every day
   schedule:
-    - cron:  '0 10 * * *'
+    - cron: "0 10 * * *"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sync:
+  sync-candidate:
     name: 🔄 Sync version with upstream
     environment: "Candidate Branch"
     runs-on: ubuntu-latest
@@ -25,3 +25,16 @@ jobs:
             VERSION=$(curl -s https://www.gimp.org/ | grep -Po "span id='ver'>\K[^<]+")
             sed -i 's/^\(version: \).*$/\1'"$VERSION"'/' snap/snapcraft.yaml
 
+  sync-preview:
+    name: 🔄 Sync version with upstream
+    environment: "Preview Candidate Branch"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 Sync version with upstream
+        uses: snapcrafters/ci/sync-version@main
+        with:
+          branch: preview
+          token: ${{ secrets.SNAPCRAFTERS_BOT_COMMIT }}
+          update-script: |
+            VERSION=$(curl -s https://www.gimp.org/downloads/devel/ | grep -Po "The current development release of GIMP is <b>\K[^<]+")
+            sed -i 's/^\(version: \).*$/\1'"$VERSION"'/' snap/snapcraft.yaml
