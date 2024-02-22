@@ -561,7 +561,7 @@ parts:
     after: [gimp]
     plugin: nil
     override-pull: |
-      VERSION=v.3.3.3
+      VERSION=v.3.3.4
       git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
       git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
       git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
@@ -571,6 +571,11 @@ parts:
       # the build phase, by the time we get there the proxy token has
       # expired - so force it to happen here.
       wget -qO gmic/src/gmic_stdlib_community.h "https://gmic.eu/gmic_stdlib_community$(echo "${VERSION}" | tr -d "v.").h"
+
+      # TODO: This can potentially be dropped after the next release of gmic-qt
+      pushd gmic-qt
+      patch -Np1 -i $CRAFT_PROJECT_DIR/snap/local/patches/gmic-gimp-image-procedure-new-cast.patch
+      popd
     build-environment:
       - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
       - PATH: /snap/bin:$PATH

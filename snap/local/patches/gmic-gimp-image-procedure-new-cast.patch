@@ -1,0 +1,13 @@
+diff --git a/src/Host/Gimp/host_gimp.cpp b/src/Host/Gimp/host_gimp.cpp
+index 166ff0c..86888d4 100644
+--- a/src/Host/Gimp/host_gimp.cpp
++++ b/src/Host/Gimp/host_gimp.cpp
+@@ -1205,7 +1205,7 @@ static GimpProcedure * gmic_qt_create_procedure(GimpPlugIn * plug_in, const gcha
+   GimpProcedure * procedure = NULL;
+ 
+   if (strcmp(name, PLUG_IN_PROC) == 0) {
+-    procedure = gimp_image_procedure_new(plug_in, name, GIMP_PDB_PROC_TYPE_PLUGIN, gmic_qt_run, NULL, NULL);
++    procedure = gimp_image_procedure_new(plug_in, name, GIMP_PDB_PROC_TYPE_PLUGIN, (GimpRunImageFunc) gmic_qt_run, NULL, NULL);
+ 
+     gimp_procedure_set_image_types(procedure, "RGB*, GRAY*");
+ 
