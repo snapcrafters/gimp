@@ -222,7 +222,7 @@ parts:
     after: [gimp]
     plugin: nil
     override-pull: |
-      VERSION=v.3.4.2
+      VERSION=v.3.4.3
       git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
       git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
       git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
