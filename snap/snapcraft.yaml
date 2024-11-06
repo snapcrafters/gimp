@@ -1,5 +1,5 @@
 name: gimp
-version: 2.99.18
+version: 3.0.0-RC1
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -40,10 +40,9 @@ environment:
 
 apps:
   gimp:
-    command: usr/bin/gimp-2.99
+    command: usr/bin/gimp
     extensions: [gnome]
     desktop: usr/share/applications/gimp.desktop
-
     common-id: org.gimp.GIMP
     slots:
       - dbus-gimp
@@ -59,8 +58,7 @@ parts:
   babl:
     plugin: meson
     source: https://gitlab.gnome.org/GNOME/babl.git
-    # TODO: replace this with a tag on next release
-    source-commit: c5f97c86224a473cc3fea231f17adef84580f2cc
+    source-tag: BABL_0_1_110
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
@@ -72,8 +70,7 @@ parts:
     after:
       - babl
     source: https://gitlab.gnome.org/GNOME/gegl.git
-    # TODO: replace this with a tag on next release
-    source-commit: d540df2ad27c06891271d96247f915073b042a3e
+    source-tag: GEGL_0_4_50
     plugin: meson
     meson-parameters:
       - --prefix=/usr
@@ -129,12 +126,10 @@ parts:
       - gegl
     plugin: meson
     source: https://gitlab.gnome.org/GNOME/gimp.git
-    source-commit: a92388c433da868c5d84b14362f7a8151d287ad7
     override-pull: |
-      # TODO: remove `craftctl default` and use this when 2.99.19 actually releases
-      #   tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_")"
-      #   git clone -b "$tag" https://gitlab.gnome.org/GNOME/gimp.git
-      craftctl default
+      tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_"  | tr "-" "_")"
+      git clone -b "$tag" https://gitlab.gnome.org/GNOME/gimp.git "$CRAFT_PART_SRC"
+      git submodule update --init
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     meson-parameters:
       - --prefix=/usr
@@ -222,7 +217,7 @@ parts:
     after: [gimp]
     plugin: nil
     override-pull: |
-      VERSION=v.3.4.2
+      VERSION="v.3.4.2"
       git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
       git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
       git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
