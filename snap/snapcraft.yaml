@@ -213,54 +213,55 @@ parts:
       - mypaint-data
       - poppler-data
 
-  gmic:
-    after: [gimp]
-    plugin: nil
-    override-pull: |
-      VERSION="v.3.4.2"
-      git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
-      git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
-      git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
+  # TODO(jnsgruk): Re-enable once compatibility is restored with GIMP 3.0
+  # gmic:
+  #   after: [gimp]
+  #   plugin: nil
+  #   override-pull: |
+  #     VERSION="v.3.4.2"
+  #     git clone -b "$VERSION" https://github.com/GreycLab/gmic.git
+  #     git clone -b "$VERSION" https://github.com/GreycLab/CImg.git
+  #     git clone -b "$VERSION" https://github.com/c-koi/gmic-qt.git
 
-      # Force this extra online fetch to happen during the pull phase.
-      # This build takes a long time on Launchpad, and if we wait until
-      # the build phase, by the time we get there the proxy token has
-      # expired - so force it to happen here.
-      wget -qO gmic/src/gmic_stdlib_community.h "https://gmic.eu/gmic_stdlib_community$(echo "${VERSION}" | tr -d "v.").h"
-    build-environment:
-      - QT_SELECT: qt6
-    build-packages:
-      - pkg-config
-      - qmake6-bin
-      - qt6-base-dev
-      - qt6-l10n-tools
-      - qt6-tools-dev
-      - qt6-wayland-dev
-      - qtchooser
-      - wget
-    stage-packages:
-      - libcurl4
-      - libdouble-conversion3
-      - libfftw3-bin
-      - libffi8
-      - libgraphicsmagick-q16-3
-      - libgraphicsmagick++-q16-12
-      - libjpeg-turbo8
-      - libopencv-core406t64
-      - libopencv-highgui406t64
-      - libopencv-video406t64
-      - libopenexr-3-1-30
-      - libpng16-16
-      - libqt6core6t64
-      - libqt6gui6t64
-      - libqt6network6t64
-      - libqt6widgets6t64
-      - qt6-wayland
-    override-build: |
-      qtchooser -install qt6 "$(which qmake6)" || true
-      make -C gmic/src CImg.h gmic_stdlib_community.h
-      cd gmic-qt
-      qmake HOST=gimp3
-      make
-      install -Dm 0755 $CRAFT_PART_BUILD/gmic-qt/gmic_gimp_qt \
-        $CRAFT_PART_INSTALL/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gimp/3.0/plug-ins/gmic_gimp_qt/gmic_gimp_qt
+  #     # Force this extra online fetch to happen during the pull phase.
+  #     # This build takes a long time on Launchpad, and if we wait until
+  #     # the build phase, by the time we get there the proxy token has
+  #     # expired - so force it to happen here.
+  #     wget -qO gmic/src/gmic_stdlib_community.h "https://gmic.eu/gmic_stdlib_community$(echo "${VERSION}" | tr -d "v.").h"
+  #   build-environment:
+  #     - QT_SELECT: qt6
+  #   build-packages:
+  #     - pkg-config
+  #     - qmake6-bin
+  #     - qt6-base-dev
+  #     - qt6-l10n-tools
+  #     - qt6-tools-dev
+  #     - qt6-wayland-dev
+  #     - qtchooser
+  #     - wget
+  #   stage-packages:
+  #     - libcurl4
+  #     - libdouble-conversion3
+  #     - libfftw3-bin
+  #     - libffi8
+  #     - libgraphicsmagick-q16-3
+  #     - libgraphicsmagick++-q16-12
+  #     - libjpeg-turbo8
+  #     - libopencv-core406t64
+  #     - libopencv-highgui406t64
+  #     - libopencv-video406t64
+  #     - libopenexr-3-1-30
+  #     - libpng16-16
+  #     - libqt6core6t64
+  #     - libqt6gui6t64
+  #     - libqt6network6t64
+  #     - libqt6widgets6t64
+  #     - qt6-wayland
+  #   override-build: |
+  #     qtchooser -install qt6 "$(which qmake6)" || true
+  #     make -C gmic/src CImg.h gmic_stdlib_community.h
+  #     cd gmic-qt
+  #     qmake HOST=gimp3
+  #     make
+  #     install -Dm 0755 $CRAFT_PART_BUILD/gmic-qt/gmic_gimp_qt \
+  #       $CRAFT_PART_INSTALL/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gimp/3.0/plug-ins/gmic_gimp_qt/gmic_gimp_qt
