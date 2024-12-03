@@ -78,7 +78,7 @@ parts:
       - -Ddocs=false
       - -Dworkshop=true
     build-environment:
-      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/lib/x86_64-linux-gnu/pkgconfig/../../../include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
       - ffmpeg
       - libexiv2-dev
@@ -149,7 +149,7 @@ parts:
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
       - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
       - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
-      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/lib/x86_64-linux-gnu/pkgconfig/../../../include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
       - automake
       - intltool
