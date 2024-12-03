@@ -57,7 +57,7 @@ apps:
 parts:
   babl:
     plugin: meson
-    source: https://gitlab.gnome.org/GNOME/babl.git
+    source: https://github.com/GNOME/babl.git
     source-tag: BABL_0_1_110
     meson-parameters:
       - --prefix=/usr
@@ -69,7 +69,7 @@ parts:
   gegl:
     after:
       - babl
-    source: https://gitlab.gnome.org/GNOME/gegl.git
+    source: https://github.com/GNOME/gegl.git
     source-tag: GEGL_0_4_50
     plugin: meson
     meson-parameters:
@@ -77,6 +77,8 @@ parts:
       - --buildtype=release
       - -Ddocs=false
       - -Dworkshop=true
+    build-environment:
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/lib/x86_64-linux-gnu/pkgconfig/../../../include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
       - ffmpeg
       - libexiv2-dev
@@ -125,10 +127,10 @@ parts:
       - babl
       - gegl
     plugin: meson
-    source: https://gitlab.gnome.org/GNOME/gimp.git
+    source: https://github.com/GNOME/gimp.git
     override-pull: |
       tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_"  | tr "-" "_")"
-      git clone -b "$tag" https://gitlab.gnome.org/GNOME/gimp.git "$CRAFT_PART_SRC"
+      git clone -b "$tag" https://github.com/GNOME/gimp.git "$CRAFT_PART_SRC"
       git submodule update --init
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     meson-parameters:
@@ -147,6 +149,7 @@ parts:
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
       - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
       - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/lib/x86_64-linux-gnu/pkgconfig/../../../include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
       - automake
       - intltool
