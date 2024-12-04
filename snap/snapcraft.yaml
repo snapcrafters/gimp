@@ -131,6 +131,7 @@ parts:
     override-pull: |
       tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_"  | tr "-" "_")"
       git clone -b "$tag" https://github.com/GNOME/gimp.git "$CRAFT_PART_SRC"
+      sed -i "s|gitlab.gnome.org|github.com|" "$CRAFT_PART_SRC"/.gitmodules
       git submodule update --init
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     meson-parameters:
