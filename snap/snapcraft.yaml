@@ -26,6 +26,12 @@ layout:
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
 
+plugs:
+  ffmpeg-2404:
+    interface: content
+    target: ffmpeg-platform
+    default-provider: ffmpeg-2404
+
 slots:
   dbus-gimp:
     interface: dbus
@@ -46,6 +52,8 @@ apps:
     common-id: org.gimp.GIMP
     environment:
       HOME: $SNAP_REAL_HOME
+      LD_LIBRARY_PATH: $SNAP/ffmpeg-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      PATH: $SNAP/ffmpeg-platform/usr/bin:$PATH
     slots:
       - dbus-gimp
     plugs:
@@ -81,8 +89,10 @@ parts:
       - -Dworkshop=true
     build-environment:
       - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+      - PKG_CONFIG_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+      - LD_LIBRARY_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      - PATH: /snap/ffmpeg-2404-sdk/current/usr/bin${PATH:+:$PATH}
     build-packages:
-      - ffmpeg
       - libexiv2-dev
       - libfftw3-dev
       - libgexiv2-2
@@ -99,7 +109,6 @@ parts:
       - libv4l-dev
       - libwebp-dev
     stage-packages:
-      - ffmpeg
       - libamd3
       - libbtf2
       - libcamd3
@@ -124,6 +133,8 @@ parts:
       - libspqr4
       - libumfpack6
       - libv4l-0
+    build-snaps:
+      - ffmpeg-2404
 
   gimp:
     after:
@@ -284,3 +295,6 @@ parts:
     override-prime: |
       craftctl default
       ${CRAFT_PART_SRC}/bin/gpu-2404-cleanup mesa-2404
+      for snap in "core24" "gnome-46-2404" "ffmpeg-2404"; do
+          cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
+      done
