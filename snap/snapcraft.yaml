@@ -114,7 +114,7 @@ parts:
     after:
       - babl
     source: https://github.com/GNOME/gegl.git
-    source-tag: GEGL_0_4_52
+    source-tag: GEGL_0_4_54
     plugin: meson
     meson-parameters:
       - --prefix=/usr
