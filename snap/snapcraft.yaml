@@ -71,7 +71,11 @@ environment:
 apps:
   gimp:
     command: usr/bin/gimp
-    command-chain: ["command-chain/openvino-launch", "command-chain/openvino-ai-plugins-gimp-launch"]
+    command-chain:
+      [
+        "command-chain/openvino-launch",
+        "command-chain/openvino-ai-plugins-gimp-launch",
+      ]
     extensions: [gnome]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
@@ -182,7 +186,6 @@ parts:
       - --prefix=/usr
       - --buildtype=release
       - -Dgi-docgen=disabled
-      - -Dg-ir-doc=false
       - -Dbuild-id=org.gimp.GIMP.snapcraft.preview
       - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues/
       - -Dcheck-update=no
