@@ -78,6 +78,55 @@ Now that your git metadata has been updated you are ready to create a bugfix bra
 6. Someone from the team will review the open pull request and either merge it or start a discussion with you with additional changes or clarification needed.
 7. Once the pull request has been merged into the stable branch, a GitHub action will rebuild the snap using your changes and publish it to the [Snap Store](https://snapcraft.io/gimp) into the `candidate` channel. After sufficient testing of the snap from the candidate channel, one of the maintainers or administrators will promote the snap to the stable branch in the Snap Store.
 
+## OpenVINO™ AI Plugins
+
+> [!IMPORTANT]
+> These plugins are only supported on Intel hardware. The stable diffusion plugin requires an Intel GPU (integrated or discrete) and/or Intel NPU. The super resolution and semantic segmentation plugins will run on an Intel CPU, GPU, or NPU.
+
+This snap contains support for AI plugins using Intel's OpenVINO AI inference library. In order to use these plugins, please follow these steps:
+
+
+1. **Install the plugins and their dependencies**:
+
+    ```shell
+    sudo snap install intel-npu-driver --beta # for NPU support
+    sudo snap install openvino-toolkit-2404 --beta
+    sudo snap install openvino-ai-plugins-gimp --beta
+    ```
+
+2. **(Optional) Enable Intel NPU and GPU acceleration**:
+
+    If you are running on a machine (e.g. a laptop or desktop containing an Intel Core Ultra processor) equipped with an Intel neural processing unit (NPU) or graphics processing unit (GPU), ensure you have permissions to use these devices by adding yourself to the `render` Unix group:
+
+    ```shell
+    sudo usermod -a -G render $USER
+    ```
+
+    You need to log out and log back for this change to take effect.
+
+    Next, ensure that the devices have read and write permissions set on the group level:
+
+    ```shell
+    sudo chown root:render /dev/accel/accel*
+    sudo chmod g+rw /dev/accel/accel*
+    sudo chown root:render /dev/dri/render*
+    sudo chmod g+rw /dev/dri/render*
+    ```
+
+3. **(Optional) Install stable diffusion models**:
+
+    Models for the super resolution and semantic segmentation plugins are relatively small and therefore built into the snap, while the stable diffusion models are each on the order of GBs and therefore downloaded to a user's home directory at `~/.local/share/openvino-ai-plugins-gimp` via one of two methods: a `model-setup` command-line tool or from within the GIMP application. To run the interactive command-line tool:
+
+    ```shell
+    openvino-ai-plugins-gimp.model-setup
+    ```
+
+    Alternatively, users may download models from within GIMP by clicking "Model" in the top-left of the stable diffusion dialog window (Layer -> OpenVINO-AI-Plugins -> Stable Diffusion).
+
+4. **Run `gimp` like normal**:
+
+    Instructions for using the OpenVINO AI plugins within GIMP can be found in the [upstream GitHub repo](https://github.com/intel/openvino-ai-plugins-gimp).
+
 ## Maintainers
 
 -   [@lucyllewy](https://github.com/lucyllewy/)

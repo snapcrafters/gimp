@@ -2,7 +2,7 @@ name: Pull Request
 
 on:
   pull_request:
-    branches: [ "**" ]
+    branches: ["**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,7 +11,8 @@ concurrency:
 jobs:
   build:
     name: 🧪 Build snap on amd64
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    timeout-minutes: 1440
     steps:
       - name: 🧪 Build snap on amd64
         uses: snapcrafters/ci/test-snap-build@main

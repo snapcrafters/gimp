@@ -9,84 +9,22 @@ description: |
 
 grade: stable
 confinement: strict
-base: core20
+base: core24
 compression: lzo
 
-architectures:
-- build-on: amd64
-- build-on: arm64
-- build-on: armhf
+platforms:
+  arm64:
+  amd64:
 
 layout:
   /etc/gimp:
     bind: $SNAP/etc/gimp
-  /etc/ld.so.cache:
-    bind-file: $SNAP_DATA/etc/ld.so.cache
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
-  # /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/darktable:
-  #   bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/darktable
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/evince/4/backends:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/evince/4/backends
-  /usr/lib/gimp:
-    bind: $SNAP/usr/lib/gimp
-  /usr/lib/python3.8:
-    bind: $SNAP/usr/lib/python3.8
-  /usr/lib/gvfs:
-    bind: $SNAP/usr/lib/gvfs
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gvfs
-  /usr/libexec:
-    bind: $SNAP/usr/libexec
-  /usr/share/color:
-    bind: $SNAP/usr/share/color
-  # /usr/share/darktable:
-  #   bind: $SNAP/usr/share/darktable
-  /usr/share/ghostscript:
-    bind: $SNAP/usr/share/ghostscript
-  /usr/share/gimp:
-    bind: $SNAP/usr/share/gimp
-  /usr/share/gvfs:
-    bind: $SNAP/usr/share/gvfs
-  /usr/share/iso-codes:
-    bind: $SNAP/data-dir/gnome-platform/usr/share/iso-codes
-  /usr/share/lensfun:
-    bind: $SNAP/usr/share/lensfun
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
+  /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
-  /usr/share/mypaint-data:
-    bind: $SNAP/usr/share/mypaint-data
-  /usr/share/xml/iso-codes:
-    bind: $SNAP/data-dir/gnome-platform/usr/share/xml/iso-codes
-
-plugs:
-  gtk-2-engines:
-    interface: content
-    target: $SNAP/lib/gtk-2.0
-    default-provider: gtk2-common-themes
-  gtk-3-themes:
-    interface: content
-    target: $SNAP/data-dir/themes
-    default-provider: gtk-common-themes:gtk-3-themes
-  sound-themes:
-    interface: content
-    target: $SNAP/data-dir/sounds
-    default-provider: gtk-common-themes:sound-themes
-  icon-themes:
-    interface: content
-    target: $SNAP/data-dir/icons
-    default-provider: gtk-common-themes:icon-themes
-  gnome-3-38-2004:
-    interface: content
-    target: $SNAP/data-dir/gnome-platform
-    default-provider: gnome-3-38-2004:gnome-3-38-2004
-
-  # color-profiles:
-  #   interface: system-files
-  #   read:
-  #   - /usr/share/color/icc
 
 slots:
   dbus-gimp:
@@ -94,957 +32,342 @@ slots:
     bus: session
     name: org.gimp.GIMP.UI
 
-hooks:
-  install:
-    command-chain:
-      - snap/command-chain/desktop-launch
-  post-refresh:
-    command-chain:
-      - snap/command-chain/desktop-launch
+plugs:
+  ffmpeg-2404:
+    interface: content
+    target: ffmpeg-platform
+    default-provider: ffmpeg-2404
+  intel-npu:
+    interface: custom-device
+    custom-device: intel-npu-device
+  npu-libs:
+    interface: content
+    content: npu-libs-2404
+    target: $SNAP/npu-libs
+  openvino-libs:
+    interface: content
+    content: openvino-libs-2404
+    target: $SNAP/openvino
+  openvino-ai-plugins-gimp-libs:
+    interface: content
+    content: openvino-ai-plugins-gimp-2404
+    target: $SNAP/openvino-ai-plugins-gimp
+  dot-local-share-openvino-ai-plugins-gimp:
+    interface: personal-files
+    write:
+      - $HOME/.local/share/openvino-ai-plugins-gimp
 
 environment:
-  SNAP_DESKTOP_RUNTIME: $SNAP/data-dir/gnome-platform
-  GTK_EXE_PREFIX: $SNAP/usr
-  GTK_USE_PORTAL: '1'
-  GIMP2_LOCALEDIR: $SNAP/usr/share/locale
-  LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/lapack:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/blas
-  PYTHONPATH: $SNAP/usr/lib/python2.7:$SNAP/usr/lib/python2.7/site-packages:$PYTHONPATH
-  FINAL_BINARY: $SNAP/usr/bin/gimp
+  GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
+  LD_LIBRARY_PATH: $SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
+  # Ensure the gmic plugin can correctly locate the QT plugins
+  QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins
+  GIMP3_LOCALEDIR: $SNAP/usr/share/locale
+  # Lua goat exercise considered unstable upstream: https://gitlab.gnome.org/GNOME/gimp/-/commit/78665ca3723f723ac313fdaeef5b62d41ab6b48d
+  # The extension will fail on GIMP startup but commenting these lines avoids the risk of a nasty crash loop
+  #LUA_PATH: $SNAP/usr/share/lua/5.1/?.lua;$SNAP/usr/share/lua/5.1/lgi/?.lua;$SNAP/usr/share/lua/5.1/lgi/override/?.lua
+  #LUA_CPATH: $SNAP/usr/lib/x86_64-linux-gnu/lua/5.1/?.so
 
 apps:
   gimp:
     command: usr/bin/gimp
-    command-chain: [snap/command-chain/desktop-launch]
+    command-chain:
+      [
+        "command-chain/openvino-launch",
+        "command-chain/openvino-ai-plugins-gimp-launch",
+      ]
+    extensions: [gnome]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
+    environment:
+      HOME: $SNAP_REAL_HOME
+      LD_LIBRARY_PATH: $SNAP/ffmpeg-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      PATH: $SNAP/ffmpeg-platform/usr/bin:$PATH
     slots:
-    - dbus-gimp
+      - dbus-gimp
     plugs:
-    - cups-control
-    - browser-support
-    - desktop
-    - desktop-legacy
-    - gsettings
-    - home
-    - network
-    - opengl
-    - removable-media
-    - unity7
-    - wayland
-    - x11
-
-  # darktable:
-  #   command: usr/bin/darktable
-  #   command-chain: [snap/command-chain/desktop-launch]
-  #   desktop: usr/share/applications/darktable.desktop
-  #   common-id: darktable.desktop
-  #   plugs:
-  #   - cups-control
-  #   - desktop
-  #   - desktop-legacy
-  #   - gsettings
-  #   - home
-  #   - network
-  #   - opengl
-  #   - removable-media
-  #   - unity7
-  #   - wayland
-  #   - x11
+      - cups-control
+      - browser-support
+      - home
+      - network
+      - removable-media
+      - unity7
+      - intel-npu
+      - npu-libs
+      - openvino-libs
+      - openvino-ai-plugins-gimp-libs
+      - dot-local-share-openvino-ai-plugins-gimp
 
 parts:
-  fix-pkgconfig-files:
-    plugin: nil
-    override-build: |
-      cat <<'EOF' > $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
-      for pcfile in $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/lib/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/*.pc $SNAPCRAFT_PART_INSTALL/usr/local/lib/pkgconfig/*.pc; do
-        sed -i -E "s~^((include|lib)dir=)/usr(/local)?~\1\\\${prefix}~g" $pcfile || true
-        sed -i -E "s~^((exec_)?prefix=)(/usr(/local)?)~\1/\3~" $pcfile || true
-      done
-      EOF
-      chmod +x $SNAPCRAFT_PART_INSTALL/fix-pkgconfig-files.sh
-    prime:
-    - -*
-
-  fix-symlinks:
-    # REF: https://unix.stackexchange.com/questions/100918/convert-absolute-symlink-to-relative-symlink-with-simple-linux-command
-    plugin: nil
-    override-build: |
-      cat <<'EOF' > $SNAPCRAFT_PART_INSTALL/fix-symlinks.sh
-      cd $SNAPCRAFT_PART_INSTALL
-      find . -lname '/*' |
-      while read l ; do
-        echo ln -sf $(echo $(echo $l | sed 's|/[^/]*|/..|g')$(readlink $l) | sed 's/.....//') $l
-      done |
-      sh
-      EOF
-      chmod +x $SNAPCRAFT_PART_INSTALL/fix-symlinks.sh
-    prime:
-    - -*
-
-  desktop-launch:
-    plugin: make
-    source: desktop-launch
-    build-packages:
-      - rsync
-      - libgail-dev
-      - libgtk-3-dev
-      - libgtk2.0-dev
-    stage-packages:
-      - appmenu-gtk2-module
-      - gtk2-engines
-      - gtk2-engines-pixbuf
-      - libatk-adaptor
-      - libcanberra-gtk-module
-      - libgail-common
-      - libgtk2.0-0
-      - libgtk2.0-bin
-      - unity-gtk2-module
-      - ibus-gtk
-    override-build: |
-      snapcraftctl build
-      mkdir -p $SNAPCRAFT_PART_INSTALL/lib/gtk-2.0
-
-      # Make GTK3 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
-      ln -sf ../../gnome-platform/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-3.0 \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-3.0
-
-      # Make GTK2 available via GTK_EXE_PREFIX expansion instead of GTK_PATH
-      mv $SNAPCRAFT_PART_INSTALL/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gtk-2.0 \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0
-
-      # Make GTK2 engines available from content snap via GTK_EXE_PREFIX expansion
-      rm -rf $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/engines
-      ln -sf ../../../../lib/gtk-2.0/2.10.0/engines \
-        $SNAPCRAFT_PART_INSTALL/usr/lib/gtk-2.0/2.10.0/
-
-  gtk-locales:
-    plugin: nil
-    build-packages:
-    - apt
-    - dpkg
-    override-pull: |
-      set -eux
-      apt download "language-pack-gnome-*-base"
-    override-build: |
-      set -eux
-      for deb in *.deb; do dpkg-deb -x $deb .; done
-      find usr/share/locale-langpack -type f -not -name "gtk20*.mo" -and -not -name "gtk30*.mo" -exec rm '{}' \;
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/share
-      cp -R usr/share/locale-langpack $SNAPCRAFT_PART_INSTALL/usr/share/
-
-  # https://download.gimp.org/pub/babl
   babl:
-    after:
-    - fix-pkgconfig-files
     plugin: meson
-    source: https://download.gimp.org/pub/babl/0.1/babl-0.1.92.tar.xz
+    source: https://github.com/GNOME/babl.git
+    source-tag: BABL_0_1_112
     meson-parameters:
-    - --prefix=/usr
-    - --buildtype=release
-    - -Db_lto=true
-    - -Dwith-docs=false
-    build-environment:
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-      - LDFLAGS: -mfpu=neon
-    - else:
-      - CFLAGS: -Ofast -g -pipe
-      - CXXFLAGS: -Ofast -g -pipe
-    override-pull: |
-      snapcraftctl pull
-      sed -i 's/not stable, Description:/not stable, description:/' meson.build
-    override-build: |
-      /usr/bin/python3 -m pip install -U meson
-
-      # LTO fails on armhf
-      LTO=-Db_lto=true
-      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
-        LTO=-Db_lto=false
-      fi
-
-      meson \
-        --prefix=/usr \
-        --buildtype=release \
-        -Dwith-docs=false \
-        $LTO \
-        $SNAPCRAFT_PART_SRC
-      ninja
-      DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dwith-docs=false
     build-packages:
-    - git
-    - gobject-introspection
-    - libgirepository1.0-dev
-    - liblcms2-dev
-    - librsvg2-bin
-    - librsvg2-dev
-    - valac
-    - w3m
-    stage-packages:
-    - gobject-introspection
-    - libgirepository-1.0-1
-    - liblcms2-2
-    - librsvg2-2
-    prime:
-    - -usr/include
-    - -usr/lib/pkgconfig
-    - -**/*.la
+      - w3m
 
-  # https://download.gimp.org/pub/gegl
   gegl:
     after:
-    - babl
-    - fix-pkgconfig-files
-    source: https://download.gimp.org/pub/gegl/0.4/gegl-0.4.38.tar.xz
+      - babl
+    source: https://github.com/GNOME/gegl.git
+    source-tag: GEGL_0_4_56
     plugin: meson
     meson-parameters:
-    - --prefix=/usr
-    - --buildtype=release
-    - -Dworkshop=true
-    - -Db_lto=true
+      - --prefix=/usr
+      - --buildtype=release
+      - -Ddocs=false
+      - -Dworkshop=true
     build-environment:
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-      - LDFLAGS: -mfpu=neon
-    - else:
-      - CFLAGS: -Ofast -g -pipe
-      - CXXFLAGS: -Ofast -g -pipe
-    - GIO_MODULE_DIR: $SNAPCRAFT_STAGE/usr/lib/gio/modules
-    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-    override-build: |
-      sed -i 's/Version:.*/Version: 1.5.2/' /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/libjpeg.pc
-      /usr/bin/python3 -m pip install -U meson
-
-      # LTO fails on armhf
-      LTO=-Db_lto=true
-      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
-        LTO=-Db_lto=false
-      fi
-
-      meson \
-        --prefix=/usr \
-        --buildtype=release \
-        -Dworkshop=true \
-        $LTO \
-        $SNAPCRAFT_PART_SRC
-      ninja
-      DESTDIR=$SNAPCRAFT_PART_INSTALL ninja install
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+      - PKG_CONFIG_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
+      - LD_LIBRARY_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      - PATH: /snap/ffmpeg-2404-sdk/current/usr/bin${PATH:+:$PATH}
     build-packages:
-    - gobject-introspection
-    - libavcodec-dev
-    - libavformat-dev
-    - libavutil-dev
-    - libcairo2-dev
-    - libexiv2-dev
-    - libfftw3-dev
-    - libgdk-pixbuf2.0-dev
-    - libgexiv2-dev
-    - libgirepository1.0-dev
-    - libglib2.0-dev
-    - libglu1-mesa-dev
-    - libgraphviz-dev
-    - libgs-dev
-    - libjpeg-dev
-    - libjson-glib-dev
-    - liblcms2-dev
-    - liblensfun-dev
-    - libluajit-5.1-dev
-    - libmaxflow-dev
-    - libopenexr-dev
-    - libopenjp2-7-dev
-    - libpango1.0-dev
-    - libpng-dev
-    - libpoppler-glib-dev
-    - libraw-dev
-    - librsvg2-dev
-    - libsdl2-dev
-    - libspiro-dev
-    - libsuitesparse-dev
-    - libswscale-dev
-    - libtiff5-dev
-    - libv4l-dev
-    - libwebp-dev
-    - pkg-config
-    - python-gi-dev
-    - valac
+      - libexiv2-dev
+      - libfftw3-dev
+      - libgexiv2-2
+      - libglib2.0-dev
+      - libglu1-mesa-dev
+      - liblensfun-dev
+      - libluajit-5.1-dev
+      - libmaxflow-dev
+      - libopenexr-dev
+      - libraw-dev
+      - libsdl2-dev
+      - libspiro-dev
+      - libsuitesparse-dev
+      - libv4l-dev
+      - libwebp-dev
     stage-packages:
-    - libamd2
-    - libavcodec58
-    - libavformat58
-    - libavutil56
-    - libbtf1
-    - libcairo2
-    - libcamd2
-    - libccolamd2
-    - libcdt5
-    - libcgraph6
-    - libcholmod3
-    - libcolamd2
-    - libcxsparse3
-    - libexiv2-27
-    - libgdk-pixbuf2.0-0
-    - libgexiv2-2
-    - libgraphblas3
-    - libgs9
-    - libgvc6
-    - libgvc6-plugins-gtk
-    - libgvpr2
-    - libjpeg-turbo8
-    - libklu1
-    - liblab-gamut1
-    - liblapack3
-    - liblcms2-2
-    - libldl2
-    - liblensfun1
-    - libluajit-5.1-2
-    - libmaxflow0
-    - libopenexr24
-    - libpathplan4
-    - libpng16-16
-    - libpoppler-glib8
-    - libraw19
-    - librbio2
-    - librsvg2-2
-    - libsdl2-2.0-0
-    - libspiro1
-    - libspqr2
-    - libswscale5
-    - libtiff5
-    - libumfpack5
-    - libv4l-0
-    - libxdot4
-    - python-gi
-    - python-gobject-2
-    stage:
-    - -**/*.la
-    - -etc
-    - -var/lib/ucf
-    - -usr/sbin/update-mime
-    - -usr/share/X11
-    - -usr/share/alsa
-    - -usr/share/applications
-    - -usr/share/apport
-    - -usr/share/apps
-    - -usr/share/binfmts
-    - -usr/share/bug
-    - -usr/share/debhelper
-    - -usr/share/doc
-    - -usr/share/doc-base
-    - -usr/share/fonts
-    - -usr/share/glib-2.0
-    - -usr/share/libdrm
-    - -usr/share/libthai
-    - -usr/share/lintian
-    - -usr/share/locale
-    - -usr/share/man
-    - -usr/share/menu
-    - -usr/share/mime
-    - -usr/share/perl5
-    - -usr/share/pixmaps
-    - -usr/share/pkgconfig
-    - -usr/share/python
-    - -usr/share/xml
-    prime:
-    - -usr/include
-    - -usr/lib/pkgconfig
-    - -usr/share/vala
+      - libamd3
+      - libbtf2
+      - libcamd3
+      - libccolamd3
+      - libcholmod5
+      - libcolamd3
+      - libcxsparse4
+      - libexiv2-27
+      - libgexiv2-2
+      - libgraphblas7
+      - libklu2
+      - liblapack3
+      - libldl3
+      - liblensfun1
+      - libluajit-5.1-2
+      - libmaxflow0
+      - libopenexr-3-1-30
+      - libraw-bin
+      - librbio4
+      - libsdl2-2.0-0
+      - libspiro1
+      - libspqr4
+      - libumfpack6
+      - libv4l-0
+    build-snaps:
+      - ffmpeg-2404
 
-  libaom:
-    after: [gegl]
-    source: https://aomedia.googlesource.com/aom
-    source-type: git
-    source-tag: v3.4.0
-    plugin: cmake
-    build-snaps: [cmake]
-    build-environment:
-    - to armhf:
-      # LTO succeeds here, but breaks libheif build on armhf
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-      - LDFLAGS: -mfpu=neon
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
-    cmake-parameters:
-    - -DCMAKE_BUILD_TYPE=Release
-    - -DCMAKE_INSTALL_PREFIX=/usr
-    - -DENABLE_DOCS=OFF
-    - -DENABLE_EXAMPLES=OFF
-    - -DENABLE_TESTDATA=OFF
-    - -DENABLE_TESTS=OFF
-    - -DCONFIG_PIC=1
-    - -DCONFIG_AV1_ENCODER=1
-    - -DCONFIG_AV1_DECODER=1
-    - -DCONFIG_MULTITHREAD=1
-    # Needs advanced grammar support from Snapcraft that isn't available here
-    # Tested against Snapcraft 7.0 (beta - 2022-05-05 (7468)).
-    # - to armhf:
-    #   - -DAOM_NEON_INTRIN_FLAG=-mfpu=neon
-    override-build: |
-      EXTRA=""
-      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "arm-linux-gnueabihf" ]; then
-        EXTRA="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon"
-      fi
-
-      export DESTDIR="$SNAPCRAFT_PART_INSTALL"
-
-      cmake $SNAPCRAFT_PART_SRC \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -DENABLE_DOCS=OFF \
-        -DENABLE_EXAMPLES=OFF \
-        -DENABLE_TESTDATA=OFF \
-        -DENABLE_TESTS=OFF \
-        -DCONFIG_PIC=1 \
-        -DCONFIG_AV1_ENCODER=1 \
-        -DCONFIG_AV1_DECODER=1 \
-        -DCONFIG_MULTITHREAD=1 \
-        $EXTRA
-
-      cmake --build . -- -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-
-      cmake --build . --target install
-    build-packages:
-    - yasm
-
-  # https://github.com/strukturag/libheif/releases
-  libheif:
-    after: [libaom]
-    source: https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz
-    plugin: autotools
-    build-environment:
-    - to armhf:
-      # LTO fails on armhf
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon
-      - LDFLAGS: -mfpu=neon
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
-    autotools-configure-parameters:
-    - --prefix=/usr
-    - --disable-go
-    - --disable-examples
-    build-packages:
-    - libde265-dev
-    - libgdk-pixbuf2.0-dev
-    - libjpeg-dev
-    - libpng-dev
-    - libx265-dev
-    stage-packages:
-    - libde265-0
-    - libgdk-pixbuf2.0-0
-    - libjpeg-turbo8
-    - libpng16-16
-    - libx265-179
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-
-  # https://github.com/mypaint/libmypaint/releases
-  libmypaint:
-    after:
-    - fix-pkgconfig-files
-    plugin: autotools
-    source: https://github.com/mypaint/libmypaint/releases/download/v1.6.1/libmypaint-1.6.1.tar.xz
-    build-packages:
-    - gobject-introspection
-    - intltool
-    - libgirepository1.0-dev
-    - libglib2.0-dev
-    - libjson-c-dev
-    - libjson-glib-dev
-    autotools-configure-parameters:
-    - --prefix=/usr
-    - --disable-static
-    build-environment:
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - LDFLAGS: -mfpu=neon -flto
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
-    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-    override-build: |
-      snapcraftctl build
-      $SNAPCRAFT_STAGE/fix-pkgconfig-files.sh
-    stage:
-    - -**/*.la
-    prime:
-    - -usr/include
-    - -usr/lib/pkgconfig
-
-  # https://github.com/Jehan/mypaint-brushes/releases
-  mypaint-brushes:
-    after:
-    - libmypaint
-    source: https://github.com/Jehan/mypaint-brushes/archive/v1.3.0.tar.gz
-    plugin: autotools
-    autotools-configure-parameters:
-    - --prefix=/usr
-    build-environment:
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - LDFLAGS: -mfpu=neon -flto
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
-    build-packages:
-    - automake-1.15
-
-  # TODO: Think about splitting to a separate snap and consume via content interface?
-  # # https://download.gimp.org/mirror/pub/gimp/help
-  # gimp-help:
-  #   after: [gimp]
-  #   plugin: autotools
-  #   source: https://download.gimp.org/mirror/pub/gimp/help/gimp-help-2.10.0.tar.bz2
-  #   autotools-configure-parameters:
-  #   - --prefix=/usr
-  #   build-environment:
-  #   - PATH: /usr/bin:$PATH # Ensure system python is used, not from staging area
-  #   build-packages:
-  #   - dblatex
-  #   - docbook2odf
-  #   - pngcrush
-  #   - pngnq
-  #   - python
-  #   - python-libxml2
-  #   organize:
-  #     root/stage/usr: usr
-  #   prime:
-  #   - -root
-
-  # https://download.gimp.org/mirror/pub/gimp/v2.10/
   gimp:
     after:
-    - babl
-    - desktop-settings-packages
-    - gegl
-    - gtk-locales
-    - libheif
-    - libmypaint
-    - mypaint-brushes
-    plugin: autotools
-    source: https://download.gimp.org/pub/gimp/v2.10/gimp-$SNAPCRAFT_PROJECT_VERSION.tar.bz2
-    autotools-configure-parameters:
-    - --prefix=/usr
-    - --sysconfdir=/etc
-    - --with-bug-report-url=https://github.com/snapcrafters/gimp/issues/
-    - --with-build-id=org.gimp.GIMP.snapcraft.stable
-    - --disable-check-update
-    - --disable-docs
-    - --disable-gtk-doc
-    - --disable-gtk-doc-html
-    - --disable-python
-    build-environment:
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - LDFLAGS: -mfpu=neon -flto
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
-    - BABL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/babl-0.1
-    - GEGL_PATH: $SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/gegl-0.4
-    # the LD_LIBRARY_PATH is to fix configure failing to test for gegl matting-levin support
-    - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAPCRAFT_STAGE/usr/lib/$SNAPCRAFT_ARCH_TRIPLET
-    - XDG_DATA_DIRS: $SNAPCRAFT_STAGE/usr/share:/usr/local/share:/usr/share
-    - PYTHON: /usr/bin/python3.8
+      - babl
+      - gegl
+    plugin: meson
+    source: https://github.com/GNOME/gimp.git
     override-pull: |
-      snapcraftctl pull
+      tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_"  | tr "-" "_")"
+      git clone -b "$tag" https://github.com/GNOME/gimp.git "$CRAFT_PART_SRC"
+      sed -i "s|gitlab.gnome.org|github.com|" "$CRAFT_PART_SRC"/.gitmodules
+      git submodule update --init
       sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
-    override-build: |
-      rm -f $SNAPCRAFT_PART_INSTALL/usr/share/pkgconfig/iso-codes.pc
-      snapcraftctl build
-      sed -i -E "s|^(.*python3?=).*|\1/snap/$SNAPCRAFT_PROJECT_NAME/current/usr/bin/python|" $SNAPCRAFT_PART_INSTALL/usr/lib/gimp/2.0/interpreters/pygimp.interp || true
-      sed -i -E 's|^# \(mypaint-brush-path .*$|(mypaint-brush-path "/usr/share/mypaint-data/1.0/brushes:~/.mypaint/brushes")|' $SNAPCRAFT_PART_INSTALL/etc/gimp/2.0/gimprc
+    meson-parameters:
+      - --prefix=/usr
+      - --buildtype=release
+      - -Dgi-docgen=disabled
+      - -Dbuild-id=org.gimp.GIMP.snapcraft.preview
+      - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues/
+      - -Dcheck-update=no
+      - -Denable-default-bin=enabled
+      - -Drelocatable-bundle=yes
+      - -Dlibunwind=true
+    build-environment:
+      - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
+      - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
+      - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
+      - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
+      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
-    - automake
-    - glib-networking
-    - gobject-introspection
-    - gtk-doc-tools
-    - intltool
-    - iso-codes
-    - libaa1-dev
-    - libart-2.0-dev
-    - libbz2-dev
-    - libcairo2-dev
-    - libcurl4-openssl-dev
-    - libdbus-glib-1-dev
-    - libexif-dev
-    - libfftw3-dev
-    - libgdk-pixbuf2.0-dev
-    - libgexiv2-dev
-    - libgirepository1.0-dev
-    - libglib2.0-dev
-    - libgpm-dev
-    - libgs-dev
-    - libgtk-3-dev
-    - libgtk2.0-dev
-    - libgudev-1.0-dev
-    - libice-dev
-    - libilmbase-dev
-    - libisocodes-dev
-    - libjpeg-dev
-    - libjson-glib-dev
-    - liblcms2-dev
-    - liblzma-dev
-    - libmng-dev
-    - libopenexr-dev
-    - libopenjp2-7-dev
-    - libpng-dev
-    - libpoppler-glib-dev
-    - libslang2-dev
-    - libsm-dev
-    - libtiff5-dev
-    - libwebp-dev
-    - libwmf-dev
-    - libx11-dev
-    - libxcursor-dev
-    - libxmu-dev
-    - libxpm-dev
-    - libxt-dev
-    - python3-dev
-    - python3-cairo-dev
-    - xdg-utils
-    - xsltproc
-    - zlib1g-dev
-    - try:
-      - libunwind-dev # not available in s390x
+      - automake
+      - intltool
+      - iso-codes
+      - libaa1-dev
+      - libappstream-glib-dev
+      - libart-2.0-dev
+      - libbz2-dev
+      - libcairo-gobject2
+      - libexif-dev
+      - libexpat1-dev
+      - libfftw3-dev
+      - libgexiv2-dev
+      - libgpm-dev
+      - libice-dev
+      - libluajit-5.1-dev
+      - liblzma-dev
+      - libmng-dev
+      - libmypaint-dev
+      - libopenexr-dev
+      - libslang2-dev
+      - libsm-dev
+      - libunwind-dev
+      - libwebp-dev
+      - libwmf-dev
+      - libxmu-dev
+      - libxpm-dev
+      - luajit
+      - poppler-data
+      - xdg-utils
+      - xsltproc
     stage-packages:
-    - dbus-x11
-    - evince
-    - ghostscript
-    - gir1.2-gtk-2.0
-    - gir1.2-poppler-0.18
-    - glib-networking
-    - gvfs-backends
-    - libaa1
-    - libart-2.0-2
-    - libbz2-1.0
-    - libcairo2
-    - libcurl4
-    - libdbus-glib-1-2
-    - libexif12
-    - libgexiv2-2
-    - libfftw3-3
-    - libgdk-pixbuf2.0-0
-    - libglib2.0-0
-    - libgpm2
-    - libgs9
-    - libilmbase24
-    - libjpeg-turbo8
-    - libjson-glib-1.0-0
-    - liblcms2-2
-    - liblzma5
-    - libmng2
-    - libopenexr24
-    - libopenjp2-7
-    - libpng16-16
-    - libpoppler-glib8
-    - libslang2
-    - libtiff5
-    - libwebp6
-    - libwebpdemux2
-    - libwebpmux3
-    - libwmf0.2-7
-    - libxmu6
-    - libxpm4
-    - libxt6
-    - python3-cairo
-    - python3-dev
-    - python3-gi
-    - rawtherapee
-    - zlib1g
-    - try:
-      - libunwind8 # not available in s390x
+      - evince
+      - ghostscript
+      - iso-codes
+      - libaa1
+      - libappstream-glib8
+      - libart-2.0-2
+      - libbz2-1.0
+      - libexif12
+      - libfftw3-bin
+      - libgexiv2-2
+      - libgpm2
+      - libheif1
+      - libluajit-5.1-2
+      - liblzma5
+      - libmng2
+      - libmypaint-1.5-1
+      - libmypaint-common
+      - libopenexr-3-1-30
+      - libslang2
+      - libsndio7.0
+      - libunwind8
+      - libwebp7
+      - libwebpdemux2
+      - libwebpmux3
+      - libwmf-0.2-7
+      - libxmu6
+      - libxpm4
+      - libxv1
+      - lua-lgi
+      - luajit
+      - mypaint-brushes
+      - mypaint-data
+      - poppler-data
+    override-stage: |
+      # fix gimp python interpreters file
+      cat <<EOF > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/gimp/3.0/interpreters/pygimp.interp
+      python=/usr/bin/python3
+      python3=/usr/bin/python3
+      /usr/bin/python=/usr/bin/python3
+      /usr/bin/python3=/usr/bin/python3
+      :Python:E::py::python3:
+      EOF
+      # update gimp's plugin search path so it will pick up plugins mounted over snapd's content interface
+      current_path=$(grep "# (plug-in-path" ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc | cut -d '"' -f2)
+      add_dir=/snap/${SNAPCRAFT_PROJECT_NAME}/current/openvino-ai-plugins-gimp/gimp-plugins
+      echo "(plug-in-path \"${current_path}:${add_dir}\")" >> ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc
+      craftctl default
+
+  command-chain-openvino:
+    plugin: dump
+    source-type: git
+    source: https://github.com/canonical/openvino-toolkit-snap.git
+    source-tag: 2024.6.0-4
     stage:
-    - -**/*.la
-    - -etc/dbus-1
-    - -etc/default
-    - -etc/dictionaries-common
-    - -etc/emacs
-    - -etc/fonts
-    - -etc/glvnd
-    - -etc/gnome
-    - -etc/gss
-    - -etc/gtk-3.0
-    - -etc/init.d
-    - -etc/libblockdev
-    - -etc/libpaper.d
-    - -etc/mailcap.order
-    - -etc/mime.types
-    - -etc/rc*.d
-    - -etc/sensors3.conf
-    - -etc/systemd
-    - -etc/ucf.conf
-    - -etc/udisks2
-    - -etc/X11
-    - -sbin/cfdisk
-    - -sbin/cgdisk
-    - -sbin/fdisk
-    - -sbin/fixparts
-    - -sbin/gdisk
-    - -sbin/parted
-    - -sbin/partprobe
-    - -sbin/sfddisk
-    - -sbin/sgdisk
-    - -usr/bin/aspell*
-    - -usr/bin/dbus*
-    - -usr/bin/desktop-file-*
-    - -usr/bin/fc-*
-    - -usr/bin/gtk-update-icon-cache
-    - -usr/bin/ispell*
-    - -usr/bin/mtrace
-    - -usr/bin/rpcgen
-    - -usr/bin/run-*
-    - -usr/bin/select-default-iwrap
-    - -usr/bin/update-*-database
-    - -usr/bin/xdpyinfo
-    - -usr/bin/xdriinfo
-    - -usr/bin/xev
-    - -usr/bin/xfd
-    - -usr/bin/xfontsel
-    - -usr/bin/xkill
-    - -usr/bin/xlsatoms
-    - -usr/bin/xlsclients
-    - -usr/bin/xlsfonts
-    - -usr/bin/xmessage
-    - -usr/bin/xprop
-    - -usr/bin/xvinfo
-    - -usr/bin/xwininfo
-    - -usr/lib/aspell
-    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/libcrypt.pc
-    - -usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pkgconfig/libxcrypt.pc
-    - -usr/share/doc/libjpeg*
-    - -usr/share/ghostscript
-    - -usr/share/pkgconfig/iso-codes.pc
-    - -**/iso-codes
-    - -var/cache
-    - -var/lib/aspell
-    - -var/lib/dbus
-    - -var/lib/dictionaries-common
-    - -var/lib/emacsen-common
-    - -var/lib/ispell
-    - -var/lib/systemd
-    - -var/lib/ucf
-    prime:
-    - -usr/include
-    - -usr/lib/pkgconfig
+      - command-chain/openvino-launch
+    override-stage: |
+      if [ $(uname -m) != "x86_64" ]; then
+        echo 'exec "$@"' > ${CRAFT_PART_INSTALL}/command-chain/openvino-launch
+      fi
+      craftctl default
+
+  command-chain-openvino-ai-plugins-gimp:
+    plugin: dump
+    source-type: git
+    source: https://github.com/canonical/openvino-ai-plugins-gimp-snap.git
+    source-branch: 3.0.0-2
+    stage:
+      - command-chain/openvino-ai-plugins-gimp-launch
+    override-stage: |
+      if [ $(uname -m) != "x86_64" ]; then
+        echo 'exec "$@"' > ${CRAFT_PART_INSTALL}/command-chain/openvino-ai-plugins-gimp-launch
+      fi
+      craftctl default
 
   gmic:
     after: [gimp]
-    plugin: nil
-    override-pull: |
-      git clone https://github.com/GreycLab/gmic.git
-      git clone https://github.com/GreycLab/CImg.git
-      git clone https://github.com/c-koi/gmic-qt.git
-      cd gmic-qt
-      # VERSION="$(git tag -l 'v.*.*' --sort=version:refname | tail -n1)"
-      VERSION=v.3.3.1
-      git checkout "$VERSION"
-      cd ../gmic
-      git checkout "$VERSION"
-      cd ../CImg
-      git checkout "$VERSION"
-    override-build: |
-      make -C gmic/src CImg.h gmic_stdlib.h
-      cd gmic-qt
-      # mkdir build
-      # cd build
-      # cmake .. \
-      #   -DCMAKE_INSTALL_PREFIX=/usr \
-      #   -DGMIC_QT_HOST=gimp \
-      #   -DGMIC_PATH=$SNAPCRAFT_PART_BUILD/gmic/src \
-      #   -DCMAKE_BUILD_TYPE=Release
-      qmake HOST=gimp
-      make -j$SNAPCRAFT_PARALLEL_BUILD_COUNT
-      make DESTDIR=$SNAPCRAFT_PART_INSTALL install
+    plugin: dump
+    source: https://gmic.eu/files/source/gmic_3.5.2.tar.gz
     build-environment:
-    - PATH: /snap/bin:$PATH
-    - to armhf:
-      - CFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - CXXFLAGS: -Ofast -g -pipe -mfpu=neon -flto
-      - LDFLAGS: -mfpu=neon -flto
-    - else:
-      - CFLAGS: -Ofast -g -pipe -flto
-      - CXXFLAGS: -Ofast -g -pipe -flto
-      - LDFLAGS: -flto
+      - QT_SELECT: qt6
     build-packages:
-      - curl
-      - g++
-      - gcc
-      - libcurl4-openssl-dev
-      - libfftw3-dev
-      - libgraphicsmagick++1-dev
-      - libgraphicsmagick1-dev
-      - libjpeg-dev
-      - libopencv-core-dev
-      - libopencv-highgui-dev
-      - libopencv-videoio-dev
-      # - libopencv-imgcodecs-dev
-      # - libopencv-imgproc-dev
-      - libopenexr-dev
-      - libpng-dev
-      - libtiff5-dev
-      - libxkbfile-dev
-      - libxres-dev
-      - make
-      - qt5-qmake-bin
+      - cmake
       - pkg-config
-      - qt5-default
-      - qtbase5-dev
-      - qttools5-dev
+      - qt6-base-dev
+      - qt6-l10n-tools
+      - qt6-tools-dev
+      - qt6-wayland-dev
+      - qtchooser
       - wget
-      - zlib1g-dev
     stage-packages:
       - libcurl4
       - libdouble-conversion3
-      - libfftw3-3
+      - libfftw3-bin
+      - libffi8
       - libgraphicsmagick-q16-3
       - libgraphicsmagick++-q16-12
       - libjpeg-turbo8
-      - libopencv-core4.2
-      - libopencv-highgui4.2
-      - libopencv-videoio4.2
-      - libopenexr24
+      - libopencv-core406t64
+      - libopencv-highgui406t64
+      - libopencv-video406t64
+      - libopenexr-3-1-30
       - libpng16-16
-      - libqt5core5a
-      - libqt5gui5
-      - libqt5network5
-      - libqt5widgets5
-      - libtiff5
-      - libxkbfile1
-      - libxres1
-      - qtwayland5
-      - zlib1g
+      - libqt6core6t64
+      - libqt6gui6t64
+      - libqt6network6t64
+      - libqt6widgets6t64
+      - qt6-wayland
+    override-build: |
+      qtchooser -install qt6 "$(which qmake6)" || true
+      make -C src CImg.h gmic_stdlib_community.h
 
-  # # https://github.com/darktable-org/darktable/releases
-  # darktable:
-  #   after: [gimp, gmic]
-  #   source: https://github.com/darktable-org/darktable/releases/download/release-3.0.2/darktable-3.0.2.tar.xz
-  #   plugin: cmake
-  #   override-pull: |
-  #     snapcraftctl pull
-  #     sed -i 's|Exec=.*|Exec=darktable %U|;s|TryExec=.*|TryExec=darktable|;s|Icon=.*|Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/darktable.svg|' data/darktable.desktop.in
-  #   cmkae-parameters:
-  #     - -DCMAKE_BUILD_TYPE=Release
-  #     - -DCMAKE_INSTALL_PREFIX=/usr
-  #   build-environment:
-  #     - CFLAGS: -Ofast -g -pipe -flto
-  #     - CXXFLAGS: -Ofast -g -pipe -flto
-  #     - LDFLAGS: -flto
-  #   build-snaps: [cmake]
-  #   build-packages:
-  #     - curl
-  #     - freeglut3-dev
-  #     - fop
-  #     - intltool
-  #     - libcairo2-dev
-  #     - libcolord-dev
-  #     - libcolord-gtk-dev
-  #     - libcups2-dev
-  #     - libdbus-glib-1-dev
-  #     - libexiv2-dev
-  #     - libflickcurl-dev
-  #     - libgnome-keyring-dev
-  #     - libgphoto2-dev
-  #     - libgraphicsmagick1-dev
-  #     - libgtk-3-dev
-  #     - libjpeg-dev
-  #     - libjson-glib-dev
-  #     - liblcms2-dev
-  #     - liblensfun-dev
-  #     - liblua5.3-dev
-  #     - libopenexr-dev
-  #     - libopenjp2-7-dev
-  #     - libosmgpsmap-1.0-dev
-  #     - libpng-dev
-  #     - libpugixml-dev
-  #     - librsvg2-dev
-  #     - libsdl1.2-dev
-  #     - libsecret-1-dev
-  #     - libsoup2.4-dev
-  #     - libsqlite3-dev
-  #     - libtiff-dev
-  #     - libwebp-dev
-  #     - xsltproc
-  #     - zlib1g-dev
-  #   stage-packages:
-  #     - freeglut3
-  #     - libcolord2
-  #     - libcolord-gtk1
-  #     - libcups2
-  #     - libdbus-glib-1-2
-  #     - libexiv2-27
-  #     - libflickcurl0
-  #     - libgnome-keyring0
-  #     - libgphoto2-6
-  #     - libgraphicsmagick-q16-3
-  #     - libjpeg-turbo8
-  #     - libjson-glib-1.0-0
-  #     - liblcms2-2
-  #     - liblensfun1
-  #     - liblensfun-data-v1
-  #     - liblua5.3-0
-  #     - libopenexr24
-  #     - libopenjp2-7
-  #     - libosmgpsmap-1.0-1
-  #     - libpng16-16
-  #     - libpugixml1v5
-  #     - librsvg2-2
-  #     - libsdl1.2debian
-  #     - libsecret-1-0
-  #     - libsoup2.4-1
-  #     - libsqlite3-0
-  #     - libtiff5
-  #     - libwebp6
+      cd gmic-qt
+      # The CMakeLists.txt file hard-codes a minimum QT6 version of 6.5.0, which is not available
+      # in Noble. Testing confirms that things seem to work fine on the version in Noble (6.4.2).
+      sed -i "s|set(MIN_QT_VERSION 6.5.0)|set(MIN_QT_VERSION 6.4.0)|g" CMakeLists.txt
 
-  # Ship a default set of GSettings schemas so that the correct theme is used
-  # in Wayland sessions on Ubuntu (see https://forum.snapcraft.io/t/7806/3).
-  desktop-settings-packages:
-    after: [ desktop-launch ]
-    plugin: nil
-    build-packages:
-    - libglib2.0-bin
-    stage-packages:
-    - gsettings-desktop-schemas
-    - ubuntu-settings
-    prime:
-    - usr/share/glib-2.0/schemas/*
+      mkdir build
+      cd build
+      cmake \
+        -DGMIC_QT_HOST=gimp3 \
+        -DGMIC_PATH=$CRAFT_PART_SRC/src \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_SYSTEM_GMIC=OFF \
+        -DBUILD_WITH_QT6=ON \
+        ..
 
-  desktop-settings-build:
-    plugin: nil
-    after: [ gimp, gmic, desktop-settings-packages ]
-    override-prime: |
-      set -eux
-      glib-compile-schemas usr/share/glib-2.0/schemas
+      make
+
+      install -Dm 0755 $CRAFT_PART_BUILD/gmic-qt/build/gmic_gimp_qt \
+        $CRAFT_PART_INSTALL/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gimp/3.0/plug-ins/gmic_gimp_qt/gmic_gimp_qt
 
   cleanup:
-    after: [ gimp, gmic, desktop-settings-build ]
-    plugin: nil
-    build-snaps:
-    - core18
-    - gnome-3-38-2004
-    - gtk-common-themes
-    - gtk2-common-themes
+    after: [gmic]
+    source: https://github.com/canonical/gpu-snap.git
+    plugin: dump
     override-prime: |
-      set -eux
-      for snap in "gnome-3-38-2004" "gtk-common-themes" "gtk2-common-themes"; do  # List all content-snaps you're using here
-        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/gpu-2404-cleanup mesa-2404
+      for snap in "core24" "gnome-46-2404" "ffmpeg-2404"; do
+          cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
       done
-      for CRUFT in bug lintian man; do
-        rm -rf $SNAPCRAFT_PRIME/usr/share/$CRUFT
-      done
-      find $SNAPCRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
-      find $SNAPCRAFT_PRIME/usr/share -type d -empty -not -path "$SNAPCRAFT_PRIME/usr/share/gimp/*" -delete
