@@ -9,7 +9,7 @@ permissions:
   issues: write
 
 jobs:
-  promote-latest:
+  promote:
     name: ⬆️ Promote to latest/stable
     environment: "Candidate Branch"
     runs-on: ubuntu-latest
@@ -23,41 +23,5 @@ jobs:
       - name: ⬆️ Promote to latest/stable
         uses: snapcrafters/ci/promote-to-stable@main
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          store-token: ${{ secrets.SNAP_STORE_STABLE }}
-  
-  promote-preview:
-    name: ⬆️ Promote to preview/stable
-    environment: "Preview Candidate Branch"
-    runs-on: ubuntu-latest
-    if: |
-      ( !github.event.issue.pull_request )
-      && contains(github.event.comment.body, '/promote ')
-      && contains(github.event.comment.body, 'preview/stable')
-      && contains(github.event.issue.body, 'preview/stable')
-      && contains(github.event.*.labels.*.name, 'testing')
-    steps:
-      - name: ⬆️ Promote to preview/stable
-        uses: snapcrafters/ci/promote-to-stable@main
-        with:
-          channel: preview/stable
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          store-token: ${{ secrets.SNAP_STORE_STABLE }}
-
-  promote-openvino:
-    name: ⬆️ Promote to 2.99-openvino/stable
-    environment: "2.99 OpenVino Candidate Branch"
-    runs-on: ubuntu-latest
-    if: |
-      ( !github.event.issue.pull_request )
-      && contains(github.event.comment.body, '/promote ')
-      && contains(github.event.comment.body, '2.99-openvino/stable')
-      && contains(github.event.issue.body, '2.99-openvino/stable')
-      && contains(github.event.*.labels.*.name, 'testing')
-    steps:
-      - name: ⬆️ Promote to 2.99-openvino/stable
-        uses: snapcrafters/ci/promote-to-stable@main
-        with:
-          channel: 2.99-openvino/stable
           github-token: ${{ secrets.GITHUB_TOKEN }}
           store-token: ${{ secrets.SNAP_STORE_STABLE }}
