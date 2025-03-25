@@ -1,5 +1,5 @@
 name: gimp
-version: 3.0.0
+version: 3.0.2
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
@@ -114,7 +114,7 @@ parts:
     after:
       - babl
     source: https://github.com/GNOME/gegl.git
-    source-tag: GEGL_0_4_56
+    source-tag: GEGL_0_4_58
     plugin: meson
     meson-parameters:
       - --prefix=/usr
