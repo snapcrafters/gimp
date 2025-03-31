@@ -97,6 +97,8 @@ apps:
       - openvino-libs
       - openvino-ai-plugins-gimp-libs
       - dot-local-share-openvino-ai-plugins-gimp
+      - gtk-3-themes
+      - icon-themes
 
 parts:
   babl:
