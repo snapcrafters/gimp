@@ -207,13 +207,16 @@ parts:
       - libart-2.0-dev
       - libbz2-dev
       - libcairo-gobject2
+      - libde265-dev
       - libexif-dev
       - libexpat1-dev
       - libfftw3-dev
       - libgexiv2-dev
       - libgpm-dev
+      - libheif-dev
       - libice-dev
       - libluajit-5.1-dev
+      - libjxl-dev
       - liblzma-dev
       - libmng-dev
       - libmypaint-dev
@@ -237,11 +240,14 @@ parts:
       - libappstream-glib8
       - libart-2.0-2
       - libbz2-1.0
+      - libde265-0
       - libexif12
       - libfftw3-bin
       - libgexiv2-2
       - libgpm2
+      - libheif-plugin-libde265
       - libheif1
+      - libjxl0.7
       - libluajit-5.1-2
       - liblzma5
       - libmng2
