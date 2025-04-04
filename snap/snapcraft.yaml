@@ -242,7 +242,7 @@ parts:
       - libbz2-1.0
       - libde265-0
       - libexif12
-      - libfftw3-bin
+      - libfftw3-double3
       - libgexiv2-2
       - libgpm2
       - libheif-plugin-libde265
@@ -328,7 +328,7 @@ parts:
     stage-packages:
       - libcurl4
       - libdouble-conversion3
-      - libfftw3-bin
+      - libfftw3-double3
       - libffi8
       - libgraphicsmagick-q16-3
       - libgraphicsmagick++-q16-12
