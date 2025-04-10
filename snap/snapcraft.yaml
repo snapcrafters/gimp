@@ -75,6 +75,7 @@ environment:
   # The extension will fail on GIMP startup but commenting these lines avoids the risk of a nasty crash loop
   #LUA_PATH: $SNAP/usr/share/lua/5.1/?.lua;$SNAP/usr/share/lua/5.1/lgi/?.lua;$SNAP/usr/share/lua/5.1/lgi/override/?.lua
   #LUA_CPATH: $SNAP/usr/lib/x86_64-linux-gnu/lua/5.1/?.so
+  LIBHEIF_PLUGIN_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libheif/plugins
 
 apps:
   gimp:
