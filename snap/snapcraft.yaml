@@ -75,7 +75,7 @@ environment:
   # The extension will fail on GIMP startup but commenting these lines avoids the risk of a nasty crash loop
   #LUA_PATH: $SNAP/usr/share/lua/5.1/?.lua;$SNAP/usr/share/lua/5.1/lgi/?.lua;$SNAP/usr/share/lua/5.1/lgi/override/?.lua
   #LUA_CPATH: $SNAP/usr/lib/x86_64-linux-gnu/lua/5.1/?.so
-  LIBHEIF_PLUGIN_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libheif/plugins
+  LIBHEIF_PLUGIN_PATH: $SNAP/usr/local/lib/libheif
 
 apps:
   gimp:
@@ -90,7 +90,7 @@ apps:
     common-id: org.gimp.GIMP
     environment:
       HOME: $SNAP_REAL_HOME
-      LD_LIBRARY_PATH: $SNAP/ffmpeg-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/ffmpeg-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
       PATH: $SNAP/ffmpeg-platform/usr/bin:$PATH
     slots:
       - dbus-gimp
@@ -179,10 +179,29 @@ parts:
     build-snaps:
       - ffmpeg-2404
 
+  # Use a newer version of libheif than is available in core24 to enable
+  # support for HEIC/HEIF images taken on later versions of iOS and Android.
+  # Minimum version needed is 1.18.2, which should be available in core26!
+  libheif:
+    plugin: cmake
+    source: https://github.com/strukturag/libheif.git
+    source-tag: v1.19.7
+    source-type: git
+    cmake-parameters:
+      - --preset=release
+    override-build: |
+      cd $CRAFT_PART_SRC
+      bash ./third-party/aom.cmd
+      export PKG_CONFIG_PATH=\$PKG_CONFIG_PATH:$(pwd)/aom/dist/lib/pkgconfig
+      craftctl default
+    prime:
+      - usr/local/lib
+
   gimp:
     after:
       - babl
       - gegl
+      - libheif
     plugin: meson
     source: https://github.com/GNOME/gimp.git
     override-pull: |
@@ -206,7 +225,7 @@ parts:
       - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
       - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
       - LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
-      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
+      - C_INCLUDE_PATH: $CRAFT_STAGE/usr/local/include:/snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
     build-packages:
       - automake
       - intltool
@@ -222,7 +241,6 @@ parts:
       - libfftw3-dev
       - libgexiv2-dev
       - libgpm-dev
-      - libheif-dev
       - libice-dev
       - libluajit-5.1-dev
       - libjxl-dev
@@ -254,8 +272,6 @@ parts:
       - libfftw3-double3
       - libgexiv2-2
       - libgpm2
-      - libheif-plugin-libde265
-      - libheif1
       - libjxl0.7
       - libluajit-5.1-2
       - liblzma5
