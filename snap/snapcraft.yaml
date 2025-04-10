@@ -1,11 +1,19 @@
 name: gimp
-version: 3.0.2
+title: GIMP
 summary: GNU Image Manipulation Program
 description: |
   Whether you are a graphic designer, photographer, illustrator, or scientist,
   GIMP provides you with sophisticated tools to get your job done. You can
   further enhance your productivity with GIMP thanks to many customization
   options and 3rd party plugins.
+
+website: https://gimp.org/
+contact: https://github.com/snapcrafters/gimp/issues
+issues: https://github.com/snapcrafters/gimp/issues
+source-code: https://github.com/snapcrafters/gimp
+license: MIT
+
+version: 3.0.2
 
 grade: stable
 confinement: strict
