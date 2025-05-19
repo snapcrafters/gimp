@@ -13,7 +13,7 @@ issues: https://github.com/snapcrafters/gimp/issues
 source-code: https://github.com/snapcrafters/gimp
 license: MIT
 
-version: 3.0.2
+version: 3.0.4
 
 grade: stable
 confinement: strict
