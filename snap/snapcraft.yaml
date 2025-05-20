@@ -111,7 +111,7 @@ parts:
   babl:
     plugin: meson
     source: https://github.com/GNOME/babl.git
-    source-tag: BABL_0_1_112
+    source-tag: BABL_0_1_114
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
@@ -123,7 +123,7 @@ parts:
     after:
       - babl
     source: https://github.com/GNOME/gegl.git
-    source-tag: GEGL_0_4_58
+    source-tag: GEGL_0_4_62
     plugin: meson
     meson-parameters:
       - --prefix=/usr
