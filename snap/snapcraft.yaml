@@ -69,7 +69,7 @@ plugs:
 
 environment:
   GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
-  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
+  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
   # Ensure the gmic plugin can correctly locate the QT plugins
   QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins
   GIMP3_LOCALEDIR: $SNAP/usr/share/locale
