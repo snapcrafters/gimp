@@ -7,6 +7,9 @@ description: |
   further enhance your productivity with GIMP thanks to many customization
   options and 3rd party plugins.
 
+  ⚡️ **OpenVINO AI Plugins**: if you are running on Intel hardware, follow
+  [this guide](https://github.com/snapcrafters/gimp/blob/candidate/README.md#openvino-ai-plugins) to enable AI features in GIMP!
+
 website: https://gimp.org/
 contact: https://github.com/snapcrafters/gimp/issues
 issues: https://gitlab.gnome.org/GNOME/gimp/-/issues
@@ -317,7 +320,7 @@ parts:
     plugin: dump
     source-type: git
     source: https://github.com/canonical/openvino-toolkit-snap.git
-    source-tag: 2025.2.0-amd64-rev32
+    source-tag: 2025.2.0-amd64-rev34
     stage:
       - command-chain/openvino-launch
     override-stage: |
