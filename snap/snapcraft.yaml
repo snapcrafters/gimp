@@ -7,6 +7,9 @@ description: |
   further enhance your productivity with GIMP thanks to many customization
   options and 3rd party plugins.
 
+  ⚡️ **OpenVINO AI Plugins**: if you are running on Intel hardware, follow
+  [this guide](https://github.com/snapcrafters/gimp/blob/candidate/README.md#openvino-ai-plugins) to enable AI features in GIMP!
+
 website: https://gimp.org/
 contact: https://github.com/snapcrafters/gimp/issues
 issues: https://gitlab.gnome.org/GNOME/gimp/-/issues
@@ -33,6 +36,8 @@ layout:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
+  /etc/gitconfig:
+    bind-file: $SNAP_DATA/etc/gitconfig
 
 slots:
   dbus-gimp:
@@ -67,7 +72,7 @@ plugs:
 
 environment:
   GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
-  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
+  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
   # Ensure the gmic plugin can correctly locate the QT plugins
   QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins
   GIMP3_LOCALEDIR: $SNAP/usr/share/locale
@@ -315,7 +320,7 @@ parts:
     plugin: dump
     source-type: git
     source: https://github.com/canonical/openvino-toolkit-snap.git
-    source-tag: 2024.6.0-4
+    source-tag: 2025.2.0-amd64-rev34
     stage:
       - command-chain/openvino-launch
     override-stage: |
@@ -328,7 +333,7 @@ parts:
     plugin: dump
     source-type: git
     source: https://github.com/canonical/openvino-ai-plugins-gimp-snap.git
-    source-branch: 3.0.0-2
+    source-tag: 3.1.2-rev39
     stage:
       - command-chain/openvino-ai-plugins-gimp-launch
     override-stage: |
