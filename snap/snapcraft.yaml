@@ -345,7 +345,7 @@ parts:
   gmic:
     after: [gimp]
     plugin: dump
-    source: https://gmic.eu/files/source/gmic_3.5.5.tar.gz
+    source: https://gmic.eu/files/source/gmic_3.6.0.tar.gz
     build-environment:
       - QT_SELECT: qt6
     build-packages:
