@@ -17,6 +17,10 @@ jobs:
     environment: "Candidate Branch"
     runs-on: ubuntu-latest
     steps:
+      - name: Install utilities
+        run: |
+          sudo apt-get install -y sd
+
       - name: 🔄 Sync version with upstream
         uses: snapcrafters/ci/sync-version@main
         with:
@@ -24,3 +28,9 @@ jobs:
           update-script: |
             VERSION=$(curl -s https://www.gimp.org/ | grep -Po "span id='ver'>\K[^<]+")
             sed -i 's/^\(version: \).*$/\1'"$VERSION"'/' snap/snapcraft.yaml
+            
+            GMIC_VERSION=$(curl -sL https://api.github.com/repos/greyclab/gmic/releases |
+              jq .  | grep tag_name | head -n 1 | cut -d'"' -f4 | cut -d"." -f2-
+            )
+
+            sd -p "gmic_[0-9\.]+.tar.gz" "gmic_$GMIC_VERSION.tar.gz" snap/snapcraft.yaml            
