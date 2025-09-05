@@ -6,10 +6,6 @@ description: |
   GIMP provides you with sophisticated tools to get your job done. You can
   further enhance your productivity with GIMP thanks to many customization
   options and 3rd party plugins.
-
-  ⚡️ **OpenVINO AI Plugins**: if you are running on Intel hardware, follow
-  [this guide](https://github.com/snapcrafters/gimp/blob/candidate/README.md#openvino-ai-plugins) to enable AI features in GIMP!
-
 website: https://gimp.org/
 contact: https://github.com/snapcrafters/gimp/issues
 issues: https://gitlab.gnome.org/GNOME/gimp/-/issues
@@ -61,20 +57,18 @@ plugs:
     interface: content
     content: openvino-libs-2404
     target: $SNAP/openvino
-  openvino-ai-plugins-gimp-libs:
-    interface: content
-    content: openvino-ai-plugins-gimp-2404
-    target: $SNAP/openvino-ai-plugins-gimp
   dot-local-share-openvino-ai-plugins-gimp:
     interface: personal-files
     write:
       - $HOME/.local/share/openvino-ai-plugins-gimp
+  gimp-plugins:
+    interface: content
+    content: gimp-plugins
+    target: $SNAP/gimp-plugins
 
 environment:
   GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
-  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
-  # Ensure the gmic plugin can correctly locate the QT plugins
-  QT_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/qt6/plugins
+  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas
   GIMP3_LOCALEDIR: $SNAP/usr/share/locale
   # Lua goat exercise considered unstable upstream: https://gitlab.gnome.org/GNOME/gimp/-/commit/78665ca3723f723ac313fdaeef5b62d41ab6b48d
   # The extension will fail on GIMP startup but commenting these lines avoids the risk of a nasty crash loop
@@ -85,11 +79,7 @@ environment:
 apps:
   gimp:
     command: usr/bin/gimp
-    command-chain:
-      [
-        "command-chain/openvino-launch",
-        "command-chain/openvino-ai-plugins-gimp-launch",
-      ]
+    command-chain: [command-chain/enable-plugins]
     extensions: [gnome]
     desktop: usr/share/applications/gimp.desktop
     common-id: org.gimp.GIMP
@@ -107,10 +97,8 @@ apps:
       - removable-media
       - unity7
       - intel-npu
-      - npu-libs
-      - openvino-libs
-      - openvino-ai-plugins-gimp-libs
       - dot-local-share-openvino-ai-plugins-gimp
+      - gimp-plugins
 
 parts:
   babl:
@@ -312,95 +300,18 @@ parts:
       EOF
       # update gimp's plugin search path so it will pick up plugins mounted over snapd's content interface
       current_path=$(grep "# (plug-in-path" ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc | cut -d '"' -f2)
-      add_dir=/snap/${SNAPCRAFT_PROJECT_NAME}/current/openvino-ai-plugins-gimp/gimp-plugins
+      add_dir=/snap/${SNAPCRAFT_PROJECT_NAME}/current/gimp-plugins
       echo "(plug-in-path \"${current_path}:${add_dir}\")" >> ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc
       craftctl default
 
-  command-chain-openvino:
+  command-chain-plugins:
     plugin: dump
-    source-type: git
-    source: https://github.com/canonical/openvino-toolkit-snap.git
-    source-tag: 2025.2.0-amd64-rev34
-    stage:
-      - command-chain/openvino-launch
-    override-stage: |
-      if [ $(uname -m) != "x86_64" ]; then
-        echo 'exec "$@"' > ${CRAFT_PART_INSTALL}/command-chain/openvino-launch
-      fi
-      craftctl default
-
-  command-chain-openvino-ai-plugins-gimp:
-    plugin: dump
-    source-type: git
-    source: https://github.com/canonical/openvino-ai-plugins-gimp-snap.git
-    source-tag: 3.1.2-rev39
-    stage:
-      - command-chain/openvino-ai-plugins-gimp-launch
-    override-stage: |
-      if [ $(uname -m) != "x86_64" ]; then
-        echo 'exec "$@"' > ${CRAFT_PART_INSTALL}/command-chain/openvino-ai-plugins-gimp-launch
-      fi
-      craftctl default
-
-  gmic:
-    after: [gimp]
-    plugin: dump
-    source: https://gmic.eu/files/source/gmic_3.6.1.tar.gz
-    build-environment:
-      - QT_SELECT: qt6
-    build-packages:
-      - cmake
-      - pkg-config
-      - qt6-base-dev
-      - qt6-l10n-tools
-      - qt6-tools-dev
-      - qt6-wayland-dev
-      - qtchooser
-      - wget
-    stage-packages:
-      - libcurl4
-      - libdouble-conversion3
-      - libfftw3-double3
-      - libffi8
-      - libgraphicsmagick-q16-3
-      - libgraphicsmagick++-q16-12
-      - libjpeg-turbo8
-      - libopencv-core406t64
-      - libopencv-highgui406t64
-      - libopencv-video406t64
-      - libopenexr-3-1-30
-      - libpng16-16
-      - libqt6core6t64
-      - libqt6gui6t64
-      - libqt6network6t64
-      - libqt6widgets6t64
-      - qt6-wayland
-    override-build: |
-      qtchooser -install qt6 "$(which qmake6)" || true
-      make -C src CImg.h gmic_stdlib_community.h
-
-      cd gmic-qt
-      # The CMakeLists.txt file hard-codes a minimum QT6 version of 6.5.0, which is not available
-      # in Noble. Testing confirms that things seem to work fine on the version in Noble (6.4.2).
-      sed -i "s|set(MIN_QT_VERSION 6.5.0)|set(MIN_QT_VERSION 6.4.0)|g" CMakeLists.txt
-
-      mkdir build
-      cd build
-      cmake \
-        -DGMIC_QT_HOST=gimp3 \
-        -DGMIC_PATH=$CRAFT_PART_SRC/src \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DENABLE_SYSTEM_GMIC=OFF \
-        -DBUILD_WITH_QT6=ON \
-        ..
-
-      make
-
-      install -Dm 0755 $CRAFT_PART_BUILD/gmic-qt/build/gmic_gimp_qt \
-        $CRAFT_PART_INSTALL/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gimp/3.0/plug-ins/gmic_gimp_qt/gmic_gimp_qt
+    source: command-chain/
+    organize:
+      enable-plugins: command-chain/enable-plugins
 
   cleanup:
-    after: [gmic]
+    after: [gimp]
     source: https://github.com/canonical/gpu-snap.git
     plugin: dump
     override-prime: |

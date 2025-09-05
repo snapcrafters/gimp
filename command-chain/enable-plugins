@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Set environment for third-party plugins.
+#
+
+shopt -s nullglob
+
+for wrapper in "${SNAP}"/gimp-plugins/wrappers-*/*.env; do
+  source "${wrapper}"
+done
+exec "$@"
