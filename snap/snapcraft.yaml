@@ -97,6 +97,8 @@ apps:
       - removable-media
       - unity7
       - intel-npu
+      - npu-libs
+      - openvino-libs
       - dot-local-share-openvino-ai-plugins-gimp
       - gimp-plugins
 
