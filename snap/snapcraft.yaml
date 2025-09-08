@@ -53,14 +53,6 @@ plugs:
     interface: content
     content: npu-libs-2404
     target: $SNAP/npu-libs
-  openvino-libs:
-    interface: content
-    content: openvino-libs-2404
-    target: $SNAP/openvino
-  dot-local-share-openvino-ai-plugins-gimp:
-    interface: personal-files
-    write:
-      - $HOME/.local/share/openvino-ai-plugins-gimp
   gimp-plugins:
     interface: content
     content: gimp-plugins
@@ -98,8 +90,6 @@ apps:
       - unity7
       - intel-npu
       - npu-libs
-      - openvino-libs
-      - dot-local-share-openvino-ai-plugins-gimp
       - gimp-plugins
 
 parts:
