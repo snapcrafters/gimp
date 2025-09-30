@@ -37,11 +37,17 @@ slots:
       read:
         - $SNAP/plugin-a
         - $SNAP/plugin-b
-        - $SNAP/wrappers-for-my-plugins
+        - $SNAP/my-plugins.conf
         - $SNAP/libs-for-my-plugins
 ```
 
-where `plugin-a` and `plugin-b` provide code for running two distinct plugins, and libraries for the plugins are installed in `libs-for-my-plugins`. Additionally, the `gimp` snap will `source` any `.env` files it finds in directories named with the `wrappers-` prefix. This provides a method for running setup commands (e.g. exporting environment variables) for the plugins each time GIMP is launched.
+where `plugin-a` and `plugin-b` provide code for running two distinct plugins, and libraries for the plugins are installed in `libs-for-my-plugins`. Additionally, the `gimp` snap supports appending directories to `LD_LIBRARY_PATH` so it can find `.so` files shipped by content producer snaps that are connected to the `gimp-plugins` interface. It does so by searching for files named `add-ld-library-path` inside directories named with a `.conf` suffix (`my-plugins.conf` in the example above). The `add-ld-library-path` file should list one directory per line, with paths relative to top-level directory of the `gimp-plugins` content interface (`$SNAP/gimp-plugins`). For example, in the example above the `add-ld-library-path` file could be as simple as:
+
+```
+libs-for-my-plugins
+```
+
+This assumes that all .so files required by the plugins are shipped inside this single directory.
 
 An example for the QT G'MIC plugins for GIMP can be found [here](https://github.com/canonical/gimp-plugins-gmic-snap).
 
