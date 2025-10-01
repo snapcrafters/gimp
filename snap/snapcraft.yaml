@@ -32,8 +32,6 @@ layout:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
   /usr/share/locale:
     bind: $SNAP/usr/share/locale
-  /etc/gitconfig:
-    bind-file: $SNAP_DATA/etc/gitconfig
 
 slots:
   dbus-gimp:
