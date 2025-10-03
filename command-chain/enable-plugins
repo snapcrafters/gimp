@@ -14,7 +14,7 @@ shopt -s nullglob
 
 for path_file in "${SNAP}"/gimp-plugins/*.conf/add-ld-library-path; do
   while IFS= read -r path || [ -n "${path}" ]; do
-    export LD_LIBRARY_PATH="${SNAP}/gimp-plugins/${path}:${LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP}/gimp-plugins/${path}"
   done < "${path_file}"
 done
 
