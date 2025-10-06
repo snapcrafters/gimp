@@ -16,7 +16,7 @@ issues: https://gitlab.gnome.org/GNOME/gimp/-/issues
 source-code: https://github.com/snapcrafters/gimp
 license: MIT
 
-version: 3.0.4
+version: 3.0.6
 
 grade: stable
 confinement: strict
@@ -116,7 +116,7 @@ parts:
   babl:
     plugin: meson
     source: https://github.com/GNOME/babl.git
-    source-tag: BABL_0_1_114
+    source-tag: BABL_0_1_116
     meson-parameters:
       - --prefix=/usr
       - --buildtype=release
@@ -128,7 +128,7 @@ parts:
     after:
       - babl
     source: https://github.com/GNOME/gegl.git
-    source-tag: GEGL_0_4_62
+    source-tag: GEGL_0_4_64
     plugin: meson
     meson-parameters:
       - --prefix=/usr
