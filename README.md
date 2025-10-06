@@ -24,53 +24,32 @@ snap install gimp
 
 <p align="center">Published for <img src="https://raw.githubusercontent.com/anythingcodes/slack-emoji-for-techies/gh-pages/emoji/tux.png" align="top" width="24" /> with :gift_heart: by Snapcrafters</p>
 
-## OpenVINO™ AI Plugins
+## Third-Party Plugins
 
-> [!IMPORTANT]
-> These plugins are only supported on Intel hardware. The stable diffusion plugin requires an Intel GPU (integrated or discrete) and/or Intel NPU. The super resolution and semantic segmentation plugins will run on an Intel CPU, GPU, or NPU.
+This snap contains a generic plug for supporting third-party plugins over snapd's content interface. To integrate such plugins, a content producer snap must provide a slot of the form:
 
-This snap contains support for AI plugins using Intel's OpenVINO AI inference library. In order to use these plugins, please follow these steps:
+```yaml
+slots:
+  gimp-plugins:
+    interface: content
+    content: gimp-plugins
+    source:
+      read:
+        - $SNAP/plugin-a
+        - $SNAP/plugin-b
+        - $SNAP/my-plugins.conf
+        - $SNAP/libs-for-my-plugins
+```
 
-1. **Install the plugins and their dependencies**:
+where `plugin-a` and `plugin-b` provide code for running two distinct plugins, and libraries for the plugins are installed in `libs-for-my-plugins`. Additionally, the `gimp` snap supports appending directories to `LD_LIBRARY_PATH` so it can find `.so` files shipped by content producer snaps that are connected to the `gimp-plugins` interface. It does so by searching for files named `add-ld-library-path` inside directories named with a `.conf` suffix (`my-plugins.conf` in the example above). The `add-ld-library-path` file should list one directory per line, with paths relative to top-level directory of the `gimp-plugins` content interface (`$SNAP/gimp-plugins`). For example, in the example above the `add-ld-library-path` file could be as simple as:
 
-    ```shell
-    sudo snap install intel-npu-driver # for NPU support
-    sudo snap install openvino-toolkit-2404
-    sudo snap install openvino-ai-plugins-gimp
-    ```
+```
+libs-for-my-plugins
+```
 
-2. **(Optional) Enable Intel NPU and GPU acceleration**:
+This assumes that all .so files required by the plugins are shipped inside this single directory.
 
-    If you are running on a machine (e.g. a laptop or desktop containing an Intel Core Ultra processor) equipped with an Intel neural processing unit (NPU) or graphics processing unit (GPU), ensure you have permissions to use these devices by adding yourself to the `render` Unix group:
-
-    ```shell
-    sudo usermod -a -G render $USER
-    ```
-
-    You need to log out and log back for this change to take effect.
-
-    Next, ensure that the devices have read and write permissions set on the group level:
-
-    ```shell
-    sudo chown root:render /dev/accel/accel*
-    sudo chmod g+rw /dev/accel/accel*
-    sudo chown root:render /dev/dri/render*
-    sudo chmod g+rw /dev/dri/render*
-    ```
-
-3. **(Optional) Install stable diffusion models**:
-
-    Models for the super resolution and semantic segmentation plugins are relatively small and therefore built into the snap, while the stable diffusion models are each on the order of GBs and therefore downloaded to a user's home directory at `~/.local/share/openvino-ai-plugins-gimp` via one of two methods: a `model-setup` command-line tool or from within the GIMP application. To run the interactive command-line tool:
-
-    ```shell
-    openvino-ai-plugins-gimp.model-setup
-    ```
-
-    Alternatively, users may download models from within GIMP by clicking "Model" in the top-left of the stable diffusion dialog window (Layer -> OpenVINO-AI-Plugins -> Stable Diffusion).
-
-4. **Run `gimp` like normal**:
-
-    Instructions for using the OpenVINO AI plugins within GIMP can be found in the [upstream GitHub repo](https://github.com/intel/openvino-ai-plugins-gimp).
+An example for the QT G'MIC plugins for GIMP can be found [here](https://github.com/canonical/gimp-plugins-gmic-snap).
 
 ## How to contribute to this snap
 
