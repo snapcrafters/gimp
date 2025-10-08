@@ -1,37 +1,57 @@
 name: gimp
-title: GIMP
-summary: GNU Image Manipulation Program
-description: |
-  Whether you are a graphic designer, photographer, illustrator, or scientist,
-  GIMP provides you with sophisticated tools to get your job done. You can
-  further enhance your productivity with GIMP thanks to many customization
-  options and 3rd party plugins.
-website: https://gimp.org/
-contact: https://github.com/snapcrafters/gimp/issues
-issues: https://gitlab.gnome.org/GNOME/gimp/-/issues
-source-code: https://github.com/snapcrafters/gimp
-license: MIT
-
+adopt-info: gimp
 version: 3.0.6
-
 grade: stable
-confinement: strict
 base: core24
 compression: lzo
+confinement: strict
 
 platforms:
   arm64:
+    build-on: [arm64]
+    build-for: [arm64]
   amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+
+apps:
+  gimp:
+    common-id: org.gimp.GIMP
+    command: usr/bin/gimp
+    command-chain: [command-chain/enable-plugins]
+    desktop: usr/share/applications/gimp.desktop
+    environment:
+      HOME: $SNAP_REAL_HOME
+      #Internet connection, Matting Leving support on FG select and NPU hardware support
+      LD_LIBRARY_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libproxy:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/npu-libs:$LD_LIBRARY_PATH
+      #JavaScript plug-ins support
+      GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
+      #AVIF, HEIC and HEJ2 plug-ins support
+      LIBHEIF_PLUGIN_PATH: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libheif/plugins
+      #PostScript plug-in support
+      GS_LIB: $SNAP/usr/share/ghostscript/10.02.1/Resource/Init
+      #Acessibility support
+      GTK_MODULES: ""
+    slots:
+      - dbus-gimp
+    plugs:
+      - cups
+      - home
+      - network
+      - removable-media
+      - intel-npu
+      - npu-libs
+      - gimp-plugins
+    extensions: [gnome]
 
 layout:
-  /etc/gimp:
-    bind: $SNAP/etc/gimp
+  #FIXME: needed at runtime because babl, gegl and GIMP are not fully relocatable yet
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
   /usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
-  /usr/share/locale:
-    bind: $SNAP/usr/share/locale
+  /etc/gimp:
+    bind: $SNAP/etc/gimp
 
 slots:
   dbus-gimp:
@@ -40,10 +60,6 @@ slots:
     name: org.gimp.GIMP.UI
 
 plugs:
-  ffmpeg-2404:
-    interface: content
-    target: ffmpeg-platform
-    default-provider: ffmpeg-2404
   intel-npu:
     interface: custom-device
     custom-device: intel-npu-device
@@ -56,257 +72,122 @@ plugs:
     content: gimp-plugins
     target: $SNAP/gimp-plugins
 
-environment:
-  GI_TYPELIB_PATH: $SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gjs/girepository-1.0:$GI_TYPELIB_PATH
-  LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/lib:$SNAP/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/usr/lib:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/lapack:$SNAP/gnome-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/blas:$SNAP/npu-libs
-  GIMP3_LOCALEDIR: $SNAP/usr/share/locale
-  # Lua goat exercise considered unstable upstream: https://gitlab.gnome.org/GNOME/gimp/-/commit/78665ca3723f723ac313fdaeef5b62d41ab6b48d
-  # The extension will fail on GIMP startup but commenting these lines avoids the risk of a nasty crash loop
-  #LUA_PATH: $SNAP/usr/share/lua/5.1/?.lua;$SNAP/usr/share/lua/5.1/lgi/?.lua;$SNAP/usr/share/lua/5.1/lgi/override/?.lua
-  #LUA_CPATH: $SNAP/usr/lib/x86_64-linux-gnu/lua/5.1/?.so
-  LIBHEIF_PLUGIN_PATH: $SNAP/usr/local/lib/libheif
-
-apps:
-  gimp:
-    command: usr/bin/gimp
-    command-chain: [command-chain/enable-plugins]
-    extensions: [gnome]
-    desktop: usr/share/applications/gimp.desktop
-    common-id: org.gimp.GIMP
-    environment:
-      HOME: $SNAP_REAL_HOME
-      LD_LIBRARY_PATH: $SNAP/usr/local/lib:$SNAP/usr/local/lib/libheif:$SNAP/ffmpeg-platform/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
-      PATH: $SNAP/ffmpeg-platform/usr/bin:$PATH
-    slots:
-      - dbus-gimp
-    plugs:
-      - cups-control
-      - browser-support
-      - home
-      - network
-      - removable-media
-      - unity7
-      - intel-npu
-      - npu-libs
-      - gimp-plugins
-
 parts:
+  buildenv:
+    plugin: nil
+    build-environment: &SNAP_ENVIRON
+      - CLICOLOR_FORCE: '1'
+      - CFLAGS: -fdiagnostics-color=always
+      - CXXFLAGS: -fdiagnostics-color=always
+      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
+      - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
+      - LIBHEIF_PLUGIN_PATH: $CRAFT_PART_INSTALL/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/libheif/plugins
+      #FIXME: needed to generate splash image because babl and gegl not fully relocatable yet
+      - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
+      - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
+      #FIXME: GNOME SDK is not setting this runtime var required by glib-networking test on gimp build
+      - GIO_MODULE_DIR: /snap/gnome-46-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gio/modules
+
   babl:
-    plugin: meson
-    source: https://github.com/GNOME/babl.git
+    source: https://gitlab.gnome.org/GNOME/babl.git
     source-tag: BABL_0_1_116
+    source-depth: 1
+    build-environment: *SNAP_ENVIRON
+    plugin: meson
     meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
+      - -Dprefix=/usr
+      - -Dlibdir=lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
       - -Dwith-docs=false
-    build-packages:
-      - w3m
+      - -Dgi-docgen=disabled
 
   gegl:
     after:
       - babl
-    source: https://github.com/GNOME/gegl.git
+    source: https://gitlab.gnome.org/GNOME/gegl.git
     source-tag: GEGL_0_4_64
+    source-depth: 1
+    build-environment: *SNAP_ENVIRON
     plugin: meson
     meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
+      - -Dprefix=/usr
+      - -Dlibdir=lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
       - -Ddocs=false
-      - -Dworkshop=true
-    build-environment:
-      - C_INCLUDE_PATH: /snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
-      - PKG_CONFIG_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}
-      - LD_LIBRARY_PATH: /snap/ffmpeg-2404-sdk/current/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
-      - PATH: /snap/ffmpeg-2404-sdk/current/usr/bin${PATH:+:$PATH}
+      - -Dgi-docgen=disabled
     build-packages:
-      - libexiv2-dev
-      - libfftw3-dev
-      - libgexiv2-2
-      - libglib2.0-dev
-      - libglu1-mesa-dev
-      - liblensfun-dev
-      - libluajit-5.1-dev
       - libmaxflow-dev
-      - libopenexr-dev
-      - libraw-dev
-      - libsdl2-dev
-      - libspiro-dev
+      - libopenexr-dev #https://github.com/ubuntu/gnome-sdk/issues/321
       - libsuitesparse-dev
-      - libv4l-dev
-      - libwebp-dev
     stage-packages:
-      - libamd3
-      - libbtf2
-      - libcamd3
-      - libccolamd3
-      - libcholmod5
-      - libcolamd3
-      - libcxsparse4
-      - libexiv2-27
-      - libgexiv2-2
-      - libgraphblas7
-      - libklu2
-      - liblapack3
-      - libldl3
-      - liblensfun1
-      - libluajit-5.1-2
+      - graphviz #https://github.com/ubuntu/gnome-sdk/issues/324
       - libmaxflow0
-      - libopenexr-3-1-30
-      - libraw-bin
-      - librbio4
-      - libsdl2-2.0-0
-      - libspiro1
-      - libspqr4
       - libumfpack6
-      - libv4l-0
-    build-snaps:
-      - ffmpeg-2404
-
-  # Use a newer version of libheif than is available in core24 to enable
-  # support for HEIC/HEIF images taken on later versions of iOS and Android.
-  # Minimum version needed is 1.18.2, which should be available in core26!
-  libheif:
-    plugin: cmake
-    source: https://github.com/strukturag/libheif.git
-    source-tag: v1.19.7
-    source-type: git
-    cmake-parameters:
-      - --preset=release
-    override-build: |
-      cd $CRAFT_PART_SRC
-      bash ./third-party/aom.cmd
-      export PKG_CONFIG_PATH=\$PKG_CONFIG_PATH:$(pwd)/aom/dist/lib/pkgconfig
-      craftctl default
-    prime:
-      - usr/local/lib
 
   gimp:
     after:
       - babl
       - gegl
-      - libheif
+    source: https://gitlab.gnome.org/GNOME/gimp.git
+    source-tag: GIMP_3_0_6
+    build-environment: *SNAP_ENVIRON
     plugin: meson
-    source: https://github.com/GNOME/gimp.git
-    override-pull: |
-      tag="$(echo "GIMP_${SNAPCRAFT_PROJECT_VERSION}" | tr "." "_"  | tr "-" "_")"
-      git clone -b "$tag" https://github.com/GNOME/gimp.git "$CRAFT_PART_SRC"
-      sed -i "s|gitlab.gnome.org|github.com|" "$CRAFT_PART_SRC"/.gitmodules
-      git submodule update --init
-      sed -i 's|^Icon=.*|Icon=/usr/share/icons/hicolor/256x256/apps/gimp.png|' desktop/gimp.desktop.in.in
     meson-parameters:
-      - --prefix=/usr
-      - --buildtype=release
+      - -Dprefix=/usr
+      - -Dlibdir=lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR
       - -Dgi-docgen=disabled
-      - -Dbuild-id=org.gimp.GIMP.snapcraft.stable
-      - -Dbug-report-url=https://github.com/snapcrafters/gimp/issues
+      - -Drelocatable-bundle=yes
       - -Dcheck-update=no
       - -Denable-default-bin=enabled
-      - -Drelocatable-bundle=yes
-      - -Dlibunwind=true
-    build-environment:
-      - BABL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/babl-0.1
-      - GEGL_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/gegl-0.4
-      - GI_TYPELIB_PATH: $CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/girepository-1.0:$GI_TYPELIB_PATH
-      - LD_LIBRARY_PATH: $CRAFT_STAGE/usr/local/lib:$CRAFT_STAGE/usr/local/lib/libheif:$:$CRAFT_STAGE/usr/lib:$CRAFT_STAGE/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR:$LD_LIBRARY_PATH
-      - C_INCLUDE_PATH: $CRAFT_STAGE/usr/local/include:$CRAFT_STAGE/usr/local/include/libheif:/snap/gnome-46-2404-sdk/current/usr/include/librsvg-2.0:${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}
-      - PKG_CONFIG_PATH: $CRAFT_STAGE/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-      - LIBHEIF_PLUGIN_PATH: $CRAFT_STAGE/usr/local/lib/libheif
+      - -Dbuild-id=org.gimp.GIMP.snapcraft.latest
     build-packages:
-      - automake
-      - intltool
-      - iso-codes
-      - libaa1-dev
-      - libappstream-glib-dev
-      - libart-2.0-dev
-      - libbz2-dev
-      - libcairo-gobject2
-      - libde265-dev
-      - libexif-dev
-      - libexpat1-dev
-      - libfftw3-dev
+      - bison
+      - flex
+      - libaa1-dev #https://github.com/ubuntu/gnome-sdk/issues/322
+      - libarchive-dev #https://github.com/ubuntu/gnome-sdk/issues/318
+      - libcfitsio-dev #https://github.com/ubuntu/gnome-sdk/issues/320
+      - libexpat1-dev #it is on Gnome SDK Snap but inexplicably the linker can't find it
       - libgexiv2-dev
-      - libgpm-dev
-      - libice-dev
-      - libluajit-5.1-dev
-      - libjxl-dev
-      - liblzma-dev
+      - libgs-dev
+      - libjxl-dev #https://github.com/ubuntu/gnome-sdk/issues/317
       - libmng-dev
       - libmypaint-dev
-      - libopenexr-dev
-      - libslang2-dev
-      - libsm-dev
-      - libunwind-dev
-      - libwebp-dev
+      - libqoi-dev
       - libwmf-dev
       - libxmu-dev
-      - libxpm-dev
-      - luajit
-      - poppler-data
-      - xdg-utils
+      - libxpm-dev #https://github.com/ubuntu/gnome-sdk/issues/319
       - xsltproc
     stage-packages:
-      - evince
-      - ghostscript
-      - iso-codes
-      - libaa1
-      - libappstream-glib8
-      - libart-2.0-2
-      - libbz2-1.0
-      - libde265-0
-      - libexif12
-      - libfftw3-double3
       - libgexiv2-2
-      - libgpm2
-      - libjxl0.7
-      - libluajit-5.1-2
-      - liblzma5
+      - libgs10
+      - libheif-plugin-dav1d
+      - libheif-plugin-aomenc
+      - libheif-plugin-libde265
+      - libheif-plugin-x265
+      - libheif-plugin-j2kdec
+      - libheif-plugin-j2kenc
       - libmng2
       - libmypaint-1.5-1
-      - libmypaint-common
-      - libopenexr-3-1-30
-      - libslang2
-      - libsndio7.0
-      - libunwind8
-      - libwebp7
-      - libwebpdemux2
-      - libwebpmux3
       - libwmf-0.2-7
       - libxmu6
-      - libxpm4
-      - libxv1
-      - lua-lgi
-      - luajit
       - mypaint-brushes
-      - mypaint-data
       - poppler-data
+      - xdg-utils
     override-stage: |
-      # fix gimp python interpreters file
-      cat <<EOF > ${CRAFT_PART_INSTALL}/usr/lib/${CRAFT_ARCH_TRIPLET_BUILD_FOR}/gimp/3.0/interpreters/pygimp.interp
-      python=/usr/bin/python3
-      python3=/usr/bin/python3
-      /usr/bin/python=/usr/bin/python3
-      /usr/bin/python3=/usr/bin/python3
-      :Python:E::py::python3:
-      EOF
       # update gimp's plugin search path so it will pick up plugins mounted over snapd's content interface
       current_path=$(grep "# (plug-in-path" ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc | cut -d '"' -f2)
-      add_dir=/snap/${SNAPCRAFT_PROJECT_NAME}/current/gimp-plugins
-      echo "(plug-in-path \"${current_path}:${add_dir}\")" >> ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc
+      echo "(plug-in-path \"${current_path}:/snap/${SNAPCRAFT_PROJECT_NAME}/current/gimp-plugins\")" >> ${CRAFT_PART_INSTALL}/etc/gimp/3.0/gimprc
+      craftctl default
+    parse-info:
+      - usr/share/metainfo/org.gimp.GIMP.appdata.xml
+    override-prime: |
+      # get gimp icon for proper desktop integration
+      cp $CRAFT_STAGE/usr/share/icons/hicolor/scalable/apps/gimp.svg $CRAFT_PRIME/gimp
       craftctl default
 
   command-chain-plugins:
     plugin: dump
     source: command-chain/
+    override-pull: |
+      craftctl default
+      chmod +x enable-plugins
     organize:
       enable-plugins: command-chain/enable-plugins
-
-  cleanup:
-    after: [gimp]
-    source: https://github.com/canonical/gpu-snap.git
-    plugin: dump
-    override-prime: |
-      craftctl default
-      ${CRAFT_PART_SRC}/bin/gpu-2404-cleanup mesa-2404
-      for snap in "core24" "gnome-46-2404" "ffmpeg-2404"; do
-          cd "/snap/$snap/current" && find . -type f,l -exec rm -rf "$CRAFT_PRIME/{}" \;
-      done
