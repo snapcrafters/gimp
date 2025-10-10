@@ -1,3 +1,10 @@
+> [!IMPORTANT]  
+> As of October 10, 2025 the GIMP snap moved to the upstream project and is now taken care of
+> by the GIMP project.
+>
+> The new snapcraft.yaml can be found [here](https://gitlab.gnome.org/GNOME/gimp/-/tree/master/build/linux/snap?ref_type=heads),
+> but existing users of the snap should notice no immediate changes.
+
 <h1 align="center">
   <img src="gimp.png" alt="GIMP">
   <br />
